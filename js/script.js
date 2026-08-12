@@ -16,19 +16,15 @@ if (siteHeader) {
 }
 
 // Curtain-split scroll effect: as the hero (split into two halves) scrolls
-// past, the halves visibly part like doors, and the next section settles
-// into place as it arrives — driven continuously by scroll position, so it
-// reverses smoothly when scrolling back up.
+// past, the halves visibly part like doors — driven continuously by scroll
+// position, so it reverses smoothly when scrolling back up.
 const heroSplitSection = document.querySelector('.hero');
 const heroSplitPhoto = document.querySelector('.hero-panel-photo');
 const heroSplitSub = document.querySelector('.hero-panel-sub');
-const heroSplitNext = heroSplitSection ? heroSplitSection.nextElementSibling : null;
 const prefersReducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 if (heroSplitSection && heroSplitPhoto && heroSplitSub && !prefersReducedMotionQuery.matches) {
   const MAX_SPLIT_PERCENT = 38;
-  const NEXT_SETTLE_PX = 36;
-  const NEXT_ENTRY_DISTANCE = 220;
   let heroSplitTicking = false;
 
   const updateHeroSplit = () => {
@@ -42,13 +38,6 @@ if (heroSplitSection && heroSplitPhoto && heroSplitSub && !prefersReducedMotionQ
 
     heroSplitPhoto.style.transform = `translateX(${-shift}%)`;
     heroSplitSub.style.transform = `translateX(${shift}%)`;
-
-    if (heroSplitNext) {
-      const nextRect = heroSplitNext.getBoundingClientRect();
-      const triggerY = window.innerHeight * 0.85;
-      const entryProgress = Math.min(Math.max((triggerY - nextRect.top) / NEXT_ENTRY_DISTANCE, 0), 1);
-      heroSplitNext.style.transform = `translateY(${(1 - entryProgress) * NEXT_SETTLE_PX}px)`;
-    }
   };
 
   window.addEventListener('scroll', () => {
@@ -59,6 +48,40 @@ if (heroSplitSection && heroSplitPhoto && heroSplitSub && !prefersReducedMotionQ
   }, { passive: true });
 
   updateHeroSplit();
+}
+
+// Section curtain-reveal: every main section after the hero wipes down into
+// place as it crosses into view (clip-path 0% -> 100% height) with a small
+// upward settle, most sections now alternate cream/navy backgrounds, so the
+// wipe reads as the new color being drawn in rather than an abrupt cut.
+const curtainSections = Array.from(document.querySelectorAll('main > section:not(.hero)'));
+
+if (curtainSections.length && !prefersReducedMotionQuery.matches) {
+  const ENTRY_TRIGGER_RATIO = 0.85;
+  const ENTRY_DISTANCE = 220;
+  const ENTRY_SETTLE_PX = 36;
+  let curtainTicking = false;
+
+  const updateCurtainSections = () => {
+    curtainTicking = false;
+    const triggerY = window.innerHeight * ENTRY_TRIGGER_RATIO;
+
+    curtainSections.forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      const progress = Math.min(Math.max((triggerY - rect.top) / ENTRY_DISTANCE, 0), 1);
+      section.style.clipPath = `inset(0 0 ${(1 - progress) * 100}% 0)`;
+      section.style.transform = `translateY(${(1 - progress) * ENTRY_SETTLE_PX}px)`;
+    });
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!curtainTicking) {
+      curtainTicking = true;
+      requestAnimationFrame(updateCurtainSections);
+    }
+  }, { passive: true });
+
+  updateCurtainSections();
 }
 
 // Letter-by-letter reveal for body text outside the first screen (.hero).

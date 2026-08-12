@@ -86,6 +86,19 @@ section {
   margin: 0 auto;
 }
 
+/* Curtain-reveal on section entry: driven continuously from scroll position
+   in js/script.js, so it needs to stay in sync with the hero's own curtain
+   effect. Excluded from .hero, which runs its own split/settle transform. */
+main > section:not(.hero) {
+  will-change: clip-path, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > section:not(.hero) {
+    will-change: auto;
+  }
+}
+
 /* ---------- header ---------- */
 
 .site-header {
@@ -545,10 +558,13 @@ section {
 /* ---------- formats ---------- */
 
 .formats {
-  border-top: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--accent);
+  border-top: 1px solid var(--border-card);
 }
 
 .formats h2 {
+  color: var(--accent);
   margin-bottom: 2.5rem;
   text-align: center;
 }
@@ -563,18 +579,17 @@ section {
   display: flex;
   flex-direction: column;
   min-height: 15rem;
-  border: 1px solid var(--border-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2.25rem 2rem 1.25rem;
-  background: var(--card-bg);
-  color: var(--accent);
+  background: var(--bg);
+  color: var(--ink);
   transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .format-tile:hover {
-  border-color: var(--accent);
-  background: var(--ink-soft);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+  border-color: var(--gold);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.24);
 }
 
 .format-label,
@@ -600,7 +615,7 @@ section {
 }
 
 .format-label {
-  color: var(--accent);
+  color: var(--ink);
   font-weight: 800;
   line-height: 1.3;
   min-height: 2.6em;
@@ -736,8 +751,14 @@ section {
 /* ---------- project ---------- */
 
 .project {
-  border-top: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--accent);
+  border-top: 1px solid var(--border-card);
   text-align: center;
+}
+
+.project .section-eyebrow {
+  color: var(--accent);
 }
 
 .section-eyebrow {
@@ -749,11 +770,12 @@ section {
 }
 
 .project h2 {
+  color: var(--accent);
   margin-bottom: 1.75rem;
 }
 
 .project-intro {
-  color: var(--muted);
+  color: var(--muted-on-card);
   max-width: 60ch;
   margin: 0 auto 3rem;
 }
@@ -767,11 +789,11 @@ section {
 }
 
 .project-col {
-  border: 1px solid var(--border-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2rem;
-  background: var(--card-bg);
-  color: var(--accent);
+  background: var(--bg);
+  color: var(--ink);
 }
 
 .project-col h3 {
@@ -782,7 +804,7 @@ section {
 .project-col li {
   position: relative;
   padding-left: 1.3rem;
-  color: var(--muted-on-card);
+  color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 0.7rem;
 }
@@ -791,7 +813,7 @@ section {
   content: "—";
   position: absolute;
   left: 0;
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .project-terms {
@@ -865,7 +887,9 @@ section {
 /* ---------- terms ---------- */
 
 .terms {
-  border-top: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--accent);
+  border-top: 1px solid var(--border-card);
 }
 
 .terms-grid {
@@ -875,19 +899,20 @@ section {
 }
 
 .terms-col h3 {
+  color: var(--accent);
   font-size: 1.15rem;
   margin-bottom: 0.75rem;
 }
 
 .terms-col p {
-  color: var(--muted);
+  color: var(--muted-on-card);
   margin-bottom: 2rem;
 }
 
 .terms-col li {
   position: relative;
   padding-left: 1.3rem;
-  color: var(--muted);
+  color: var(--muted-on-card);
   margin-bottom: 0.8rem;
 }
 
@@ -895,7 +920,7 @@ section {
   content: "—";
   position: absolute;
   left: 0;
-  color: var(--ink);
+  color: var(--accent);
 }
 
 /* ---------- start ---------- */
