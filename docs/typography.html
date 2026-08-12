@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Типографика 27.12 — комбинации и приёмы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Prata&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Spectral:ital,wght@0,200;0,300;0,400;0,600;1,200;1,300&family=Forum&family=Tenor+Sans&family=Inter:wght@300;400;500;600;700;800;900&family=Inter+Tight:wght@400;500;600;700;800;900&family=Golos+Text:wght@400;500;600;700;800;900&family=Onest:wght@300;400;500;700;800&family=Manrope:wght@300;400;600;800&family=Unbounded:wght@300;400;600;800&family=Oswald:wght@300;400;600;700&family=Jost:wght@300;400;500&family=Geologica:wght@300;400;600&family=Martian+Mono:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400;500;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Caveat:wght@400;600&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f2e8; --ink:#1c1817; --muted:rgba(28,24,23,.6);
+  --navy:#30345a; --navy-soft:#454a75; --gold:#c49a5a;
+  --panel:#fbfbf3; --line:rgba(28,24,23,.16); --line-strong:rgba(28,24,23,.32);
+  --ok:#3f6b4a; --no:#a23b3b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Golos Text',sans-serif; font-weight:400; line-height:1.6;
+  -webkit-font-smoothing:antialiased; padding:0 0 8rem;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.25rem,4vw,3rem)}
+
+/* ── шапка документа ───────────────────────────── */
+.doc-head{padding:clamp(3rem,8vw,6rem) 0 clamp(2rem,5vw,4rem);border-bottom:1px solid var(--line-strong)}
+.doc-kicker{font-family:'Martian Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--navy-soft)}
+.doc-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(2.4rem,7vw,5rem);line-height:.98;letter-spacing:-.025em;margin:1.2rem 0 1.4rem;max-width:16ch}
+.doc-title em{font-style:italic;font-weight:400}
+.doc-lead{max-width:62ch;font-size:1.0625rem;color:var(--muted)}
+.doc-lead strong{color:var(--ink);font-weight:600}
+
+/* ── навигация ─────────────────────────────────── */
+.toc{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:2.2rem}
+.toc a{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--ink);border:1px solid var(--line-strong);border-radius:999px;padding:.45rem .95rem;transition:.18s}
+.toc a:hover{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+
+/* ── секции ────────────────────────────────────── */
+section{padding:clamp(3rem,7vw,5.5rem) 0 0}
+.sec-head{display:flex;align-items:baseline;gap:1rem;border-bottom:1px solid var(--line);padding-bottom:.9rem;margin-bottom:2.5rem}
+.sec-num{font-family:'Martian Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.15em;color:var(--gold)}
+.sec-head h2{font-family:'Golos Text',sans-serif;font-weight:700;font-size:clamp(1.35rem,3vw,2rem);letter-spacing:-.02em;line-height:1.1}
+.sec-note{margin-left:auto;font-size:12.5px;color:var(--muted);text-align:right;max-width:34ch}
+.sec-intro{max-width:70ch;margin-bottom:2.5rem;color:var(--muted)}
+.sec-intro strong{color:var(--ink);font-weight:600}
+.sec-intro code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:rgba(48,52,90,.09);padding:.1em .4em;border-radius:3px;color:var(--navy)}
+
+/* ── таблица кириллицы ─────────────────────────── */
+.cyr{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem}
+@media(max-width:760px){.cyr{grid-template-columns:1fr}}
+.cyr-box{border:1px solid var(--line-strong);background:var(--panel);padding:1.5rem}
+.cyr-box h3{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.55rem}
+.cyr-box.bad h3{color:var(--no)}
+.cyr-box.good h3{color:var(--ok)}
+.cyr-box ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.cyr-box li{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.5;display:flex;gap:.6rem;align-items:baseline}
+.cyr-box li b{font-weight:500;min-width:11.5ch;color:var(--ink)}
+.cyr-box li span{color:var(--muted);font-family:'Golos Text',sans-serif;font-size:12.5px}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.bad .dot{background:var(--no)} .good .dot{background:var(--ok)}
+
+.test-line{border:1px dashed var(--line-strong);padding:1.25rem 1.5rem;margin-bottom:2rem;background:rgba(196,154,90,.07)}
+.test-line p{font-size:13px;color:var(--muted);margin-bottom:.5rem}
+.test-line b{font-family:'Playfair Display',serif;font-size:clamp(1.1rem,2.6vw,1.6rem);font-weight:500;letter-spacing:-.01em;color:var(--ink);display:block}
+
+/* ── карточка комбинации ───────────────────────── */
+.combo{border-top:1px solid var(--line-strong);padding:2.5rem 0 3rem}
+.combo:first-of-type{border-top:none;padding-top:0}
+.combo-head{display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap}
+.combo-num{font-family:'Martian Mono',monospace;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:300;line-height:1;color:var(--gold);letter-spacing:-.03em}
+.combo-head h3{font-family:'Golos Text',sans-serif;font-size:clamp(1.2rem,2.6vw,1.6rem);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.combo-stack{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--navy-soft);letter-spacing:.02em;margin-top:.3rem}
+.combo-ref{margin-left:auto;font-size:11.5px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);padding:.35rem .7rem;border-radius:999px;white-space:nowrap}
+.combo-mood{max-width:68ch;margin:1rem 0 1.75rem;color:var(--muted);font-size:.9375rem}
+.combo-mood b{color:var(--ink);font-weight:600}
+.warn{display:block;margin-top:.6rem;font-size:13px;color:var(--no)}
+.warn::before{content:"! ";font-weight:700}
+
+/* ── образец ───────────────────────────────────── */
+.specimen{background:var(--panel);border:1px solid var(--line-strong);padding:clamp(1.75rem,4vw,3rem);margin-bottom:1.25rem}
+.specimen.dark{background:var(--navy);border-color:var(--navy);color:#f2f2e8}
+.specimen.dark .sp-body{color:rgba(242,242,232,.7)}
+.specimen.dark .sp-label,.specimen.dark .sp-meta{color:rgba(242,242,232,.6)}
+.sp-label{display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:1.25rem}
+.sp-h{font-size:clamp(1.9rem,5.4vw,3.4rem);line-height:1.02;letter-spacing:-.025em;margin-bottom:1.1rem;text-wrap:balance}
+.sp-body{max-width:52ch;font-size:1rem;color:var(--muted);margin-bottom:1.5rem}
+.sp-meta{font-size:11.5px;text-transform:uppercase;color:var(--muted);padding-top:1.1rem;border-top:1px solid var(--line)}
+.specimen.dark .sp-meta{border-top-color:rgba(242,242,232,.24)}
+
+/* ── стили образцов по комбинациям ─────────────── */
+/* 01 Editorial Luxe */
+.s01 .sp-h{font-family:'Playfair Display',serif;font-weight:600}
+.s01 .sp-h em{font-style:italic;font-weight:400}
+.s01 .sp-body{font-family:'Golos Text',sans-serif;font-weight:400}
+.s01 .sp-label,.s01 .sp-meta{font-family:'Martian Mono',monospace;font-weight:400;letter-spacing:.18em;font-size:10px}
+/* 02 Didone Fashion */
+.s02 .sp-h{font-family:'Prata',serif;font-weight:400;letter-spacing:-.015em;line-height:1.08}
+.s02 .sp-body{font-family:'Inter',sans-serif;font-weight:300}
+.s02 .sp-label,.s02 .sp-meta{font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.3em}
+/* 03 Swiss Editorial */
+.s03 .sp-h{font-family:'Inter Tight',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:-.035em;line-height:.94}
+.s03 .sp-body{font-family:'Inter',sans-serif;font-weight:400}
+.s03 .sp-label,.s03 .sp-meta{font-family:'IBM Plex Mono',monospace;font-weight:400;letter-spacing:.1em}
+/* 04 Techno Wide */
+.s04 .sp-h{font-family:'Unbounded',sans-serif;font-weight:600;letter-spacing:-.02em;line-height:1.08;font-size:clamp(1.5rem,4.2vw,2.6rem)}
+.s04 .sp-body{font-family:'Onest',sans-serif;font-weight:400}
+.s04 .sp-label,.s04 .sp-meta{font-family:'Martian Mono',monospace;font-weight:400;letter-spacing:.14em;font-size:10px}
+/* 05 Quiet Luxury */
+.s05 .sp-h{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:-.01em;line-height:1.05;font-size:clamp(2.2rem,6.5vw,4.2rem)}
+.s05 .sp-h em{font-style:italic}
+.s05 .sp-body{font-family:'Inter',sans-serif;font-weight:300;font-size:.9375rem}
+.s05 .sp-label,.s05 .sp-meta{font-family:'Jost',sans-serif;font-weight:400;letter-spacing:.4em;font-size:10px}
+/* 06 Poster Brutal */
+.s06 .sp-h{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:-.005em;line-height:.95;font-size:clamp(2.2rem,7vw,4.4rem)}
+.s06 .sp-body{font-family:'Golos Text',sans-serif;font-weight:400}
+.s06 .sp-label,.s06 .sp-meta{font-family:'JetBrains Mono',monospace;font-weight:500;letter-spacing:.12em}
+/* 07 Old-School Contrast */
+.s07 .sp-h{font-family:'Old Standard TT',serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:1.06}
+.s07 .sp-h em{font-style:italic;text-transform:none}
+.s07 .sp-body{font-family:'Manrope',sans-serif;font-weight:300}
+.s07 .sp-label,.s07 .sp-meta{font-family:'Manrope',sans-serif;font-weight:600;letter-spacing:.26em}
+/* 08 Serif × Mono */
+.s08 .sp-h{font-family:'Spectral',serif;font-weight:300;letter-spacing:-.02em;line-height:1.05}
+.s08 .sp-h em{font-style:italic;font-weight:200}
+.s08 .sp-body{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:.8125rem;line-height:1.75;text-transform:uppercase;letter-spacing:.02em}
+.s08 .sp-label,.s08 .sp-meta{font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.1em}
+
+/* ── блок кода ─────────────────────────────────── */
+.code{position:relative;background:var(--navy);border-radius:2px;overflow:hidden}
+.code pre{overflow-x:auto;padding:2.7rem 1.5rem 1.35rem;margin:0}
+.code code{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:#e8e8dd;white-space:pre;display:block;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
+.code .c{color:#8f93b8} .code .p{color:var(--gold)} .code .v{color:#c8d6ff}
+.copy{position:absolute;top:.6rem;right:.6rem;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;background:rgba(242,242,232,.1);color:#e8e8dd;border:1px solid rgba(242,242,232,.25);border-radius:3px;padding:.35rem .6rem;cursor:pointer;transition:.15s}
+.copy:hover{background:rgba(242,242,232,.22)}
+.copy.done{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+
+/* ── приёмы ────────────────────────────────────── */
+.trick{border-top:1px solid var(--line);padding:2.25rem 0}
+.trick:first-of-type{border-top:none}
+.trick-head{display:flex;align-items:baseline;gap:.85rem;margin-bottom:.5rem;flex-wrap:wrap}
+.trick-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.1em}
+.trick-head h3{font-size:1.0625rem;font-weight:700;letter-spacing:-.01em}
+.trick-why{max-width:70ch;font-size:.875rem;color:var(--muted);margin-bottom:1.35rem}
+.trick-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start}
+@media(max-width:900px){.trick-grid{grid-template-columns:1fr}}
+.demo{background:var(--panel);border:1px solid var(--line-strong);padding:1.75rem;min-height:130px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.demo.dark{background:var(--navy);border-color:var(--navy);color:#f2f2e8}
+
+/* демо-приёмы */
+.d-italic{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3.4vw,2.1rem);font-weight:600;line-height:1.1;letter-spacing:-.02em}
+.d-italic em{font-style:italic;font-weight:400;color:var(--navy-soft)}
+
+.d-mixed{font-family:'Playfair Display',serif;line-height:.92;letter-spacing:-.03em}
+.d-mixed .sm{display:block;font-family:'Martian Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;line-height:1}
+.d-mixed .lg{display:block;font-size:clamp(2rem,5.5vw,3.4rem);font-weight:600}
+.d-mixed .md{display:block;font-size:clamp(1.1rem,2.4vw,1.5rem);font-style:italic;font-weight:400}
+
+.d-bleed{position:relative;margin:-1.75rem;padding:1.75rem 0;overflow:hidden}
+.d-bleed span{display:block;font-family:'Prata',serif;font-size:clamp(3rem,11vw,6rem);line-height:1;white-space:nowrap;margin-left:-.06em;letter-spacing:-.02em}
+
+.marq{overflow:hidden;margin:-1.75rem;padding:1.75rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.marq-track{display:flex;width:max-content;animation:marq 22s linear infinite}
+.marq-track span{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2rem,6vw,3.6rem);line-height:1;letter-spacing:-.01em;padding-right:.6em;opacity:.9}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+.d-label{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.34em;color:var(--muted);display:block;margin-bottom:.9rem}
+.d-label + p{font-family:'Inter',sans-serif;font-size:.9375rem;max-width:40ch;color:var(--ink)}
+
+.d-meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:grid;gap:.5rem}
+.d-meta div{display:flex;justify-content:space-between;gap:2rem;border-bottom:1px dotted var(--line-strong);padding-bottom:.45rem}
+.d-meta b{color:var(--ink);font-weight:500}
+
+.d-num{display:flex;gap:1.25rem;align-items:flex-start}
+.d-num .n{font-family:'Jost',sans-serif;font-weight:300;font-size:clamp(2.6rem,7vw,4.2rem);line-height:.8;color:var(--gold);letter-spacing:-.04em}
+.d-num h4{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.d-num p{font-size:.8125rem;color:var(--muted);max-width:34ch}
+
+.d-dash{font-family:'Inter Tight',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(1.4rem,3.8vw,2.3rem);line-height:1;letter-spacing:-.03em}
+.d-dash span{display:block}
+.d-dash i{font-style:normal;color:var(--gold)}
+
+.d-vert{display:flex;gap:1.5rem;align-items:stretch;min-height:120px}
+.d-vert .v{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.24em;color:var(--muted);border-right:1px solid var(--line-strong);padding-right:.75rem}
+.d-vert p{font-family:'Inter',sans-serif;font-size:.9375rem;color:var(--ink);align-self:center;max-width:38ch}
+
+.d-script{font-family:'Golos Text',sans-serif;font-size:clamp(1.2rem,3vw,1.85rem);font-weight:600;line-height:1.25;letter-spacing:-.015em}
+.d-script em{font-family:'Caveat',cursive;font-style:normal;font-weight:600;font-size:1.5em;color:var(--gold);line-height:.8;padding:0 .12em}
+
+.d-stroke{font-family:'Inter Tight',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.8rem,5.4vw,3.2rem);line-height:.94;letter-spacing:-.035em}
+.d-stroke .out{-webkit-text-stroke:1.2px currentColor;color:transparent;display:block}
+
+.d-optic{font-family:'Golos Text',sans-serif;font-weight:700}
+.d-optic .big{font-size:clamp(1.8rem,5.2vw,3rem);letter-spacing:-.035em;line-height:.98;display:block;text-wrap:balance;margin-bottom:1rem}
+.d-optic .small{font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:500;color:var(--muted);display:block}
+
+.d-figs{font-family:'Golos Text',sans-serif}
+.d-figs .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:.5rem 0;font-size:.9375rem}
+.d-figs .num{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1;font-weight:600}
+
+.d-hang{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start}
+.d-hang .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);padding-top:.55rem;white-space:nowrap}
+.d-hang p{font-family:'Playfair Display',serif;font-size:clamp(1.15rem,2.9vw,1.7rem);line-height:1.24;letter-spacing:-.015em}
+
+.d-mark{font-family:'Golos Text',sans-serif;font-size:clamp(1.15rem,2.9vw,1.7rem);font-weight:600;line-height:1.4;letter-spacing:-.015em}
+.d-mark mark{background:var(--gold);color:var(--navy);padding:.04em .28em;border-radius:2px}
+
+.d-rule{display:flex;align-items:center;gap:1rem;width:100%}
+.d-rule::before,.d-rule::after{content:"";height:1px;background:var(--line-strong);flex:1}
+.d-rule span{font-family:'Martian Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.22em;color:var(--muted);white-space:nowrap}
+
+.d-two{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:end;width:100%}
+.d-two .l{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,4.4vw,2.6rem);font-weight:300;line-height:1.02;letter-spacing:-.01em}
+.d-two .r{font-family:'Inter',sans-serif;font-size:.8125rem;line-height:1.65;color:var(--muted);text-align:right}
+
+.d-drop p{font-family:'Spectral',serif;font-size:.9375rem;line-height:1.7;color:var(--ink)}
+.d-drop p::first-letter{font-family:'Playfair Display',serif;font-size:3.6em;font-weight:600;float:left;line-height:.82;padding:.06em .12em 0 0;color:var(--navy)}
+
+/* ── шпаргалка ─────────────────────────────────── */
+.cheat{width:100%;border-collapse:collapse;font-size:13px}
+.cheat th{text-align:left;font-family:'Martian Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);font-weight:400;padding:0 1rem .8rem 0;border-bottom:1px solid var(--line-strong)}
+.cheat td{padding:.75rem 1rem .75rem 0;border-bottom:1px solid var(--line);vertical-align:top}
+.cheat td:first-child{font-family:'JetBrains Mono',monospace;font-weight:500;white-space:nowrap}
+.cheat td:last-child{color:var(--muted)}
+.cheat .role{font-family:'Golos Text',sans-serif;font-weight:600;color:var(--navy-soft);white-space:nowrap}
+.tbl-scroll{overflow-x:auto}
+
+/* ── гигиена ───────────────────────────────────── */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1.25rem}
+.rule{border-left:2px solid var(--gold);padding:.15rem 0 .15rem 1.15rem}
+.rule h4{font-size:.9375rem;font-weight:700;margin-bottom:.4rem;letter-spacing:-.01em}
+.rule p{font-size:.8125rem;color:var(--muted);line-height:1.65}
+.rule code{font-family:'JetBrains Mono',monospace;font-size:.92em;color:var(--navy)}
+
+footer{margin-top:5rem;padding-top:2rem;border-top:1px solid var(--line-strong);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc-head">
+  <p class="doc-kicker">27.12 Consulting — рабочий документ · <span id="today"></span></p>
+  <h1 class="doc-title">Шрифтовые пары <em>и приёмы</em></h1>
+  <p class="doc-lead">Разобрал 19 референсов и собрал из них <strong>8 готовых комбинаций</strong> и <strong>16 приёмов</strong>, которые можно вставить в проект копипастой. Все шрифты проверены на кириллицу через Google Fonts API — в документе нет ни одного, который сломается на слове «Ассортимент».</p>
+  <nav class="toc">
+    <a href="#cyr">00 · Кириллица</a>
+    <a href="#combos">01 · Комбинации</a>
+    <a href="#tricks">02 · Приёмы</a>
+    <a href="#cheat">03 · Шпаргалка</a>
+    <a href="#rules">04 · Гигиена</a>
+  </nav>
+</header>
+
+<!-- ═══ 00 КИРИЛЛИЦА ═══ -->
+<section id="cyr">
+  <div class="sec-head">
+    <span class="sec-num">00</span>
+    <h2>Главное правило: сначала кириллица, потом красота</h2>
+    <p class="sec-note">Проверено запросами к fonts.googleapis.com</p>
+  </div>
+  <p class="sec-intro">Большинство эффектных шрифтов из референсов — латиница-онли. Если такой шрифт подключить, браузер <strong>не покажет ошибку</strong>: он молча подставит системный запасной, и заголовок станет безликим. Именно это случилось с Michroma в блоке «Три формата работы» — шрифт грузился корректно, но его кириллица нарисована автогенерацией и не имеет ничего общего с фирменной широкой латиницей.</p>
+
+  <div class="cyr">
+    <div class="cyr-box bad">
+      <h3><span class="dot"></span>Нет кириллицы — не брать</h3>
+      <ul>
+        <li><b>Michroma</b><span>сейчас в проекте, заменить</span></li>
+        <li><b>Archivo</b><span>грузится в index.html впустую</span></li>
+        <li><b>Bebas Neue</b><span>классика плакатов, но латиница-онли</span></li>
+        <li><b>Anton</b><span>— // —</span></li>
+        <li><b>Archivo Black</b><span>— // —</span></li>
+        <li><b>Instrument Serif</b><span>любимец Awwwards, не для нас</span></li>
+        <li><b>Bodoni Moda</b><span>дидон из Serrina/Rue Noire</span></li>
+        <li><b>Space Mono</b><span>тот самый «техно-моно»</span></li>
+      </ul>
+    </div>
+    <div class="cyr-box good">
+      <h3><span class="dot"></span>Кириллица есть — можно</h3>
+      <ul>
+        <li><b>Prata</b><span>замена Bodoni / дидонам</span></li>
+        <li><b>Unbounded</b><span>замена Michroma (широкий гротеск)</span></li>
+        <li><b>Oswald</b><span>замена Bebas / Anton (конденс)</span></li>
+        <li><b>Inter Tight</b><span>замена Helvetica Neue Bold</span></li>
+        <li><b>Martian Mono</b><span>замена Space Mono, шире и техничнее</span></li>
+        <li><b>Old Standard TT</b><span>высокий контраст + курсив</span></li>
+        <li><b>Cormorant Garamond</b><span>тихая роскошь</span></li>
+        <li><b>Spectral</b><span>редакционный с курсивом</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="test-line">
+    <p>Тест-строка для проверки любого нового шрифта — тут есть все проблемные знаки (Ё, Щ, Ъ, Ы, Ю, Я, №):</p>
+    <b>Съешь ещё этих мягких булок №27.12 — Ъ, Ы, Ю, Я, Ж, Щ, Ф, Э, Ё</b>
+  </div>
+
+  <div class="code">
+    <button class="copy">copy</button>
+    <pre><code><span class="c">// Проверка в консоли браузера: вернёт true, только если шрифт реально загружен</span>
+document.fonts.check(<span class="v">'16px "Prata"'</span>)
+
+<span class="c">// Честная проверка кириллицы — сравнить ширину строки в шрифте и в fallback.</span>
+<span class="c">// Если ширины совпадают — кириллицы в шрифте нет, работает подмена.</span>
+<span class="p">const</span> m = (f) => {
+  <span class="p">const</span> c = document.createElement(<span class="v">'canvas'</span>).getContext(<span class="v">'2d'</span>);
+  c.font = <span class="v">`64px ${f}`</span>;
+  <span class="p">return</span> c.measureText(<span class="v">'Ассортимент'</span>).width;
+};
+m(<span class="v">'"Prata", monospace'</span>) !== m(<span class="v">'monospace'</span>)  <span class="c">// → true = ок</span></code></pre>
+  </div>
+</section>
+
+<!-- ═══ 01 КОМБИНАЦИИ ═══ -->
+<section id="combos">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>Восемь комбинаций</h2>
+    <p class="sec-note">Каждая — три роли: дисплей / текст / метки</p>
+  </div>
+  <p class="sec-intro">Формула во всех парах одна: <strong>дисплейный шрифт</strong> для заголовков, <strong>нейтральный</strong> для текста, <strong>моно или разряженный капс</strong> для меток и цифр. Третий шрифт нужен именно для мелочи — это то, что отличает референсы от обычных лендингов. Образцы ниже — на реальном тексте сайта.</p>
+
+  <!-- 01 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">01</span>
+      <div>
+        <h3>Editorial Luxe</h3>
+        <p class="combo-stack">Playfair Display × Golos Text × Martian Mono</p>
+      </div>
+      <span class="combo-ref">Реф: Tiara, Rue Noire</span>
+    </header>
+    <p class="combo-mood">То, что уже стоит в проекте, но доведённое до референса. Разница — в третьем шрифте: <b>Martian Mono на метках</b> и <b>курсив Playfair на одном слове</b> заголовка. Самый безопасный путь: менять почти нечего, а картинка меняется сильно.</p>
+    <div class="specimen s01">
+      <span class="sp-label">01 — Формат работы</span>
+      <h4 class="sp-h">От текущих продаж <em>к управляемой</em> чистой прибыли</h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
+      <p class="sp-meta">Ассортимент · Кабинет · Контент · Чистая прибыль</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Martian+Mono:wght@400;500&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">:root</span> {
+  <span class="p">--font-display</span>: <span class="v">'Playfair Display'</span>, serif;
+  <span class="p">--font-body</span>:    <span class="v">'Golos Text'</span>, sans-serif;
+  <span class="p">--font-mono</span>:    <span class="v">'Martian Mono'</span>, monospace;
+}
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">var(--font-display)</span>;
+  font-weight: <span class="v">600</span>;
+  letter-spacing: <span class="v">-.025em</span>;
+  line-height: <span class="v">1.02</span>;
+}
+<span class="p">h1 em, h2 em</span> { font-style: <span class="v">italic</span>; font-weight: <span class="v">400</span>; }
+<span class="p">.label, .meta</span> {
+  font-family: <span class="v">var(--font-mono)</span>;
+  font-size: <span class="v">10px</span>;
+  letter-spacing: <span class="v">.18em</span>;
+  text-transform: <span class="v">uppercase</span>;
+}</code></pre>
+    </div>
+  </article>
+
+  <!-- 02 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">02</span>
+      <div>
+        <h3>Didone Fashion</h3>
+        <p class="combo-stack">Prata × Inter Light × Inter Caps</p>
+      </div>
+      <span class="combo-ref">Реф: Serrina, GI Studio, Cloister</span>
+    </header>
+    <p class="combo-mood">Тот самый «модный дидон» с гигантскими тонкими засечками из Serrina и Cloister. <b>Prata — единственный настоящий дидон на Google Fonts с приличной кириллицей</b>, поэтому альтернатив тут почти нет. Отлично работает крупно и на всю ширину.</p>
+    <p class="combo-mood warn">У Prata только одно начертание (400). Никакого bold — если нужен акцент, увеличивай кегль, а не вес. И никогда не ставь её в мелкий текст: тонкие штрихи развалятся.</p>
+    <div class="specimen s02">
+      <span class="sp-label">Три формата работы</span>
+      <h4 class="sp-h">Управляемая чистая прибыль</h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом.</p>
+      <p class="sp-meta">27.12 — Consulting — Since 2021</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Prata&amp;family=Inter:wght@300;400;500&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">:root</span> {
+  <span class="p">--font-display</span>: <span class="v">'Prata'</span>, serif;
+  <span class="p">--font-body</span>:    <span class="v">'Inter'</span>, sans-serif;
+}
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">var(--font-display)</span>;
+  font-weight: <span class="v">400</span>;          <span class="c">/* другого нет */</span>
+  font-size: <span class="v">clamp(2rem, 6vw, 4.5rem)</span>;
+  letter-spacing: <span class="v">-.015em</span>;
+  line-height: <span class="v">1.08</span>;
+}
+<span class="p">body</span> { font-family: <span class="v">var(--font-body)</span>; font-weight: <span class="v">300</span>; }
+<span class="p">.label</span> {
+  font-family: <span class="v">var(--font-body)</span>;
+  font-weight: <span class="v">500</span>;
+  font-size: <span class="v">11px</span>;
+  letter-spacing: <span class="v">.3em</span>;
+  text-transform: <span class="v">uppercase</span>;
+}</code></pre>
+    </div>
+  </article>
+
+  <!-- 03 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">03</span>
+      <div>
+        <h3>Swiss Editorial</h3>
+        <p class="combo-stack">Inter Tight × Inter × IBM Plex Mono</p>
+      </div>
+      <span class="combo-ref">Реф: Rue Paris, HAUS, IMG Models</span>
+    </header>
+    <p class="combo-mood">Самая «консалтинговая» пара из всех: холодная швейцарская сетка, гигантский капс, ноль украшений. <b>Inter Tight — бесплатный аналог Helvetica Neue Bold</b> с полной кириллицей. Читается как экспертиза и деньги, а не как бьюти-бренд.</p>
+    <div class="specimen s03 dark">
+      <span class="sp-label">[ Формат 02 ]</span>
+      <h4 class="sp-h">Чистая<br>прибыль —<br>управляемо</h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
+      <p class="sp-meta">Ассортимент / Кабинет / Контент</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&amp;family=Inter:wght@400;500&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">:root</span> {
+  <span class="p">--font-display</span>: <span class="v">'Inter Tight'</span>, sans-serif;
+  <span class="p">--font-body</span>:    <span class="v">'Inter'</span>, sans-serif;
+  <span class="p">--font-mono</span>:    <span class="v">'IBM Plex Mono'</span>, monospace;
+}
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">var(--font-display)</span>;
+  font-weight: <span class="v">700</span>;
+  text-transform: <span class="v">uppercase</span>;
+  font-size: <span class="v">clamp(2.2rem, 7vw, 5.5rem)</span>;
+  letter-spacing: <span class="v">-.035em</span>;   <span class="c">/* обязательно минус на капсе */</span>
+  line-height: <span class="v">.94</span>;
+}
+<span class="p">.meta</span> {
+  font-family: <span class="v">var(--font-mono)</span>;
+  font-size: <span class="v">11.5px</span>;
+  letter-spacing: <span class="v">.1em</span>;
+  text-transform: <span class="v">uppercase</span>;
+}</code></pre>
+    </div>
+  </article>
+
+  <!-- 04 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">04</span>
+      <div>
+        <h3>Techno Wide</h3>
+        <p class="combo-stack">Unbounded × Onest × Martian Mono</p>
+      </div>
+      <span class="combo-ref">Реф: Muland, IMG Models</span>
+    </header>
+    <p class="combo-mood">Прямая и честная <b>замена Michroma</b>: тот же широкий геометрический «техно», но кириллица нарисована осознанно, а не автогенерацией. Unbounded уже подключён в проекте и используется в одном месте — можно расширить его роль вместо Michroma.</p>
+    <p class="combo-mood warn">Unbounded очень широкий: длинные русские слова («Ассортимент», «Консультация») переносятся некрасиво. Используй только короткими строками и в 2–3 слова, не в абзацах.</p>
+    <div class="specimen s04">
+      <span class="sp-label">03 / Формат</span>
+      <h4 class="sp-h">Три формата работы</h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
+      <p class="sp-meta">27.12 — Consulting</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&amp;family=Onest:wght@300;400;500&amp;family=Martian+Mono:wght@400&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">:root</span> {
+  <span class="p">--font-display</span>: <span class="v">'Unbounded'</span>, sans-serif;
+  <span class="p">--font-body</span>:    <span class="v">'Onest'</span>, sans-serif;
+  <span class="p">--font-mono</span>:    <span class="v">'Martian Mono'</span>, monospace;
+}
+<span class="p">h2</span> {
+  font-family: <span class="v">var(--font-display)</span>;
+  font-weight: <span class="v">600</span>;
+  font-size: <span class="v">clamp(1.5rem, 4.2vw, 2.8rem)</span>;  <span class="c">/* мельче обычного: шрифт широкий */</span>
+  letter-spacing: <span class="v">-.02em</span>;
+  line-height: <span class="v">1.08</span>;
+  max-width: <span class="v">18ch</span>;               <span class="c">/* держим короткие строки */</span>
+  text-wrap: <span class="v">balance</span>;
+}</code></pre>
+    </div>
+  </article>
+
+  <!-- 05 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">05</span>
+      <div>
+        <h3>Quiet Luxury</h3>
+        <p class="combo-stack">Cormorant Garamond 300 × Inter Light × Jost Caps</p>
+      </div>
+      <span class="combo-ref">Реф: Kindled+Kindred, Mia Parker</span>
+    </header>
+    <p class="combo-mood">Тихий дорогой вариант: всё <b>тонкое, крупное и с огромным количеством воздуха</b>. Работает только при щедрых отступах — если сжать блоки, эффект пропадает и выглядит как недоделанное. Разрядка меток 0.4em здесь несущая конструкция, а не украшение.</p>
+    <div class="specimen s05">
+      <span class="sp-label">Нас трое</span>
+      <h4 class="sp-h">Управляемая <em>чистая прибыль</em></h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом.</p>
+      <p class="sp-meta">Ассортимент · Кабинет · Контент</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&amp;family=Inter:wght@300;400&amp;family=Jost:wght@400&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">'Cormorant Garamond'</span>, serif;
+  font-weight: <span class="v">300</span>;
+  font-size: <span class="v">clamp(2.4rem, 7vw, 5rem)</span>;   <span class="c">/* тонкое = крупное */</span>
+  letter-spacing: <span class="v">-.01em</span>;
+  line-height: <span class="v">1.05</span>;
+}
+<span class="p">body</span> { font-family: <span class="v">'Inter'</span>, sans-serif; font-weight: <span class="v">300</span>; }
+<span class="p">.label</span> {
+  font-family: <span class="v">'Jost'</span>, sans-serif;
+  font-size: <span class="v">10px</span>;
+  letter-spacing: <span class="v">.4em</span>;
+  text-transform: <span class="v">uppercase</span>;
+}
+<span class="p">section</span> { padding-block: <span class="v">clamp(5rem, 12vw, 10rem)</span>; } <span class="c">/* воздух обязателен */</span></code></pre>
+    </div>
+  </article>
+
+  <!-- 06 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">06</span>
+      <div>
+        <h3>Poster Brutal</h3>
+        <p class="combo-stack">Oswald 700 × Golos Text × JetBrains Mono</p>
+      </div>
+      <span class="combo-ref">Реф: Mariana Napolitani, Muland</span>
+    </header>
+    <p class="combo-mood">Плакатная энергия: узкий тяжёлый капс во всю ширину, моно-подписи, жёсткие блоки. <b>Oswald заменяет Bebas Neue и Anton</b>, у которых кириллицы нет. Смотрится дерзко — подойдёт для одной ударной секции, а не для всего сайта.</p>
+    <div class="specimen s06">
+      <span class="sp-label">// Формат 01</span>
+      <h4 class="sp-h">Три формата работы</h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
+      <p class="sp-meta">27.12 / Consulting / Moscow</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&amp;family=Golos+Text:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">'Oswald'</span>, sans-serif;
+  font-weight: <span class="v">700</span>;
+  text-transform: <span class="v">uppercase</span>;
+  font-size: <span class="v">clamp(2.4rem, 8vw, 6rem)</span>;
+  line-height: <span class="v">.95</span>;
+  letter-spacing: <span class="v">-.005em</span>;   <span class="c">/* Oswald узкий — минус почти не нужен */</span>
+}
+<span class="p">.meta</span> {
+  font-family: <span class="v">'JetBrains Mono'</span>, monospace;
+  font-weight: <span class="v">500</span>;
+  font-size: <span class="v">11.5px</span>;
+  letter-spacing: <span class="v">.12em</span>;
+  text-transform: <span class="v">uppercase</span>;
+}</code></pre>
+    </div>
+  </article>
+
+  <!-- 07 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">07</span>
+      <div>
+        <h3>Old-School Contrast</h3>
+        <p class="combo-stack">Old Standard TT × Manrope × Manrope Caps</p>
+      </div>
+      <span class="combo-ref">Реф: Rue Noire, Alora Rachelle</span>
+    </header>
+    <p class="combo-mood">Именно этот шрифт даёт трюк «IDENTITY <em>IN</em> MOTION» из Rue Noire: у Old Standard TT <b>настоящий рисованный курсив с кириллицей</b>, а не механический наклон. Максимальный контраст толстых и тонких штрихов — читается как обложка журнала.</p>
+    <div class="specimen s07">
+      <span class="sp-label">Формат работы</span>
+      <h4 class="sp-h">Чистая прибыль <em>управляемо</em></h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом.</p>
+      <p class="sp-meta">Ассортимент · Кабинет · Контент</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@300;600&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">'Old Standard TT'</span>, serif;
+  font-weight: <span class="v">400</span>;
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">.01em</span>;
+  line-height: <span class="v">1.06</span>;
+}
+<span class="p">h1 em, h2 em</span> {          <span class="c">/* ключ приёма: курсив строчными внутри капса */</span>
+  font-style: <span class="v">italic</span>;
+  text-transform: <span class="v">none</span>;
+}
+<span class="p">.label</span> {
+  font-family: <span class="v">'Manrope'</span>, sans-serif;
+  font-weight: <span class="v">600</span>;
+  letter-spacing: <span class="v">.26em</span>;
+  text-transform: <span class="v">uppercase</span>;
+  font-size: <span class="v">11px</span>;
+}</code></pre>
+    </div>
+  </article>
+
+  <!-- 08 -->
+  <article class="combo">
+    <header class="combo-head">
+      <span class="combo-num">08</span>
+      <div>
+        <h3>Serif × Mono</h3>
+        <p class="combo-stack">Spectral Light × JetBrains Mono (как основной текст)</p>
+      </div>
+      <span class="combo-ref">Реф: Anna Chernykh, Tiara body</span>
+    </header>
+    <p class="combo-mood">Самый необычный ход из подборки: <b>моноширинный шрифт используется не для меток, а для основного текста</b> — капсом, мелко, с большим интерлиньяжем. Так сделан таплинк Anna Chernykh и мелкий текст у Tiara. Даёт ощущение «студии», а не «услуги».</p>
+    <p class="combo-mood warn">Моно-капс читается медленнее обычного текста. Годится для коротких абзацев до 3–4 строк — не для описаний услуг на полэкрана.</p>
+    <div class="specimen s08">
+      <span class="sp-label">[ 27.12 / формат ]</span>
+      <h4 class="sp-h">От текущих продаж <em>к чистой прибыли</em></h4>
+      <p class="sp-body">Бюро для fashion-брендов, которые уже продают на маркетплейсах</p>
+      <p class="sp-meta">Ассортимент — Кабинет — Контент</p>
+    </div>
+    <div class="code">
+      <button class="copy">copy</button>
+      <pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,200;0,300;1,200&amp;family=JetBrains+Mono:wght@300;400&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+<span class="p">h1, h2</span> {
+  font-family: <span class="v">'Spectral'</span>, serif;
+  font-weight: <span class="v">300</span>;
+  letter-spacing: <span class="v">-.02em</span>;
+  line-height: <span class="v">1.05</span>;
+}
+<span class="p">h1 em</span> { font-style: <span class="v">italic</span>; font-weight: <span class="v">200</span>; }
+
+<span class="p">.mono-body</span> {                <span class="c">/* короткие абзацы, не длинные */</span>
+  font-family: <span class="v">'JetBrains Mono'</span>, monospace;
+  font-weight: <span class="v">300</span>;
+  font-size: <span class="v">13px</span>;
+  line-height: <span class="v">1.75</span>;       <span class="c">/* моно требует большего интерлиньяжа */</span>
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">.02em</span>;
+  max-width: <span class="v">44ch</span>;
+}</code></pre>
+    </div>
+  </article>
+</section>
+
+<!-- ═══ 02 ПРИЁМЫ ═══ -->
+<section id="tricks">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>Шестнадцать приёмов</h2>
+    <p class="sec-note">Работают на любой паре из раздела 01</p>
+  </div>
+  <p class="sec-intro">Разница между «нормальным лендингом» и референсами — не в шрифте, а в этих мелочах. Их можно набирать по 3–4 штуки на страницу: <strong>больше — превращается в кашу</strong>. Слева живой пример, справа код для копирования.</p>
+
+  <!-- T1 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">01</span><h3>Курсив на смысловом слове</h3></div>
+    <p class="trick-why">Базовый приём всех референсов («HI, <em>I'm</em> TIARA», «IDENTITY <em>IN</em> MOTION»). Выделяем курсивом одно слово — то, которое несёт смысл, а не служебное. Держит внимание и добавляет «руки дизайнера» без единого дополнительного шрифта.</p>
+    <div class="trick-grid">
+      <div class="demo"><p class="d-italic">От текущих продаж <em>к управляемой</em> прибыли</p></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;h2&gt;От текущих продаж &lt;em&gt;к управляемой&lt;/em&gt; прибыли&lt;/h2&gt;
+
+<span class="p">h2</span> { font-family: <span class="v">'Playfair Display'</span>, serif; font-weight: <span class="v">600</span>; }
+<span class="p">h2 em</span> {
+  font-style: <span class="v">italic</span>;
+  font-weight: <span class="v">400</span>;      <span class="c">/* курсив всегда легче основного */</span>
+  color: <span class="v">var(--ink-soft)</span>;
+}</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T2 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">02</span><h3>Три кегля в одном заголовке</h3></div>
+    <p class="trick-why">Заголовок собирается из строк разного размера: мелкая метка, огромное главное, среднее курсивное. Создаёт ритм и «постерность» — как в Tiara и Alora. Работает, только если размеры отличаются заметно (в 2–3 раза), иначе выглядит случайностью.</p>
+    <div class="trick-grid">
+      <div class="demo"><p class="d-mixed"><span class="sm">27.12 Consulting</span><span class="lg">Чистая прибыль</span><span class="md">управляемо, а не случайно</span></p></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;h2 class=<span class="v">"stack"</span>&gt;
+  &lt;span class=<span class="v">"sm"</span>&gt;27.12 Consulting&lt;/span&gt;
+  &lt;span class=<span class="v">"lg"</span>&gt;Чистая прибыль&lt;/span&gt;
+  &lt;span class=<span class="v">"md"</span>&gt;управляемо, а не случайно&lt;/span&gt;
+&lt;/h2&gt;
+
+<span class="p">.stack</span>    { line-height: <span class="v">.92</span>; letter-spacing: <span class="v">-.03em</span>; }
+<span class="p">.stack .sm</span>{ display:<span class="v">block</span>; font-family:<span class="v">'Martian Mono'</span>,monospace;
+             font-size:<span class="v">11px</span>; letter-spacing:<span class="v">.2em</span>;
+             text-transform:<span class="v">uppercase</span>; line-height:<span class="v">1</span>; }
+<span class="p">.stack .lg</span>{ display:<span class="v">block</span>; font-size:<span class="v">clamp(2rem,6vw,4.5rem)</span>; font-weight:<span class="v">600</span>; }
+<span class="p">.stack .md</span>{ display:<span class="v">block</span>; font-size:<span class="v">clamp(1.1rem,2.4vw,1.6rem)</span>; font-style:<span class="v">italic</span>; }</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T3 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">03</span><h3>Гигант, обрезанный краем экрана</h3></div>
+    <p class="trick-why">Слово набирается настолько крупно, что физически не помещается, и уходит за край («SERRINA.C», «MY VALUES MY V»). Мгновенно читается как дизайн-решение, а не как ошибка вёрстки. Обязательное условие — слово должно угадываться по первым буквам.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-bleed"><span>КОНСАЛТИНГ 27.12</span></div></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.bleed</span> {
+  overflow: <span class="v">hidden</span>;          <span class="c">/* на секции, не на body */</span>
+}
+<span class="p">.bleed span</span> {
+  display: <span class="v">block</span>;
+  font-family: <span class="v">'Prata'</span>, serif;
+  font-size: <span class="v">clamp(4rem, 16vw, 14rem)</span>;
+  line-height: <span class="v">1</span>;
+  white-space: <span class="v">nowrap</span>;       <span class="c">/* не переносить — в этом смысл */</span>
+  margin-left: <span class="v">-.06em</span>;       <span class="c">/* убрать боковой просвет буквы */</span>
+}
+<span class="c">/* важно: overflow-x:hidden должен быть и на body,</span>
+<span class="c">   иначе появится горизонтальный скролл */</span></code></pre></div>
+    </div>
+  </div>
+
+  <!-- T4 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">04</span><h3>Бегущая строка гигантским кеглем</h3></div>
+    <p class="trick-why">В проекте бегущая строка уже есть в шапке — но мелкая. Референсы (Tiara, Rue Noire) используют её <em>как разделитель секций</em>, набирая кеглем 60–120px. Дублируем контент дважды и двигаем на -50% — шов незаметен.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="marq"><div class="marq-track">
+        <span>Ассортимент — Кабинет — Контент — Прибыль —&nbsp;</span>
+        <span>Ассортимент — Кабинет — Контент — Прибыль —&nbsp;</span>
+      </div></div></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;div class=<span class="v">"marq"</span>&gt;&lt;div class=<span class="v">"marq-track"</span>&gt;
+  &lt;span&gt;Ассортимент — Кабинет — Контент —&amp;nbsp;&lt;/span&gt;
+  &lt;span aria-hidden=<span class="v">"true"</span>&gt;Ассортимент — Кабинет — Контент —&amp;nbsp;&lt;/span&gt;
+&lt;/div&gt;&lt;/div&gt;
+
+<span class="p">.marq</span>       { overflow:<span class="v">hidden</span>; border-block:<span class="v">1px solid var(--border)</span>; }
+<span class="p">.marq-track</span> { display:<span class="v">flex</span>; width:<span class="v">max-content</span>;
+              animation:<span class="v">marq 26s linear infinite</span>; }
+<span class="p">.marq-track span</span> {
+  font-family:<span class="v">'Oswald'</span>,sans-serif; font-weight:<span class="v">700</span>;
+  text-transform:<span class="v">uppercase</span>;
+  font-size:<span class="v">clamp(2rem,7vw,5rem)</span>; line-height:<span class="v">1.1</span>;
+}
+<span class="p">@keyframes marq</span> { to { transform:<span class="v">translateX(-50%)</span>; } }
+<span class="p">@media (prefers-reduced-motion:reduce)</span> { <span class="p">.marq-track</span>{animation:<span class="v">none</span>} }</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T5 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">05</span><h3>Микро-метки капсом с разрядкой</h3></div>
+    <p class="trick-why">Самый дешёвый способ поднять уровень вёрстки: над каждым блоком — крохотная строчка капсом с разрядкой 0.3em. Есть буквально во всех 19 референсах. Правило: <em>чем мельче кегль, тем больше разрядка</em>.</p>
+    <div class="trick-grid">
+      <div class="demo"><span class="d-label">01 — Ассортимент</span><p>Что продавать, в каком объёме и по какой цене, чтобы юнит-экономика сходилась.</p></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.label</span> {
+  display: <span class="v">block</span>;
+  font-size: <span class="v">10.5px</span>;          <span class="c">/* 10–12px, не больше */</span>
+  font-weight: <span class="v">500</span>;
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">.34em</span>;      <span class="c">/* 0.25–0.4em */</span>
+  color: <span class="v">var(--muted)</span>;
+  margin-bottom: <span class="v">.9rem</span>;
+}
+<span class="c">/* разрядка добавляет пробел справа от последней буквы —</span>
+<span class="c">   компенсируем, если метка выравнивается по правому краю: */</span>
+<span class="p">.label.right</span> { margin-right: <span class="v">-.34em</span>; }</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T6 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">06</span><h3>Моноширинный для мета-данных</h3></div>
+    <p class="trick-why">Цены, даты, номера, статусы — всё, что «данные», а не «речь», набирается моно. У Rue Paris и HAUS так набраны сметы и таймлайны. Побочный бонус: одинаковая ширина цифр делает колонки ровными сами собой.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-meta">
+        <div><span>Формат</span><b>Разовая консультация</b></div>
+        <div><span>Срок</span><b>2 недели</b></div>
+        <div><span>Стоимость</span><b>от 90 000 ₽</b></div>
+      </div></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.meta</span> {
+  font-family: <span class="v">'IBM Plex Mono'</span>, monospace;
+  font-size: <span class="v">11.5px</span>;
+  letter-spacing: <span class="v">.06em</span>;
+  text-transform: <span class="v">uppercase</span>;
+  display: <span class="v">grid</span>;
+  gap: <span class="v">.5rem</span>;
+}
+<span class="p">.meta div</span> {
+  display: <span class="v">flex</span>;
+  justify-content: <span class="v">space-between</span>;
+  border-bottom: <span class="v">1px dotted var(--border)</span>;
+  padding-bottom: <span class="v">.45rem</span>;
+}</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T7 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">07</span><h3>Крупные номера как якоря</h3></div>
+    <p class="trick-why">01 / 02 / 03 набираются тонким шрифтом кеглем 60–90px и работают навигацией по секции (Serrina, HAUS, GI Studio). Цвет — акцентный (у нас золото), вес — light: номер должен структурировать, а не орать.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-num"><span class="n">02</span><div><h4>Кабинет</h4><p>Настройка карточек, рекламы и аналитики так, чтобы решения принимались по цифрам.</p></div></div></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.num-item</span>   { display:<span class="v">flex</span>; gap:<span class="v">1.25rem</span>; align-items:<span class="v">flex-start</span>; }
+<span class="p">.num-item .n</span> {
+  font-family: <span class="v">'Jost'</span>, sans-serif;
+  font-weight: <span class="v">300</span>;             <span class="c">/* тонкий, не жирный */</span>
+  font-size: <span class="v">clamp(2.6rem, 7vw, 5rem)</span>;
+  line-height: <span class="v">.8</span>;
+  letter-spacing: <span class="v">-.04em</span>;
+  color: <span class="v">var(--gold)</span>;
+  font-variant-numeric: <span class="v">lining-nums</span>;
+}</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T8 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">08</span><h3>Тире вместо переноса строки</h3></div>
+    <p class="trick-why">«FASHION — MODELS — AGENCY»: каждая строка заголовка начинается или заканчивается длинным тире. Приём из IMG Models и Rue Paris — превращает обычный заголовок в композицию. Переносы задаются вручную, не автоматикой.</p>
+    <div class="trick-grid">
+      <div class="demo"><p class="d-dash"><span>Ассортимент <i>—</i></span><span>Кабинет</span><span><i>—</i> Прибыль</span></p></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;h2 class=<span class="v">"dash"</span>&gt;
+  &lt;span&gt;Ассортимент &lt;i&gt;—&lt;/i&gt;&lt;/span&gt;
+  &lt;span&gt;Кабинет&lt;/span&gt;
+  &lt;span&gt;&lt;i&gt;—&lt;/i&gt; Прибыль&lt;/span&gt;
+&lt;/h2&gt;
+
+<span class="p">.dash</span>       { font-family:<span class="v">'Inter Tight'</span>,sans-serif; font-weight:<span class="v">700</span>;
+             text-transform:<span class="v">uppercase</span>; line-height:<span class="v">1</span>;
+             letter-spacing:<span class="v">-.03em</span>; }
+<span class="p">.dash span</span>  { display:<span class="v">block</span>; }
+<span class="p">.dash i</span>     { font-style:<span class="v">normal</span>; color:<span class="v">var(--gold)</span>; }</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T9 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">09</span><h3>Вертикальная подпись сбоку</h3></div>
+    <p class="trick-why">Повёрнутая на 90° строка вдоль края блока — фирменный знак IMG Models и Rue Paris. Занимает пустое поле слева и добавляет «журнальности». Только для второстепенного текста: читать вертикально неудобно.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-vert"><span class="v">27.12 / Consulting</span><p>Бюро для fashion-брендов, которые уже продают на маркетплейсах.</p></div></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.vlabel</span> {
+  writing-mode: <span class="v">vertical-rl</span>;
+  transform: <span class="v">rotate(180deg)</span>;   <span class="c">/* снизу вверх */</span>
+  font-family: <span class="v">'JetBrains Mono'</span>, monospace;
+  font-size: <span class="v">10.5px</span>;
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">.24em</span>;
+  color: <span class="v">var(--muted)</span>;
+  border-right: <span class="v">1px solid var(--border)</span>;
+  padding-right: <span class="v">.75rem</span>;
+}
+<span class="p">@media (max-width: 720px)</span> {        <span class="c">/* на мобильном убрать */</span>
+  <span class="p">.vlabel</span> { display: <span class="v">none</span>; }
+}</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T10 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">10</span><h3>Рукописный акцент одним словом</h3></div>
+    <p class="trick-why">В GI Studio слово «физического» написано от руки посреди строгого заголовка. Приём смягчает деловой тон — но <b>ровно одно слово на страницу</b>, иначе получается свадебное приглашение. Caveat и Marck Script — единственные приличные рукописные с кириллицей.</p>
+    <div class="trick-grid">
+      <div class="demo"><p class="d-script">Не отчёты ради отчётов, а <em>управляемая</em> чистая прибыль</p></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;link href=<span class="v">"https://fonts.googleapis.com/css2?family=Caveat:wght@600&amp;display=swap"</span> rel=<span class="v">"stylesheet"</span>&gt;
+
+&lt;h2&gt;Не отчёты ради отчётов, а &lt;em&gt;управляемая&lt;/em&gt; чистая прибыль&lt;/h2&gt;
+
+<span class="p">h2 em</span> {
+  font-family: <span class="v">'Caveat'</span>, cursive;
+  font-style: <span class="v">normal</span>;
+  font-weight: <span class="v">600</span>;
+  font-size: <span class="v">1.5em</span>;      <span class="c">/* рукописные визуально мельче — компенсируем */</span>
+  line-height: <span class="v">.8</span>;        <span class="c">/* и не раздуваем строку */</span>
+  color: <span class="v">var(--gold)</span>;
+  padding: <span class="v">0 .12em</span>;
+}</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T11 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">11</span><h3>Контур вместо заливки</h3></div>
+    <p class="trick-why">Вторая строка заголовка набирается «пустой» — только обводка. Даёт глубину без второго цвета и хорошо ложится поверх фото. Правило: обводка всегда на менее важной строке, иначе текст теряет вес.</p>
+    <div class="trick-grid">
+      <div class="demo dark"><p class="d-stroke">Чистая прибыль<span class="out">управляемо</span></p></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;h2&gt;Чистая прибыль &lt;span class=<span class="v">"outline"</span>&gt;управляемо&lt;/span&gt;&lt;/h2&gt;
+
+<span class="p">h2</span> {
+  font-family: <span class="v">'Inter Tight'</span>, sans-serif;
+  font-weight: <span class="v">800</span>;
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">-.035em</span>;
+}
+<span class="p">.outline</span> {
+  display: <span class="v">block</span>;
+  -webkit-text-stroke: <span class="v">1.2px currentColor</span>;
+  color: <span class="v">transparent</span>;
+}
+<span class="c">/* толщину подбирать от кегля: ~1px на 40px, ~2px на 100px */</span></code></pre></div>
+    </div>
+  </div>
+
+  <!-- T12 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">12</span><h3>Оптика крупного кегля</h3></div>
+    <p class="trick-why">Главная техническая причина, почему свои заголовки выглядят «дешевле» референсных. Крупный текст нужно <b>сжимать</b> (минусовой трекинг, интерлиньяж меньше единицы), мелкий — <b>разряжать</b>. Плюс <code>text-wrap: balance</code>, чтобы последняя строка не оставалась одиноким словом.</p>
+    <div class="trick-grid">
+      <div class="demo"><p class="d-optic"><span class="big">От текущих продаж к управляемой чистой прибыли</span><span class="small">Тот же шрифт, другая оптика</span></p></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="c">/* Шкала трекинга: чем крупнее — тем плотнее */</span>
+<span class="p">.h-xl</span>  { font-size:<span class="v">clamp(2.4rem,7vw,5rem)</span>; letter-spacing:<span class="v">-.035em</span>; line-height:<span class="v">.98</span>; }
+<span class="p">.h-lg</span>  { font-size:<span class="v">clamp(1.8rem,4vw,3rem)</span>;   letter-spacing:<span class="v">-.025em</span>; line-height:<span class="v">1.06</span>; }
+<span class="p">.h-md</span>  { font-size:<span class="v">1.35rem</span>;                letter-spacing:<span class="v">-.015em</span>; line-height:<span class="v">1.25</span>; }
+<span class="p">body</span>  { font-size:<span class="v">1rem</span>;                    letter-spacing:<span class="v">0</span>;      line-height:<span class="v">1.6</span>; }
+<span class="p">.label</span>{ font-size:<span class="v">10.5px</span>;                 letter-spacing:<span class="v">.3em</span>;   line-height:<span class="v">1.4</span>; }
+
+<span class="p">h1, h2, .h-xl</span> {
+  text-wrap: <span class="v">balance</span>;      <span class="c">/* ровные строки, нет висячего слова */</span>
+  max-width: <span class="v">20ch</span>;          <span class="c">/* заголовок не шире 20 знаков */</span>
+}
+<span class="p">p</span> { max-width: <span class="v">68ch</span>; text-wrap: <span class="v">pretty</span>; }</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T13 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">13</span><h3>Табличные цифры в числах</h3></div>
+    <p class="trick-why">Незаметная, но профессиональная деталь: по умолчанию цифры разной ширины, и колонки с ценами «пляшут». Одна строка CSS выравнивает их идеально. Обязательно для прайсов, метрик и результатов.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-figs">
+        <div class="row"><span>Выручка</span><span class="num">11 480 000 ₽</span></div>
+        <div class="row"><span>Чистая прибыль</span><span class="num">1 907 000 ₽</span></div>
+        <div class="row"><span>Маржинальность</span><span class="num">16,6 %</span></div>
+      </div></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.num</span> {
+  font-variant-numeric: <span class="v">tabular-nums lining-nums</span>;
+  font-feature-settings: <span class="v">"tnum" 1</span>;   <span class="c">/* для старых браузеров */</span>
+  font-weight: <span class="v">600</span>;
+}
+<span class="c">/* Ещё полезные фичи OpenType: */</span>
+<span class="p">.smallcaps</span> { font-variant-caps: <span class="v">all-small-caps</span>; letter-spacing: <span class="v">.08em</span>; }
+<span class="p">.frac</span>      { font-variant-numeric: <span class="v">diagonal-fractions</span>; }
+<span class="c">/* И типографская мелочь: неразрывный пробел перед ₽ и % — &amp;nbsp; */</span></code></pre></div>
+    </div>
+  </div>
+
+  <!-- T14 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">14</span><h3>Метка на полях (hanging label)</h3></div>
+    <p class="trick-why">Подпись выносится слева от абзаца, в поле — как маргиналия в книге. Приём из Kindled+Kindred и Homme. Создаёт вторую колонку без реальной сетки и хорошо заполняет пустое левое поле в широких секциях.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-hang"><span class="tag">[ подход ]</span><p>Сначала считаем экономику, потом трогаем витрину.</p></div></div>
+      <div class="code"><button class="copy">copy</button><pre><code><span class="p">.hang</span> {
+  display: <span class="v">grid</span>;
+  grid-template-columns: <span class="v">auto 1fr</span>;
+  gap: <span class="v">1.5rem</span>;
+  align-items: <span class="v">start</span>;
+}
+<span class="p">.hang .tag</span> {
+  font-family: <span class="v">'JetBrains Mono'</span>, monospace;
+  font-size: <span class="v">10.5px</span>;
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">.16em</span>;
+  color: <span class="v">var(--muted)</span>;
+  padding-top: <span class="v">.55rem</span>;      <span class="c">/* выравниваем по базовой линии текста */</span>
+  white-space: <span class="v">nowrap</span>;
+}
+<span class="p">@media (max-width:640px)</span> { <span class="p">.hang</span> { grid-template-columns:<span class="v">1fr</span>; gap:<span class="v">.5rem</span>; } }</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T15 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">15</span><h3>Заливка под одним словом</h3></div>
+    <p class="trick-why">Прямоугольник акцентного цвета прямо под словом в строке. Работает как маркер в тексте и хорошо тащит на себя взгляд в длинном заголовке. У нас в палитре для этого есть золото <code>#c49a5a</code> на навy.</p>
+    <div class="trick-grid">
+      <div class="demo"><p class="d-mark">Мы не про отчёты — мы про <mark>чистую прибыль</mark> в конце месяца</p></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;h2&gt;Мы про &lt;mark&gt;чистую прибыль&lt;/mark&gt; в конце месяца&lt;/h2&gt;
+
+<span class="p">mark</span> {
+  background: <span class="v">var(--gold)</span>;
+  color: <span class="v">var(--card-bg)</span>;
+  padding: <span class="v">.04em .28em</span>;
+  border-radius: <span class="v">2px</span>;
+  box-decoration-break: <span class="v">clone</span>;   <span class="c">/* ровно на переносе строки */</span>
+  -webkit-box-decoration-break: <span class="v">clone</span>;
+}</code></pre></div>
+    </div>
+  </div>
+
+  <!-- T16 -->
+  <div class="trick">
+    <div class="trick-head"><span class="trick-num">16</span><h3>Линия-разделитель с меткой</h3></div>
+    <p class="trick-why">Горизонтальная линия во всю ширину с подписью посередине или у края. Разделяет секции лучше, чем просто отступ, и даёт ещё одну точку для моно-шрифта. Есть у HAUS, Rue Paris, Mia Parker.</p>
+    <div class="trick-grid">
+      <div class="demo"><div class="d-rule"><span>Три формата работы</span></div></div>
+      <div class="code"><button class="copy">copy</button><pre><code>&lt;div class=<span class="v">"rule"</span>&gt;&lt;span&gt;Три формата работы&lt;/span&gt;&lt;/div&gt;
+
+<span class="p">.rule</span> { display:<span class="v">flex</span>; align-items:<span class="v">center</span>; gap:<span class="v">1rem</span>; }
+<span class="p">.rule::before, .rule::after</span> {
+  content: <span class="v">""</span>;
+  height: <span class="v">1px</span>;
+  background: <span class="v">var(--border)</span>;
+  flex: <span class="v">1</span>;
+}
+<span class="p">.rule span</span> {
+  font-family: <span class="v">'Martian Mono'</span>, monospace;
+  font-size: <span class="v">10px</span>;
+  text-transform: <span class="v">uppercase</span>;
+  letter-spacing: <span class="v">.22em</span>;
+  white-space: <span class="v">nowrap</span>;
+  color: <span class="v">var(--muted)</span>;
+}
+<span class="c">/* метка у левого края: убрать ::before */</span></code></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 ШПАРГАЛКА ═══ -->
+<section id="cheat">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>Шпаргалка по ролям</h2>
+    <p class="sec-note">Все — Google Fonts, все с кириллицей</p>
+  </div>
+  <p class="sec-intro">Если нужно быстро подобрать шрифт под конкретную задачу — бери отсюда. Слева роль, дальше — чем шрифт хорош и чего от него ждать. <strong>В одном макете держим максимум три</strong>: дисплейный, текстовый, моно.</p>
+  <div class="tbl-scroll">
+  <table class="cheat">
+    <thead><tr><th>Шрифт</th><th>Роль</th><th>Характер и на что смотреть</th></tr></thead>
+    <tbody>
+      <tr><td>Prata</td><td class="role">Дисплей</td><td>Высокий контраст, «мода». Только вес 400, только крупно</td></tr>
+      <tr><td>Playfair Display</td><td class="role">Дисплей</td><td>Универсальный редакционный, есть настоящий курсив, веса 400–900</td></tr>
+      <tr><td>Old Standard TT</td><td class="role">Дисплей</td><td>Максимальный контраст, лучший курсив для приёма «роман + курсив»</td></tr>
+      <tr><td>Cormorant Garamond</td><td class="role">Дисплей</td><td>Тонкий, «тихая роскошь». Требует крупного кегля и много воздуха</td></tr>
+      <tr><td>Spectral</td><td class="role">Дисплей / текст</td><td>Редакционная антиква, хороша и в заголовке, и в абзаце</td></tr>
+      <tr><td>Forum</td><td class="role">Дисплей</td><td>Капитель-антиква, «музейный» тон. Только капсом с разрядкой</td></tr>
+      <tr><td>Inter Tight</td><td class="role">Дисплей</td><td>Плотный гротеск, замена Helvetica Neue Bold. Обязателен минус-трекинг</td></tr>
+      <tr><td>Unbounded</td><td class="role">Дисплей</td><td>Широкий «техно», замена Michroma. Не для длинных русских слов</td></tr>
+      <tr><td>Oswald</td><td class="role">Дисплей</td><td>Узкий конденс-капс, замена Bebas Neue и Anton. Плакатная энергия</td></tr>
+      <tr><td>Yeseva One</td><td class="role">Дисплей</td><td>Декоративная антиква, очень характерная. Только 1–2 слова</td></tr>
+      <tr><td>Golos Text</td><td class="role">Текст</td><td>Сделан под русский, лучшая читаемость в абзацах. Уже в проекте</td></tr>
+      <tr><td>Inter</td><td class="role">Текст</td><td>Нейтральный стандарт, 9 весов. Безопасный выбор всегда</td></tr>
+      <tr><td>Onest</td><td class="role">Текст</td><td>Современный, чуть теплее Inter. Хорош в паре с «техно»-дисплеем</td></tr>
+      <tr><td>Manrope</td><td class="role">Текст</td><td>Геометричный, приятный в light. Хорош для разряженных меток</td></tr>
+      <tr><td>Jost</td><td class="role">Цифры / метки</td><td>Futura-подобный. Отличные light-цифры для крупных номеров</td></tr>
+      <tr><td>Martian Mono</td><td class="role">Моно</td><td>Широкий техничный моно, замена Space Mono. Лучший для меток</td></tr>
+      <tr><td>JetBrains Mono</td><td class="role">Моно</td><td>Нейтральный, отлично читается мелко. Универсальный</td></tr>
+      <tr><td>IBM Plex Mono</td><td class="role">Моно</td><td>Чуть теплее и «корпоративнее». Идеален для смет и таблиц</td></tr>
+      <tr><td>Caveat</td><td class="role">Акцент</td><td>Рукописный, разборчивый. Ровно одно слово на страницу</td></tr>
+      <tr><td>Marck Script</td><td class="role">Акцент</td><td>Тоньше и «подписнее» Caveat. Хорош для имитации подписи</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══ 04 ГИГИЕНА ═══ -->
+<section id="rules">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>Гигиена</h2>
+    <p class="sec-note">Что проверять перед тем, как считать готовым</p>
+  </div>
+  <div class="rules">
+    <div class="rule"><h4>Максимум три шрифта</h4><p>Дисплей + текст + моно. Четвёртый почти всегда означает, что один из трёх выбран неправильно.</p></div>
+    <div class="rule"><h4>Только нужные веса</h4><p>Каждый вес — отдельный файл. Сейчас в <code>index.html</code> грузится <code>Inter:300..900</code> — девять начертаний. Реально используются 3–4.</p></div>
+    <div class="rule"><h4>Чистить неиспользуемое</h4><p><code>Archivo</code> и <code>Rubik Mono One</code> подключены, но не используются в CSS. У Archivo к тому же нет кириллицы — удалить из <code>&lt;link&gt;</code>.</p></div>
+    <div class="rule"><h4>Трекинг по кеглю</h4><p>Крупное сжимаем (<code>-.02…-.04em</code>), мелкий капс разряжаем (<code>.25….4em</code>). Средний текст оставляем в покое.</p></div>
+    <div class="rule"><h4>Интерлиньяж по кеглю</h4><p>Заголовки <code>.94–1.08</code>, текст <code>1.55–1.65</code>, моно <code>1.7+</code>. Один <code>line-height</code> на всё — типичная ошибка.</p></div>
+    <div class="rule"><h4>Длина строки</h4><p>Заголовок до <code>20ch</code>, абзац <code>60–70ch</code>. Иначе глаз теряет начало следующей строки.</p></div>
+    <div class="rule"><h4>preconnect обязателен</h4><p>Нужны оба: <code>fonts.googleapis.com</code> и <code>fonts.gstatic.com</code> с <code>crossorigin</code>. Второго в проекте сейчас нет.</p></div>
+    <div class="rule"><h4>Проверка на длинных словах</h4><p>«Ассортимент», «Консультация», «Маркетплейсы» — на них ломается широкий дисплейный шрифт. Проверять до финала, а не после.</p></div>
+    <div class="rule"><h4>Русская типографика</h4><p>Тире «—» вместо дефиса, «ёлочки» вместо кавычек, неразрывный пробел перед <code>₽</code>, <code>%</code> и после коротких предлогов.</p></div>
+  </div>
+</section>
+
+<footer>
+  <span>27.12 Consulting · Типографика</span>
+  <span>19 референсов → 8 пар + 16 приёмов</span>
+</footer>
+
+</div>
+
+<script>
+document.getElementById('today').textContent =
+  new Date().toLocaleDateString('ru-RU', { day:'2-digit', month:'long', year:'numeric' });
+
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const code = btn.parentElement.querySelector('code').innerText;
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = code; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    btn.textContent = 'скопировано';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('done'); }, 1600);
+  });
+});
+</script>
+</body>
+</html>

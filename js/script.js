@@ -1,13 +1,65 @@
-const revealEls = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-visible');
-      revealObserver.unobserve(entry.target);
+// Keep --header-h in sync with the sticky header, so the hero can fill exactly
+// the rest of the first screen: min-height: calc(100svh - var(--header-h)).
+const siteHeader = document.querySelector('.site-header');
+
+if (siteHeader) {
+  const syncHeaderHeight = () => {
+    const h = Math.round(siteHeader.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  };
+
+  syncHeaderHeight();
+  window.addEventListener('resize', syncHeaderHeight);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(syncHeaderHeight);
+  }
+}
+
+// Curtain-split scroll effect: as the hero (split into two halves) scrolls
+// past, the halves visibly part like doors, and the next section settles
+// into place as it arrives — driven continuously by scroll position, so it
+// reverses smoothly when scrolling back up.
+const heroSplitSection = document.querySelector('.hero');
+const heroSplitPhoto = document.querySelector('.hero-panel-photo');
+const heroSplitSub = document.querySelector('.hero-panel-sub');
+const heroSplitNext = heroSplitSection ? heroSplitSection.nextElementSibling : null;
+const prefersReducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+if (heroSplitSection && heroSplitPhoto && heroSplitSub && !prefersReducedMotionQuery.matches) {
+  const MAX_SPLIT_PERCENT = 38;
+  const NEXT_SETTLE_PX = 36;
+  const NEXT_ENTRY_DISTANCE = 220;
+  let heroSplitTicking = false;
+
+  const updateHeroSplit = () => {
+    heroSplitTicking = false;
+
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
+    const heroRect = heroSplitSection.getBoundingClientRect();
+    const heroHeight = heroSplitSection.offsetHeight || 1;
+    const splitProgress = Math.min(Math.max((headerH - heroRect.top) / heroHeight, 0), 1);
+    const shift = splitProgress * MAX_SPLIT_PERCENT;
+
+    heroSplitPhoto.style.transform = `translateX(${-shift}%)`;
+    heroSplitSub.style.transform = `translateX(${shift}%)`;
+
+    if (heroSplitNext) {
+      const nextRect = heroSplitNext.getBoundingClientRect();
+      const triggerY = window.innerHeight * 0.85;
+      const entryProgress = Math.min(Math.max((triggerY - nextRect.top) / NEXT_ENTRY_DISTANCE, 0), 1);
+      heroSplitNext.style.transform = `translateY(${(1 - entryProgress) * NEXT_SETTLE_PX}px)`;
     }
-  });
-}, { threshold: 0.15 });
-revealEls.forEach((el) => revealObserver.observe(el));
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!heroSplitTicking) {
+      heroSplitTicking = true;
+      requestAnimationFrame(updateHeroSplit);
+    }
+  }, { passive: true });
+
+  updateHeroSplit();
+}
 
 // Letter-by-letter reveal for body text outside the first screen (.hero).
 function splitTextIntoLetters(root) {
@@ -70,7 +122,7 @@ letterTargets.forEach((el) => letterObserver.observe(el));
 // 3D cursor-follow tilt for every card outside the first screen (.hero).
 const tiltEls = Array.from(
   document.querySelectorAll(
-    '.team-card, .format-tile, .service-card, .promo-block, .project-col, .stage-card, .fix-block, .steps-list li'
+    '.team-card, .format-tile, .service-card, .promo-block, .project-col, .stage-card, .steps-list li'
   )
 ).filter((el) => !el.closest('.hero'));
 
