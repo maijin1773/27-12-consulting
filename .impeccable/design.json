@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T00:00:00.000Z",
+  "title": "Design System: 27.12 Consulting",
+  "extensions": {
+    "colorMeta": {
+      "brass-gold": { "role": "primary", "displayName": "Brass Gold", "canonical": "#d4a748", "tonalRamp": ["#3d2f10", "#5c4419", "#7d5d22", "#a17a2e", "#c4953b", "#d4a748", "#e0bc6f", "#f0dcb0"] },
+      "ledger-navy": { "role": "secondary", "displayName": "Ledger Navy", "canonical": "#30345a", "tonalRamp": ["#0e0f1e", "#181b34", "#232748", "#2b2f52", "#30345a", "#454a75", "#6b709a", "#9a9ec0"] },
+      "navy-soft": { "role": "secondary", "displayName": "Navy Soft", "canonical": "#454a75" },
+      "bone-cream": { "role": "neutral", "displayName": "Bone Cream", "canonical": "#f2f2e8", "tonalRamp": ["#7d7d70", "#9d9d8f", "#bcbcae", "#d6d6c8", "#e6e6da", "#f2f2e8", "#f7f7f0", "#fbfbf6"] },
+      "espresso-ink": { "role": "neutral", "displayName": "Espresso Ink", "canonical": "#1c1817", "tonalRamp": ["#000000", "#0d0b0a", "#1c1817", "#2e2927", "#453f3c", "#5f5854", "#7a726d", "#978e88"] },
+      "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "rgba(28, 24, 23, 0.64)" },
+      "cream-muted": { "role": "neutral", "displayName": "Cream Muted", "canonical": "rgba(242, 242, 232, 0.72)" },
+      "hairline-on-cream": { "role": "neutral", "displayName": "Hairline on Cream", "canonical": "rgba(28, 24, 23, 0.24)" },
+      "hairline-on-navy": { "role": "neutral", "displayName": "Hairline on Navy", "canonical": "rgba(242, 242, 232, 0.3)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headline only, one italic Brass Gold word inside it." },
+      "section-title": { "displayName": "Section Title", "purpose": "Every section's centered uppercase <h2>." },
+      "heading": { "displayName": "Heading", "purpose": "Card and column <h3> titles." },
+      "body": { "displayName": "Body", "purpose": "Paragraph copy inside cards and columns." },
+      "numeral": { "displayName": "Numeral", "purpose": "Logo mark '27.12' only." }
+    },
+    "shadows": [
+      { "name": "hover-lift", "value": "0 16px 32px rgba(0,0,0,0.24)", "purpose": "Format-tile hover only; never present at rest." }
+    ],
+    "motion": [
+      { "name": "curtain-reveal", "value": "clip-path inset, scroll-driven", "purpose": "Each main section wipes into view as it's scrolled into place; disabled under prefers-reduced-motion." },
+      { "name": "hover-lift", "value": "transform: translateY(-2px), 0.2s", "purpose": "All button variants on hover." }
+    ],
+    "breakpoints": [
+      { "name": "tablet", "value": "900px" },
+      { "name": "mobile", "value": "600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main CTA — Ledger Navy fill, Bone Cream text, full pill.",
+      "html": "<button class=\"ds-btn-primary\">Обсудить проект</button>",
+      "css": ".ds-btn-primary { display: inline-block; padding: 0.9rem 2rem; border-radius: 999px; font-size: 0.95rem; letter-spacing: 0.01em; background: #30345a; color: #f2f2e8; border: none; transition: transform 0.2s, background 0.2s; } .ds-btn-primary:hover { transform: translateY(-2px); background: #454a75; }"
+    },
+    {
+      "name": "On-Navy Button",
+      "kind": "button",
+      "refersTo": "button-on-navy",
+      "description": "Inverted primary for use when the button itself sits on a navy surface (hero).",
+      "html": "<button class=\"ds-btn-on-navy\">Обсудить проект</button>",
+      "css": ".ds-btn-on-navy { display: inline-block; padding: 0.9rem 2rem; border-radius: 999px; font-size: 0.95rem; letter-spacing: 0.01em; background: #f2f2e8; color: #1c1817; border: none; transition: transform 0.2s, background 0.2s, color 0.2s; } .ds-btn-on-navy:hover { transform: translateY(-2px); background: #454a75; color: #f2f2e8; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action inside cards — outline only, fills with an inset ring on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Заказать</button>",
+      "css": ".ds-btn-ghost { display: inline-block; padding: 0.6rem 1.4rem; border-radius: 999px; font-size: 0.85rem; background: transparent; color: inherit; border: 1px solid currentColor; transition: transform 0.2s, box-shadow 0.2s; } .ds-btn-ghost:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px currentColor; }"
+    },
+    {
+      "name": "Service Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Canonical card — fill is always the inverse of its section's background (shown here as it sits on a cream section).",
+      "html": "<article class=\"ds-card\"><p class=\"ds-card-zone\">Ассортимент и товар</p><h3 class=\"ds-card-title\">Ассортиментный аудит</h3><p class=\"ds-card-price\">от 40 000 ₽</p><p class=\"ds-card-desc\">Какие модели локомотивы, какие дорабатывать, какие выводить.</p></article>",
+      "css": ".ds-card { background: #30345a; color: #f2f2e8; border: 1px solid rgba(242,242,232,0.3); border-radius: 6px; padding: 2rem; font-family: Inter, sans-serif; } .ds-card-zone { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem; } .ds-card-title { font-family: 'Golos Text', sans-serif; font-weight: 500; font-size: 1.15rem; margin: 0 0 0.5rem; } .ds-card-price { font-weight: 700; margin-bottom: 1rem; } .ds-card-desc { color: rgba(242,242,232,0.72); font-size: 0.92rem; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trend Auditor",
+    "overview": "The system reads as a fashion trend-analyst's working ledger, not a marketing brochure: confident editorial typography borrowed from fashion print, disciplined by the exactness of an audit — numbered stages, SKU-level specificity, a single accent color spent deliberately rather than decoratively. Photography is full-bleed and unretouched-feeling; everything else (color, type, spacing) is structural and restrained so the photography and the numbers stay the loudest things on the page. The page alternates bone-cream and ledger-navy full-bleed sections in sequence, so scrolling reads as turning pages in a bound dossier rather than scanning one flat surface. Cards always take the color opposite their section's background — never the same — so they never blend into the page they sit on.",
+    "keyCharacteristics": [
+      "Full-bleed alternating cream/navy sections, no in-between grays",
+      "One accent color (brass gold), spent only on the single most important word or number per view",
+      "Flat by default; shadow appears only as a hover response, never at rest",
+      "Pill-shaped buttons against hard-edged rectangular cards and sections — the only curve in an otherwise rectilinear system"
+    ],
+    "rules": [
+      { "name": "The Inverted Card Rule", "body": "A card's fill is always the opposite of the section it sits in: navy cards on cream sections, cream cards on navy sections. A card never shares its section's background color.", "section": "colors" },
+      { "name": "The One Accent Rule", "body": "Brass Gold appears at most once or twice per screen — a headline word, a price, a logo mark. It is never a background, never a button fill, never applied to body text.", "section": "colors" },
+      { "name": "The One Serif Rule", "body": "Playfair Display appears only in the hero headline and its italic accent word. Every other heading on the page is sans-serif.", "section": "typography" },
+      { "name": "The Flat-At-Rest Rule", "body": "Nothing casts a shadow while idle. Shadow appears only on :hover as direct feedback to a pointer, and disappears immediately after.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep Brass Gold to one emphasis point per screen — a word, a number, a mark.",
+      "Do invert card color against its section's background, every time.",
+      "Do keep section <h2> titles in Oswald uppercase; keep Playfair Display exclusive to the hero.",
+      "Do leave surfaces flat at rest; only add shadow as hover feedback."
+    ],
+    "donts": [
+      "Don't introduce a gray scale — neutrals are cream and ink/cream-muted only, no mid-gray.",
+      "Don't give a card the same fill as the section it sits in.",
+      "Don't use Brass Gold as a background or button fill.",
+      "Don't add a shadow that persists at rest; shadow is state-only."
+    ]
+  }
+}

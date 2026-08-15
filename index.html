@@ -36,8 +36,24 @@
       </span>
     </div>
   </div>
-  <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-primary">Обсудить проект</a>
+  <button type="button" class="menu-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="site-menu">
+    <span></span><span></span><span></span>
+  </button>
 </header>
+
+<div class="site-menu" id="site-menu" aria-hidden="true">
+  <button type="button" class="site-menu-close" aria-label="Закрыть меню">
+    <span></span><span></span>
+  </button>
+  <nav class="site-menu-nav" aria-label="Разделы страницы">
+    <a href="#who">Команда</a>
+    <a href="#services">Услуги</a>
+    <a href="#project">Проект</a>
+    <a href="#partnership">Процесс</a>
+    <a href="#start">Как начать</a>
+  </nav>
+  <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-on-navy site-menu-cta">Обсудить проект</a>
+</div>
 
 <main id="top">
 
@@ -78,7 +94,7 @@
         <p class="team-desc">Кабинет и карточки, SEO, цены, акции, реклама, аналитика продаж и возвратов, остатки и процессы.</p>
       </article>
       <article class="team-card reveal">
-        <div class="team-avatar">МА</div>
+        <div class="team-avatar"><img src="images/team-maria.jpg" alt="Мария Адамцова"></div>
         <h3>Мария Адамцова</h3>
         <p class="team-role">Контент и подача</p>
         <p class="team-desc">Стратегия визуала, карточки и инфографика, ТЗ на съёмку, работа с конверсией и восприятием бренда.</p>
@@ -301,7 +317,11 @@
 </main>
 
 <footer class="site-footer">
-  <p class="footer-brand"><img src="images/logo-mark.png" alt="27.12" class="logo-icon">Consulting · тренды, товар, продажи, контент</p>
+  <p class="footer-brand">
+    <span class="logo footer-logo"><span class="logo-num">27.12</span><span class="logo-word">Consulting</span></span>
+    <span class="footer-dot">·</span>
+    <span class="footer-tagline">тренды, товар, продажи, контент</span>
+  </p>
   <p class="footer-desc">Наш канал — разборы ассортимента, рекламы и контента на реальных примерах.</p>
   <a href="https://t.me/consulting27_12" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Подписаться</a>
 </footer>

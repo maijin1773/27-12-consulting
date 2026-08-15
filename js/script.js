@@ -84,6 +84,47 @@ if (curtainSections.length && !prefersReducedMotionQuery.matches) {
   updateCurtainSections();
 }
 
+// Team card reveal ("Нас трое"): each card wipes in top-down with a
+// staggered gold top-line draw, and its photo wipes in with a slight
+// offset — layered on top of the section-level curtain above.
+const teamCards = Array.from(document.querySelectorAll('.team-card'));
+
+if (teamCards.length && !prefersReducedMotionQuery.matches) {
+  const CARD_TRIGGER_RATIO = 0.85;
+  const CARD_ENTRY_DISTANCE = 260;
+  const CARD_STAGGER_PX = 40;
+  let teamCardTicking = false;
+
+  const updateTeamCards = () => {
+    teamCardTicking = false;
+    const triggerY = window.innerHeight * CARD_TRIGGER_RATIO;
+
+    teamCards.forEach((card, i) => {
+      const rect = card.getBoundingClientRect();
+      const raw = (triggerY - rect.top - i * CARD_STAGGER_PX) / CARD_ENTRY_DISTANCE;
+      const progress = Math.min(Math.max(raw, 0), 1);
+
+      card.style.clipPath = `inset(0 0 ${(1 - progress) * 100}% 0)`;
+      card.style.setProperty('--line-scale', Math.min(progress * 1.6, 1));
+
+      const avatar = card.querySelector('.team-avatar');
+      if (avatar) {
+        const photoProgress = Math.min(Math.max((progress - 0.3) / 0.7, 0), 1);
+        avatar.style.clipPath = `inset(0 0 ${(1 - photoProgress) * 100}% 0)`;
+      }
+    });
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!teamCardTicking) {
+      teamCardTicking = true;
+      requestAnimationFrame(updateTeamCards);
+    }
+  }, { passive: true });
+
+  updateTeamCards();
+}
+
 // Letter-by-letter reveal for body text outside the first screen (.hero).
 function splitTextIntoLetters(root) {
   // Only split root's own direct text; nested elements (e.g. an <img>, or a
@@ -181,3 +222,43 @@ tiltEls.forEach((el) => {
     el.style.transform = '';
   });
 });
+
+// Full-screen overlay menu, toggled from the header burger button.
+const menuToggle = document.querySelector('.menu-toggle');
+const siteMenu = document.getElementById('site-menu');
+
+if (menuToggle && siteMenu) {
+  const openMenu = () => {
+    siteMenu.classList.add('is-open');
+    siteMenu.setAttribute('aria-hidden', 'false');
+    menuToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeMenu = () => {
+    siteMenu.classList.remove('is-open');
+    siteMenu.setAttribute('aria-hidden', 'true');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+
+  menuToggle.addEventListener('click', () => {
+    if (siteMenu.classList.contains('is-open')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  siteMenu.querySelector('.site-menu-close').addEventListener('click', closeMenu);
+
+  siteMenu.querySelectorAll('.site-menu-nav a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && siteMenu.classList.contains('is-open')) {
+      closeMenu();
+    }
+  });
+}

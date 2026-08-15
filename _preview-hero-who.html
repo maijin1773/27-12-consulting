@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Превью: hero → Нас трое (скролл + цвет на hover)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Golos+Text:wght@500;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f2f2e8;
+    --ink:#1c1817;
+    --muted: rgba(28,24,23,.64);
+    --card-bg:#30345a;
+    --accent:#f2f2e8;
+    --muted-on-card: rgba(242,242,232,.72);
+    --gold:#d4a748;
+    --border-card: rgba(242,242,232,.3);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter', sans-serif; line-height:1.6; overflow-x:hidden; }
+
+  .note-bar{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    background:var(--ink); color:var(--accent);
+    font-size:.82rem; padding:.7rem 1.25rem; text-align:center;
+  }
+  .note-bar b{ color:var(--gold); }
+
+  .hero{ min-height:100svh; display:grid; grid-template-columns:1fr 1fr; }
+  .hero-photo{
+    background:linear-gradient(135deg, #cfcfc4, #9c9c90);
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(28,24,23,.35); font-family:'Playfair Display', serif; font-size:1.2rem;
+  }
+  .hero-sub{
+    background:var(--card-bg); color:var(--accent);
+    display:flex; flex-direction:column; justify-content:center;
+    padding:clamp(1.5rem,4vw,3.5rem);
+  }
+  .hero-sub h1{
+    font-family:'Playfair Display', serif; font-weight:600;
+    font-size:clamp(2.6rem,7vh,5rem); line-height:1.05; margin-bottom:1.5rem;
+  }
+  .hero-sub h1 em{ font-style:italic; font-weight:400; color:var(--gold); }
+  .hero-sub p{ color:var(--muted-on-card); max-width:42ch; }
+
+  .who{ padding:clamp(3.5rem,9vw,7rem) clamp(1.5rem,4vw,3rem); max-width:1200px; margin:0 auto; position:relative; }
+  .who::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(to right, rgba(28,24,23,.24) 50%, var(--gold) 50%);
+  }
+  .who h2{
+    font-family:'Golos Text', sans-serif; font-weight:800; text-transform:uppercase;
+    text-align:center; font-size:clamp(2rem,5vw,3rem); margin-bottom:2.5rem;
+  }
+
+  .team-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2.5rem; }
+  @media (max-width:800px){ .team-grid{ grid-template-columns:1fr; } }
+
+  .team-card{
+    position:relative;
+    background:var(--card-bg); color:var(--accent);
+    border:1px solid var(--border-card); border-radius:6px; padding:2rem;
+    text-align:left;
+    will-change:clip-path, transform;
+  }
+  .team-card::before{
+    content:""; position:absolute; top:0; left:0; width:100%; height:3px;
+    background:var(--gold); transform-origin:left;
+  }
+
+  .team-avatar{
+    position:relative;
+    width:100%; aspect-ratio:4/5;
+    border-radius:4px; margin-bottom:1.25rem;
+    overflow:hidden;
+    background:#111;
+    will-change:clip-path;
+  }
+  .team-avatar img{
+    position:absolute; inset:0;
+    width:100%; height:100%; object-fit:cover;
+    display:block;
+  }
+  /* Black & white by default (matches the hero photo). No filter, no
+     distortion — a plain, exact circle reveal. The photo itself is never
+     touched. */
+  .avatar-bw{ filter:grayscale(1) contrast(1.02); }
+  .avatar-color{
+    clip-path:circle(0px at var(--px,50%) var(--py,50%));
+    transition:clip-path 1.3s cubic-bezier(0.45, 0, 0.2, 1);
+  }
+  .team-card.tilt-active .avatar-color{
+    clip-path:circle(var(--pr,0px) at var(--px,50%) var(--py,50%));
+  }
+
+  .team-card h3{ font-family:'Golos Text', sans-serif; font-weight:500; font-size:1.2rem; margin-bottom:.3rem; }
+  .team-role{ font-size:.85rem; letter-spacing:.03em; text-transform:uppercase; color:var(--gold); margin-bottom:.9rem; }
+  .team-desc{ color:var(--muted-on-card); font-size:.95rem; }
+
+  .hint{
+    text-align:center; margin-top:2.5rem; font-size:.82rem; color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .avatar-color{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="note-bar">Превью · <b>непрерывное раскрытие при скролле</b> + чёрно-белое фото, <b>наведите курсор</b> — цвет расходится кругом из точки курсора на всё фото, без искажений</div>
+
+<section class="hero">
+  <div class="hero-photo">[ фото — как на сайте ]</div>
+  <div class="hero-sub">
+    <h1>От текущих продаж к <em>управляемой</em> чистой прибыли</h1>
+    <p>Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
+  </div>
+</section>
+
+<section class="who">
+  <h2>Нас трое</h2>
+  <div class="team-grid" id="teamGrid">
+    <article class="team-card" id="card0">
+      <div class="team-avatar">
+        <img class="avatar-bw" src="images/team-nadezhda.jpg" alt="">
+        <img class="avatar-color" src="images/team-nadezhda.jpg" alt="Надежда Логинова">
+      </div>
+      <h3>Надежда Логинова</h3>
+      <p class="team-role">Тренды, ассортимент, производство</p>
+      <p class="team-desc">Спрос и конкуренты, ассортиментная матрица, разработка моделей, план производства и закупки, трендовая аналитика.</p>
+    </article>
+    <article class="team-card" id="card1">
+      <div class="team-avatar">
+        <img class="avatar-bw" src="images/team-ksenia.jpg" alt="">
+        <img class="avatar-color" src="images/team-ksenia.jpg" alt="Ксения Шевлягина">
+      </div>
+      <h3>Ксения Шевлягина</h3>
+      <p class="team-role">Кабинет и операции</p>
+      <p class="team-desc">Кабинет и карточки, SEO, цены, акции, реклама, аналитика продаж и возвратов, остатки и процессы.</p>
+    </article>
+    <article class="team-card" id="card2">
+      <div class="team-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4a4f7a,#23273f);">
+        <span style="font-family:'Golos Text',sans-serif;font-weight:800;font-size:2.5rem;color:rgba(242,242,232,.35);">МА</span>
+      </div>
+      <h3>Мария Адамцова</h3>
+      <p class="team-role">Контент и подача</p>
+      <p class="team-desc">Стратегия визуала, карточки и инфографика, ТЗ на съёмку, работа с конверсией и восприятием бренда.</p>
+    </article>
+  </div>
+  <p class="hint">Прокрутите вверх-вниз несколько раз — раскрытие следует за скроллом в обе стороны, как основной эффект сайта</p>
+</section>
+
+<section style="min-height:80vh"></section>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.team-card'));
+
+  // Scroll-driven reveal: card wipes down first, photo follows with an offset,
+  // continuously tied to scroll position (matches the site's existing curtain-reveal).
+  var ENTRY_TRIGGER_RATIO = 0.85;
+  var ENTRY_DISTANCE = 260;
+  var STAGGER_PX = 90; // extra px of scroll each subsequent card waits for
+
+  function update(){
+    ticking = false;
+    var triggerY = window.innerHeight * ENTRY_TRIGGER_RATIO;
+
+    cards.forEach(function(card, i){
+      var rect = card.getBoundingClientRect();
+      var effectiveTop = rect.top + i * STAGGER_PX * 0; // stagger handled via distance offset below
+      var raw = (triggerY - rect.top - i * 40) / ENTRY_DISTANCE;
+      var progress = Math.min(Math.max(raw, 0), 1);
+
+      if (prefersReduced) progress = 1;
+
+      // Card itself: top-down wipe + gold line draw
+      card.style.clipPath = 'inset(0 0 ' + ((1 - progress) * 100) + '% 0)';
+      var lineP = Math.min(progress * 1.6, 1);
+      var before = card;
+      card.style.setProperty('--line-scale', lineP);
+
+      // Photo: starts revealing a bit after the card, finishes a bit after too
+      var avatar = card.querySelector('.team-avatar');
+      if (avatar) {
+        var photoP = Math.min(Math.max((progress - 0.3) / 0.7, 0), 1);
+        avatar.style.clipPath = 'inset(0 0 ' + ((1 - photoP) * 100) + '% 0)';
+      }
+    });
+  }
+
+  var ticking = false;
+  function onScroll(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }
+  window.addEventListener('scroll', onScroll, { passive:true });
+  update();
+
+  // Gold line draw, driven by the same --line-scale custom property
+  var style = document.createElement('style');
+  style.textContent = '.team-card::before{ transform:scaleX(var(--line-scale,0)); }';
+  document.head.appendChild(style);
+
+  // Blob reveal: --px/--py are set once, at the cursor's entry point; --pr
+  // is set to the photo's own diagonal, so the circle floods the whole
+  // photo rather than staying a small spot. Plain clip-path circle() —
+  // exact, predictable growth; only its edge is roughened by the filter.
+  cards.forEach(function(card){
+    var avatar = card.querySelector('.team-avatar');
+    if (!avatar) return;
+
+    // Seed --px/--py in px (matching the unit mouseenter will later use) so
+    // the very first hover never has to interpolate from a %-based fallback
+    // toward a px target — that mismatch was dragging the circle's center
+    // toward the box's middle mid-transition instead of holding still.
+    var initRect = avatar.getBoundingClientRect();
+    card.style.setProperty('--px', (initRect.width / 2) + 'px');
+    card.style.setProperty('--py', (initRect.height / 2) + 'px');
+    card.style.setProperty('--pr', '0px');
+
+    card.addEventListener('mouseenter', function(e){
+      var rect = avatar.getBoundingClientRect();
+      var diagonal = Math.sqrt(rect.width * rect.width + rect.height * rect.height);
+      card.style.setProperty('--px', (e.clientX - rect.left) + 'px');
+      card.style.setProperty('--py', (e.clientY - rect.top) + 'px');
+      card.style.setProperty('--pr', (diagonal * 1.05) + 'px');
+      card.classList.add('tilt-active');
+    });
+    card.addEventListener('mouseleave', function(){
+      card.classList.remove('tilt-active');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
