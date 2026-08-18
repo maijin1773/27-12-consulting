@@ -322,10 +322,16 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
     { x: -4, y: -4, r: 3 },
     { x: 4, y: 3, r: -3 },
   ];
-  const SETTLE_START = 0.03; // scroll fraction before any card is shown or starts settling
-  const STAGGER = 0.1; // per-card offset once settling starts
-  const SETTLE_END = 0.82; // last card must be fully in place by here — see settleSpan below. Pushed later still, and .team-pin-track's scroll room was also increased, so the piled/fanned pose holds and unfurls over a long, deliberate stretch of scroll.
-  const CLOSE_START = 0.9; // mask exit starts here — the 0.82-0.9 gap is a held pause with all three cards fully settled and visible
+  // Fractions below are sized against .team-pin-track's scroll room (now
+  // 2000px — just enough for the pile-in/settle sequence itself, no held
+  // pause after). SETTLE_START/STAGGER/SETTLE_END keep the exact same
+  // absolute-px settle pacing this always had (69px / 230px-per-card /
+  // 1886px), so cards still unfurl at the same speed — the pin now simply
+  // releases right as they finish, instead of holding them frozen on
+  // screen afterward. See updateTeamExit below for what happens next.
+  const SETTLE_START = 0.0345; // scroll fraction before any card is shown or starts settling
+  const STAGGER = 0.115; // per-card offset once settling starts
+  const SETTLE_END = 0.943; // last card must be fully in place by here — see settleSpan below.
   let teamFlipTicking = false;
 
   const updateTeamFlip = () => {
@@ -340,9 +346,6 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
     // on screen. Zero the curve at the moment it actually locks in place.
     const stickyOffset = parseFloat(getComputedStyle(teamGridFlip).top) || 0;
     const overall = scrubRoom > 0 ? Math.min(Math.max((stickyOffset - trackRect.top) / scrubRoom, 0), 1) : 1;
-    // Settle must finish by SETTLE_END (well before CLOSE_START), otherwise
-    // the last (most-staggered) card is still sliding into place while the
-    // mask exit below has already started eating the grid from the bottom.
     const settleSpan = SETTLE_END - SETTLE_START - (teamCardsFlip.length - 1) * STAGGER;
 
     teamCardsFlip.forEach((card, i) => {
@@ -356,21 +359,11 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
       card.style.transform = `translate(${p.x * (1 - settleProgress)}%, ${p.y * (1 - settleProgress)}%) rotate(${p.r * (1 - settleProgress)}deg)`;
     });
 
-    // Mask-reveal exit (annnimate.com "mask-reveal" reference, run in
-    // reverse): once the fan has fully settled, the last stretch of the
-    // pin track's scroll room erases the whole grid from the bottom edge
-    // upward — same inset() clip-path curtainSections uses to reveal a
-    // section, just growing instead of shrinking, so it reads as
-    // dissolving away rather than sliding off. Finishes right as the grid
-    // is about to unstick, so the release itself is never seen.
-    //
-    // clipPath must stay fully unset (not "inset(0 0 0% 0)") outside the
-    // closing zone: any clip-path at all — even a nominal 0% inset — clips
-    // the piled cards' rotated/translated overflow to .team-grid's own
-    // box, which is exactly the overflow the pile pose depends on being
-    // visible past.
-    const closeProgress = Math.min(Math.max((overall - CLOSE_START) / (1 - CLOSE_START), 0), 1);
-    teamGridFlip.style.clipPath = closeProgress > 0 ? `inset(0 0 ${closeProgress * 100}% 0)` : '';
+    // Hover interactions (grow-on-hover flex-basis + text sizing, in
+    // style.css) are gated to this class: hovering mid-flip would otherwise
+    // fight the pile/fan transform above with a layout change it was never
+    // designed to combine with.
+    teamGridFlip.classList.toggle('is-settled', overall >= SETTLE_END);
   };
 
   window.addEventListener('scroll', () => {
@@ -383,6 +376,48 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
   window.addEventListener('resize', updateTeamFlip);
 
   updateTeamFlip();
+
+  // Exit dissolve: once the pin above releases, .team-grid resumes normal
+  // document flow and scrolls up with the page like any other content —
+  // deliberately no held pause first, cards should already be moving. This
+  // is what makes leaving the section read as dissolving away (same
+  // inset() mask-reveal technique curtainSections uses for entrances, just
+  // run as an exit) rather than a hard cut against the viewport edge.
+  // Explicitly gated on is-settled, not just on `stickyOffset - rect.top`
+  // being 0 while pinned: any clip-path at all — even a nominal 0% inset —
+  // would clip the piled cards' rotated/translated overflow to the grid's
+  // own untransformed box (a hard rectangular "frame" around the fan), so
+  // this must never even momentarily apply before the pile has settled.
+  const EXIT_DISTANCE = 320;
+  let teamExitTicking = false;
+
+  const updateTeamExit = () => {
+    teamExitTicking = false;
+    if (!teamGridFlip.classList.contains('is-settled')) {
+      teamGridFlip.style.clipPath = '';
+      return;
+    }
+    const stickyOffset = parseFloat(getComputedStyle(teamGridFlip).top) || 0;
+    const rect = teamGridFlip.getBoundingClientRect();
+    const exitProgress = Math.min(Math.max((stickyOffset - rect.top) / EXIT_DISTANCE, 0), 1);
+    teamGridFlip.style.clipPath = exitProgress > 0 ? `inset(0 0 ${exitProgress * 100}% 0)` : '';
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!teamExitTicking) {
+      teamExitTicking = true;
+      requestAnimationFrame(updateTeamExit);
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', updateTeamExit);
+
+  updateTeamExit();
+} else if (teamGridFlip) {
+  // No flip sequence to gate hover behind when motion is reduced — cards
+  // are shown at rest from the start (see the reduced-motion override in
+  // style.css), so hover should just work immediately.
+  teamGridFlip.classList.add('is-settled');
 }
 
 // Letter-by-letter reveal for body text outside the first screen (.hero).
@@ -577,9 +612,13 @@ if (foldHeading && !prefersReducedMotionQuery.matches) {
 // treatment), not a boxed card, and a 3D perspective tilt across a thin
 // horizontal strip looks broken — its own fill-sweep hover already gives it
 // directional feedback.
+// .service-card is excluded: now one full-width card at a time (Full-Bleed
+// Snap), a perspective tilt on something that large reads as broken rather
+// than premium — and it fought .card-hint's positioning (.tilt-card > *
+// resets every direct child to position: relative).
 const tiltEls = Array.from(
   document.querySelectorAll(
-    '.service-card, .promo-block, .project-col, .stage-card, .steps-list li'
+    '.promo-block, .project-col, .stage-card, .steps-list li'
   )
 ).filter((el) => !el.closest('.hero'));
 
@@ -685,4 +724,90 @@ if (servicesGrid) {
       servicesGrid.scrollLeft += e.deltaY;
     }
   }, { passive: false });
+
+  // "Scroll right" hint badges (.card-hint, one per card except the last —
+  // see style.css): dismissed for good the first time this strip is
+  // actually scrolled, by any input (wheel, drag, touch, scrollbar). Once
+  // the visitor has demonstrated they know to scroll, repeating the hint
+  // would just be noise.
+  const serviceHints = servicesGrid.querySelectorAll('.card-hint');
+  if (serviceHints.length) {
+    let hintsDismissed = false;
+    servicesGrid.addEventListener('scroll', () => {
+      if (hintsDismissed) return;
+      if (servicesGrid.scrollLeft > 20) {
+        hintsDismissed = true;
+        serviceHints.forEach((hint) => hint.classList.add('is-dismissed'));
+      }
+    }, { passive: true });
+  }
+}
+
+// Gold scroll scrubber for the services strip: primary scroll control now
+// that only one card is visible at a time. Thumb width tracks the visible
+// fraction (like a minimap), and it's both draggable and click-to-jump.
+const servicesScrubberWrap = document.getElementById('services-scrubber');
+const servicesScrubberThumb = document.getElementById('services-scrubber-thumb');
+
+if (servicesGrid && servicesScrubberWrap && servicesScrubberThumb) {
+  const maxServicesScroll = () => Math.max(1, servicesGrid.scrollWidth - servicesGrid.clientWidth);
+
+  const syncServicesThumb = () => {
+    const trackW = servicesScrubberWrap.clientWidth;
+    const visibleFrac = Math.min(1, servicesGrid.clientWidth / servicesGrid.scrollWidth);
+    const thumbW = Math.max(24, trackW * visibleFrac);
+    const pct = servicesGrid.scrollLeft / maxServicesScroll();
+    servicesScrubberThumb.style.width = `${thumbW}px`;
+    servicesScrubberThumb.style.left = `${pct * (trackW - thumbW)}px`;
+  };
+
+  let servicesScrubberTicking = false;
+  servicesGrid.addEventListener('scroll', () => {
+    if (!servicesScrubberTicking) {
+      servicesScrubberTicking = true;
+      requestAnimationFrame(() => {
+        servicesScrubberTicking = false;
+        syncServicesThumb();
+      });
+    }
+  }, { passive: true });
+  window.addEventListener('resize', syncServicesThumb);
+  syncServicesThumb();
+
+  let scrubberDragging = false;
+  let scrubberStartX = 0;
+  let scrubberStartLeft = 0;
+
+  servicesScrubberThumb.addEventListener('pointerdown', (e) => {
+    scrubberDragging = true;
+    servicesScrubberThumb.classList.add('dragging');
+    servicesScrubberThumb.setPointerCapture(e.pointerId);
+    scrubberStartX = e.clientX;
+    scrubberStartLeft = parseFloat(servicesScrubberThumb.style.left) || 0;
+    e.stopPropagation();
+  });
+
+  servicesScrubberThumb.addEventListener('pointermove', (e) => {
+    if (!scrubberDragging) return;
+    const trackW = servicesScrubberWrap.clientWidth;
+    const thumbW = servicesScrubberThumb.offsetWidth;
+    const newLeft = Math.max(0, Math.min(trackW - thumbW, scrubberStartLeft + (e.clientX - scrubberStartX)));
+    servicesGrid.scrollLeft = (newLeft / (trackW - thumbW)) * maxServicesScroll();
+  });
+
+  const endScrubberDrag = () => {
+    scrubberDragging = false;
+    servicesScrubberThumb.classList.remove('dragging');
+  };
+  servicesScrubberThumb.addEventListener('pointerup', endScrubberDrag);
+  servicesScrubberThumb.addEventListener('pointercancel', endScrubberDrag);
+
+  servicesScrubberWrap.addEventListener('pointerdown', (e) => {
+    if (e.target === servicesScrubberThumb) return;
+    const trackW = servicesScrubberWrap.clientWidth;
+    const thumbW = servicesScrubberThumb.offsetWidth;
+    const x = e.clientX - servicesScrubberWrap.getBoundingClientRect().left - thumbW / 2;
+    const clamped = Math.max(0, Math.min(trackW - thumbW, x));
+    servicesGrid.scrollLeft = (clamped / (trackW - thumbW)) * maxServicesScroll();
+  });
 }
