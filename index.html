@@ -7,10 +7,30 @@
 <meta name="description" content="Бюро для fashion-брендов на маркетплейсах: ассортимент, кабинет, контент, чистая прибыль.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800;900&family=Jost:wght@300;400;500&family=Golos+Text:wght@400;500;600;700;800&family=Oswald:wght@600;700&family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800;900&family=Jost:wght@300;400;500&family=Golos+Text:wght@400;500;600;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+<div id="bg-wash" aria-hidden="true"></div>
+<div id="bg-rays" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="dissolve-noise" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="3" seed="11" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="70" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <!-- Two shapes per mask: a plain, unfiltered "core" rect that always keeps
+         the top/left/right edges perfectly straight (they never dissolve),
+         and a thin "band" rect — only this one gets the noise filter — that
+         rides the current boundary so just that seam turns organic. -->
+    <mask id="hero-dissolve-mask" maskUnits="userSpaceOnUse">
+      <rect id="hero-dissolve-core" x="0" y="0" width="0" height="0" fill="#fff" />
+      <rect id="hero-dissolve-band" x="0" y="0" width="0" height="0" fill="#fff" filter="url(#dissolve-noise)" />
+    </mask>
+  </defs>
+</svg>
 
 <header class="site-header">
   <a href="#top" class="logo"><span class="logo-num">27.12</span><span class="logo-word">Consulting</span></a>
@@ -42,6 +62,7 @@
 </header>
 
 <div class="site-menu" id="site-menu" aria-hidden="true">
+  <span class="site-menu-logo" aria-hidden="true">27.12</span>
   <button type="button" class="site-menu-close" aria-label="Закрыть меню">
     <span></span><span></span>
   </button>
@@ -57,6 +78,7 @@
 
 <main id="top">
 
+  <div class="hero-pin-track">
   <section class="hero">
     <div class="hero-panels stagger">
       <div class="hero-panel hero-panel-photo reveal">
@@ -69,36 +91,70 @@
         </div>
       </div>
       <div class="hero-panel hero-panel-sub reveal">
-        <h2 class="hero-panel-headline">От текущих продаж к <em>управляемой</em> чистой прибыли</h2>
-        <p class="hero-sub">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
-        <div class="hero-actions">
-          <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-on-navy">Обсудить проект</a>
+        <div class="hero-panel-sub-inner">
+          <h2 class="hero-panel-headline">От текущих продаж к <em>управляемой</em> чистой прибыли</h2>
+          <p class="hero-sub">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят управлять результатом, а не реагировать на него.</p>
+          <div class="hero-actions">
+            <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-on-navy">Обсудить проект</a>
+          </div>
         </div>
       </div>
     </div>
+    <div class="dissolve-glow" aria-hidden="true"></div>
   </section>
+  </div>
 
   <section class="who" id="who">
-    <h2 class="reveal">Нас трое</h2>
-    <div class="team-grid stagger">
-      <article class="team-card reveal">
-        <div class="team-avatar"><img src="images/team-nadezhda.jpg" alt="Надежда Логинова"></div>
-        <h3>Надежда Логинова</h3>
-        <p class="team-role">Тренды, ассортимент, производство</p>
-        <p class="team-desc">Спрос и конкуренты, ассортиментная матрица, разработка моделей, план производства и закупки, трендовая аналитика.</p>
-      </article>
-      <article class="team-card reveal">
-        <div class="team-avatar"><img src="images/team-ksenia.jpg" alt="Ксения Шевлягина"></div>
-        <h3>Ксения Шевлягина</h3>
-        <p class="team-role">Кабинет и операции</p>
-        <p class="team-desc">Кабинет и карточки, SEO, цены, акции, реклама, аналитика продаж и возвратов, остатки и процессы.</p>
-      </article>
-      <article class="team-card reveal">
-        <div class="team-avatar"><img src="images/team-maria.jpg" alt="Мария Адамцова"></div>
-        <h3>Мария Адамцова</h3>
-        <p class="team-role">Контент и подача</p>
-        <p class="team-desc">Стратегия визуала, карточки и инфографика, ТЗ на съёмку, работа с конверсией и восприятием бренда.</p>
-      </article>
+    <h2 class="reveal fold-heading"><span class="who-line">Нас</span><span class="who-line">трое</span></h2>
+    <div class="team-pin-track">
+      <div class="team-grid stagger">
+        <div class="team-slot">
+          <article class="team-card reveal">
+            <div class="team-card-face">
+              <div class="team-avatar">
+                <div class="team-avatar-photo"><img src="images/team-nadezhda.jpg" alt="Надежда Логинова"></div>
+                <div class="team-tags">
+                  <span>Тренды</span>
+                  <span>Ассортимент</span>
+                  <span>Производство</span>
+                </div>
+              </div>
+              <h3 class="team-name"><span>Надежда</span><span>Логинова</span></h3>
+              <p class="team-desc">Спрос и конкуренты, ассортиментная матрица, разработка моделей, план производства и закупки, трендовая аналитика.</p>
+            </div>
+          </article>
+        </div>
+        <div class="team-slot">
+          <article class="team-card reveal">
+            <div class="team-card-face">
+              <div class="team-avatar">
+                <div class="team-avatar-photo"><img src="images/team-ksenia.jpg" alt="Ксения Шевлягина"></div>
+                <div class="team-tags">
+                  <span>Кабинет</span>
+                  <span>Операции</span>
+                </div>
+              </div>
+              <h3 class="team-name"><span>Ксения</span><span>Шевлягина</span></h3>
+              <p class="team-desc">Кабинет и карточки, SEO, цены, акции, реклама, аналитика продаж и возвратов, остатки и процессы.</p>
+            </div>
+          </article>
+        </div>
+        <div class="team-slot">
+          <article class="team-card reveal">
+            <div class="team-card-face">
+              <div class="team-avatar">
+                <div class="team-avatar-photo"><img src="images/team-maria.jpg" alt="Мария Адамцова"></div>
+                <div class="team-tags">
+                  <span>Контент</span>
+                  <span>Подача</span>
+                </div>
+              </div>
+              <h3 class="team-name"><span>Мария</span><span>Адамцова</span></h3>
+              <p class="team-desc">Стратегия визуала, карточки и инфографика, ТЗ на съёмку, работа с конверсией, восприятие бренда.</p>
+            </div>
+          </article>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -106,18 +162,27 @@
     <h2 class="reveal">Три формата работы</h2>
     <div class="formats-grid stagger">
       <a href="#services" class="format-tile reveal">
-        <p class="format-label">Разовая услуга</p>
-        <h3>Один запрос — один результат</h3>
+        <span class="format-num">01</span>
+        <span class="format-text">
+          <p class="format-label">Разовая услуга</p>
+          <h3>Один запрос — один результат</h3>
+        </span>
         <span class="format-link">Смотреть →</span>
       </a>
       <a href="#project" class="format-tile reveal">
-        <p class="format-label">Полный аудит кабинета</p>
-        <h3>Ревизия ассортимента и продаж</h3>
+        <span class="format-num">02</span>
+        <span class="format-text">
+          <p class="format-label">Полный аудит кабинета</p>
+          <h3>Ревизия ассортимента и продаж</h3>
+        </span>
         <span class="format-link">Смотреть →</span>
       </a>
       <a href="#partnership" class="format-tile reveal">
-        <p class="format-label">Постоянное сопровождение</p>
-        <h3>Консалтинг кабинета на партнерских условиях</h3>
+        <span class="format-num">03</span>
+        <span class="format-text">
+          <p class="format-label">Постоянное сопровождение</p>
+          <h3>Консалтинг кабинета на партнерских условиях</h3>
+        </span>
         <span class="format-link">Смотреть →</span>
       </a>
     </div>
@@ -130,7 +195,7 @@
       <article class="service-card reveal">
         <p class="service-zone">Ассортимент и товар</p>
         <h3>Ассортиментный аудит</h3>
-        <p class="service-price">от 40 000 ₽</p>
+        <p class="service-price">от <span class="price-num">40 000 ₽</span></p>
         <p class="service-desc">Что делать с тем, что уже продаётся: какие модели локомотивы, какие дорабатывать, какие выводить.</p>
         <p class="service-format">Формат: зум-знакомство · зум-отчёт · Google-таблица с разбором по SKU · PDF с рекомендациями.</p>
         <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Заказать</a>
@@ -139,7 +204,7 @@
       <article class="service-card reveal">
         <p class="service-zone">Ассортимент и товар</p>
         <h3>Сезонная матрица + персональный трендбук</h3>
-        <p class="service-price">от 55 000 ₽</p>
+        <p class="service-price">от <span class="price-num">55 000 ₽</span></p>
         <p class="service-desc">Что производить в следующем сезоне: модели, цвета, размерный ряд, глубина — с трендовым обоснованием под ваш бренд.</p>
         <p class="service-format">Формат: зум-знакомство · зум-отчёт · PDF-файл.</p>
         <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Заказать</a>
@@ -148,7 +213,7 @@
       <article class="service-card reveal">
         <p class="service-zone">Кабинет и продажи</p>
         <h3>Аудит кабинета Wildberries</h3>
-        <p class="service-price">от 35 000 ₽</p>
+        <p class="service-price">от <span class="price-num">35 000 ₽</span></p>
         <p class="service-desc">Комплексная диагностика: финансовые показатели, рекламные кампании, карточки, конверсии, воронка продаж. На выходе: слабые места, точки роста и пошаговый план действий с приоритетами.</p>
         <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Заказать</a>
       </article>
@@ -156,7 +221,7 @@
       <article class="service-card reveal">
         <p class="service-zone">Кабинет и продажи</p>
         <h3>Индивидуальная консультация</h3>
-        <p class="service-price">1 час · 10 000 ₽</p>
+        <p class="service-price">1 час · <span class="price-num">10 000 ₽</span></p>
         <p class="service-desc">Разбор одного вашего запроса: кабинет, отдельный артикул, внутренняя реклама, аналитика продаж, чистая прибыль. На выходе: конкретный план действий без общих рекомендаций.</p>
         <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Заказать</a>
       </article>
@@ -164,7 +229,7 @@
       <article class="service-card reveal">
         <p class="service-zone">Контент и визуал</p>
         <h3>ТЗ для дизайнера под ключ</h3>
-        <p class="service-price">1 шаблон · 5 000 ₽</p>
+        <p class="service-price">1 шаблон · <span class="price-num">5 000 ₽</span></p>
         <p class="service-desc">Сбор данных по артикулу, готовое ТЗ и сопровождение работы дизайнера до первого круга правок включительно. Дизайнер перестаёт угадывать, а вы — переделывать карточку по три раза.</p>
         <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Заказать</a>
       </article>
@@ -172,7 +237,7 @@
       <article class="service-card reveal">
         <p class="service-zone">Контент и визуал</p>
         <h3>Нейрофотосессия</h3>
-        <p class="service-price">от 10 000 ₽ за 1 артикул · от 3 артикулов — 8 000 ₽ за артикул</p>
+        <p class="service-price">от <span class="price-num">10 000 ₽</span> за 1 артикул · от 3 артикулов — <span class="price-num">8 000 ₽</span> за артикул</p>
         <p class="service-desc">Контент для карточек без съёмки, моделей и студии — быстрее и дешевле классической фотосессии.</p>
         <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Заказать</a>
       </article>
@@ -189,7 +254,7 @@
         <li>UGC-контент</li>
       </ul>
       <p class="promo-note">Стоимость рассчитывается под задачу: зависит от категории, количества артикулов и бюджета. Бюджет на блогеров, рекламу и трафик оплачивается брендом отдельно.</p>
-      <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-primary">Заказать услугу</a>
+      <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost">Заказать услугу</a>
     </div>
   </section>
 
@@ -237,7 +302,7 @@
     </div>
 
     <div class="project-terms reveal">
-      <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-primary">Записаться на разбор</a>
+      <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-ghost">Записаться на разбор</a>
     </div>
   </section>
 

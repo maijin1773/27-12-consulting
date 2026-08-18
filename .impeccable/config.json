@@ -1,0 +1,38 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-radius",
+        "value": "2px)",
+        "createdAt": "2026-08-15T22:18:00.551Z",
+        "reason": "team-avatar inner radius is intentionally --radius minus 2px for nested-corner fit inside the card, not an arbitrary value"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "unbounded",
+        "createdAt": "2026-08-15T22:18:00.797Z",
+        "reason": "Unbounded is intentionally used for the format-tile accent labels; DESIGN.md typography section predates this addition and should be updated separately"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-08-16T00:28:28.862Z",
+        "reason": "pre-existing site convention since initial commit (5d344c8), unrelated to this edit (team-card/frame structure only); typography explicitly deferred by user this session"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#fff8e6",
+        "files": [
+          "css/style.css"
+        ],
+        "createdAt": "2026-08-17T19:38:46.827Z",
+        "reason": "Intentional bright warm-white core for the .bg-glint sparkle highlight (approved gold background-pattern effect), not palette drift"
+      }
+    ]
+  }
+}

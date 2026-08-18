@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Библиотека анимаций 27.12</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=Martian+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f2e8; --ink:#1c1817; --muted:rgba(28,24,23,.6);
+  --navy:#30345a; --navy-soft:#454a75; --gold:#c49a5a;
+  --panel:#fbfbf3; --line:rgba(28,24,23,.16); --line-strong:rgba(28,24,23,.32);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Golos Text',sans-serif; font-weight:400; line-height:1.6;
+  -webkit-font-smoothing:antialiased; padding:0 0 8rem; overflow-x:hidden;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.25rem,4vw,3rem)}
+
+.doc-head{padding:clamp(3rem,8vw,6rem) 0 clamp(2rem,5vw,4rem);border-bottom:1px solid var(--line-strong)}
+.doc-kicker{font-family:'Martian Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--navy-soft)}
+.doc-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(2.4rem,7vw,5rem);line-height:.98;letter-spacing:-.025em;margin:1.2rem 0 1.4rem;max-width:18ch}
+.doc-title em{font-style:italic;font-weight:400}
+.doc-lead{max-width:64ch;font-size:1.0625rem;color:var(--muted)}
+.doc-lead strong{color:var(--ink);font-weight:600}
+
+.toc{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:2.2rem}
+.toc a{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--ink);border:1px solid var(--line-strong);border-radius:999px;padding:.45rem .95rem;transition:.18s}
+.toc a:hover{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+
+section{padding:clamp(3rem,7vw,5.5rem) 0 0}
+.sec-head{display:flex;align-items:baseline;gap:1rem;border-bottom:1px solid var(--line);padding-bottom:.9rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.sec-num{font-family:'Martian Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.15em;color:var(--gold)}
+.sec-head h2{font-family:'Golos Text',sans-serif;font-weight:700;font-size:clamp(1.35rem,3vw,2rem);letter-spacing:-.02em;line-height:1.1}
+.sec-note{margin-left:auto;font-size:12.5px;color:var(--muted);text-align:right;max-width:34ch}
+.sec-intro{max-width:72ch;margin-bottom:2rem;color:var(--muted)}
+.sec-intro strong{color:var(--ink);font-weight:600}
+.sec-intro code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:rgba(48,52,90,.09);padding:.1em .4em;border-radius:3px;color:var(--navy)}
+
+/* ── демо-панель ───────────────────────────────── */
+.panel{border:1px solid var(--line-strong);background:var(--panel);margin-bottom:2rem}
+.panel-grid{display:grid;grid-template-columns:1.1fr 1fr}
+@media(max-width:860px){.panel-grid{grid-template-columns:1fr}}
+.demo-side{min-width:0;padding:clamp(1.5rem,3vw,2.25rem);border-right:1px solid var(--line-strong);display:flex;flex-direction:column;gap:1.25rem}
+@media(max-width:860px){.demo-side{border-right:none;border-bottom:1px solid var(--line-strong)}}
+.demo-stage{min-height:150px;display:flex;align-items:center;justify-content:center;gap:1.25rem;flex-wrap:wrap;position:relative;overflow:hidden}
+.replay{align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;background:var(--navy);color:var(--bg);border:none;border-radius:999px;padding:.5rem 1rem;cursor:pointer;transition:.15s}
+.replay:hover{background:var(--navy-soft)}
+.demo-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+
+/* ── код ───────────────────────────────────────── */
+.code{min-width:0;position:relative;background:var(--navy);border-radius:0 0 2px 2px}
+@media(max-width:860px){.code{border-radius:2px}}
+.code pre{overflow-x:auto;padding:2.6rem 1.35rem 1.25rem;margin:0;max-height:420px;overflow-y:auto}
+.code code{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;color:#e8e8dd;white-space:pre;display:block;font-variant-ligatures:none}
+.code .c{color:#8f93b8} .code .p{color:var(--gold)} .code .v{color:#c8d6ff}
+.copy{position:absolute;top:.6rem;right:.6rem;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;background:rgba(242,242,232,.1);color:#e8e8dd;border:1px solid rgba(242,242,232,.25);border-radius:3px;padding:.35rem .6rem;cursor:pointer;transition:.15s}
+.copy:hover{background:rgba(242,242,232,.22)}
+.copy.done{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+
+/* ── общие элементы демо ─────────────────────────── */
+.chip{width:64px;height:64px;border-radius:10px;background:var(--navy);box-shadow:0 8px 20px rgba(28,24,23,.12)}
+.chip.gold{background:var(--gold)}
+.card-sm{width:120px;height:150px;background:var(--navy);border-radius:8px;box-shadow:0 10px 26px rgba(28,24,23,.16)}
+
+/* 01 entrances */
+.d-fade{opacity:0;transition:opacity .6s ease}
+.d-fade.in{opacity:1}
+.d-slide{opacity:0;transform:translateX(-36px);transition:transform .55s cubic-bezier(.16,1,.3,1),opacity .55s ease}
+.d-slide.in{opacity:1;transform:translateX(0)}
+.d-scalein{opacity:0;transform:scale(.8);transition:transform .5s ease,opacity .5s ease}
+.d-scalein.in{opacity:1;transform:scale(1)}
+.d-pop{opacity:0;transform:scale(.4);transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .3s ease}
+.d-pop.in{opacity:1;transform:scale(1)}
+.d-reveal{width:64px;height:64px;background:var(--navy);border-radius:10px;clip-path:inset(0 100% 0 0);transition:clip-path .7s cubic-bezier(.65,0,.35,1)}
+.d-reveal.in{clip-path:inset(0 0% 0 0)}
+.ent-item{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.ent-item span{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+/* 02 stagger */
+.stagger-row{display:flex;gap:.6rem}
+.stagger-item{width:34px;height:64px;background:var(--navy);border-radius:6px;opacity:0;transform:translateY(16px);transition:opacity .45s ease,transform .45s ease}
+.stagger-row.in .stagger-item{opacity:1;transform:translateY(0)}
+.stagger-row.in .stagger-item:nth-child(1){transition-delay:0ms}
+.stagger-row.in .stagger-item:nth-child(2){transition-delay:70ms}
+.stagger-row.in .stagger-item:nth-child(3){transition-delay:140ms}
+.stagger-row.in .stagger-item:nth-child(4){transition-delay:210ms}
+.stagger-row.in .stagger-item:nth-child(5){transition-delay:280ms}
+.stagger-row.in .stagger-item:nth-child(6){transition-delay:350ms}
+
+/* 03 transforms */
+.xform-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;width:100%}
+.xform-box{display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.xform-box .chip{transition:transform .4s ease}
+.xform-box:nth-child(1) .chip:hover{transform:translateY(-14px)}
+.xform-box:nth-child(2) .chip:hover{transform:scale(1.25)}
+.xform-box:nth-child(3) .chip:hover{transform:rotate(35deg)}
+.xform-box:nth-child(4) .chip:hover{transform:skew(-12deg,4deg)}
+.xform-box span{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.tilt-wrap{perspective:700px}
+.tilt-card{width:150px;height:96px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;transition:transform .12s ease-out;will-change:transform}
+.persp-row{display:flex;gap:2rem}
+.persp-box{width:90px;height:90px}
+.persp-near{perspective:180px}
+.persp-far{perspective:900px}
+.persp-inner{width:100%;height:100%;background:var(--navy);border-radius:8px;transform:rotateY(48deg)}
+
+/* 04 transitions */
+.xfade-stage{position:relative;width:120px;height:90px}
+.xfade-layer{position:absolute;inset:0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:11px;transition:opacity .5s ease}
+.xfade-a{background:var(--navy)}
+.xfade-b{background:var(--gold);opacity:0}
+.xfade-stage.show-b .xfade-a{opacity:0}
+.xfade-stage.show-b .xfade-b{opacity:1}
+
+.accordion{width:220px;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;background:#fff}
+.acc-trigger{width:100%;padding:.75rem 1rem;background:var(--navy);color:var(--bg);border:none;font-family:'Golos Text',sans-serif;font-size:13px;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.acc-trigger::after{content:"+";font-size:16px;transition:transform .3s ease}
+.accordion.open .acc-trigger::after{transform:rotate(45deg)}
+.acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.accordion.open .acc-body{grid-template-rows:1fr}
+.acc-body-inner{overflow:hidden}
+.acc-body-inner p{padding:.85rem 1rem;font-size:12.5px;color:var(--muted)}
+
+.layout-track{position:relative;width:220px;height:56px;border:1px dashed var(--line-strong);border-radius:999px}
+.layout-slot{position:absolute;top:50%;width:44px;height:44px;transform:translateY(-50%)}
+.layout-slot.left{left:4px}
+.layout-slot.right{right:4px}
+.layout-dot{width:44px;height:44px;border-radius:50%;background:var(--gold);position:absolute;top:50%;left:4px;transform:translate(0,-50%);transition:left .45s cubic-bezier(.65,0,.35,1)}
+.layout-track.right .layout-dot{left:calc(220px - 48px)}
+
+/* 05 scroll */
+.scroll-box{width:100%;max-width:360px;height:230px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:8px;position:relative;background:#fff}
+.scroll-inner{position:relative;padding:1rem}
+.scroll-parallax-bg{position:absolute;inset:-40px 0 auto 0;height:420px;background:linear-gradient(180deg,var(--navy),var(--navy-soft));border-radius:8px;z-index:0}
+.scroll-item{position:relative;z-index:1;margin:180px 0 40px;padding:1rem 1.1rem;background:#fff;border:1px solid var(--line-strong);border-radius:8px;opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease;font-size:12.5px}
+.scroll-item.in{opacity:1;transform:translateY(0)}
+.scroll-item:first-child{margin-top:130px}
+.scroll-hint{font-size:11px;color:var(--bg);opacity:.85;position:relative;z-index:1;padding:1rem 1.1rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+
+/* 06 feedback */
+.press-btn{font-family:'Golos Text',sans-serif;font-weight:600;font-size:13px;background:var(--navy);color:var(--bg);border:none;border-radius:999px;padding:.75rem 1.5rem;cursor:pointer;transition:transform .12s ease}
+.press-btn:active{transform:scale(.93)}
+.ripple-btn{position:relative;overflow:hidden;font-family:'Golos Text',sans-serif;font-weight:600;font-size:13px;background:var(--navy);color:var(--bg);border:none;border-radius:8px;padding:.9rem 1.6rem;cursor:pointer}
+.ripple-dot{position:absolute;border-radius:50%;background:rgba(242,242,232,.55);transform:scale(0);animation:ripple .6s ease-out forwards;pointer-events:none}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.shake-btn{font-family:'Golos Text',sans-serif;font-weight:600;font-size:13px;background:#fff;color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:.9rem 1.6rem;cursor:pointer}
+.shake-btn.shake{animation:shake .4s ease}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+.rubber-track{width:220px;height:64px;border:1px dashed var(--line-strong);border-radius:999px;display:flex;align-items:center;padding:0 8px;touch-action:none}
+.rubber-dot{width:48px;height:48px;border-radius:50%;background:var(--gold);cursor:grab;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.rubber-dot.dragging{cursor:grabbing;transition:none}
+
+/* 07 easing */
+.ease-tracks{display:flex;flex-direction:column;gap:.9rem;width:100%}
+.ease-row{display:flex;align-items:center;gap:.75rem}
+.ease-row .lbl{width:96px;flex:none;font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ease-lane{position:relative;flex:1;height:3px;background:var(--line)}
+.ease-ball{position:absolute;top:50%;left:0;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--navy);transform:translateX(0)}
+.ease-lane.run .ease-ball{transition:transform 1.1s var(--ez);transform:translateX(calc(100% - 14px))}
+
+footer{margin-top:5rem;padding-top:2rem;border-top:1px solid var(--line-strong);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc-head">
+  <p class="doc-kicker">27.12 Consulting — рабочий документ</p>
+  <h1 class="doc-title">Библиотека <em>анимаций</em></h1>
+  <p class="doc-lead">Живые примеры, а не просто термины: каждый эффект можно посмотреть в деле и <strong>сразу скопировать код</strong>. Организовано по тем же категориям, что и глоссарий (<code>animation-vocabulary</code>) — появление, тайминг, трансформации, переходы, скролл, обратная связь, easing.</p>
+  <nav class="toc">
+    <a href="#entrances">01 · Появление</a>
+    <a href="#stagger">02 · Тайминг</a>
+    <a href="#transforms">03 · Трансформации</a>
+    <a href="#transitions">04 · Переходы</a>
+    <a href="#scroll">05 · Скролл</a>
+    <a href="#feedback">06 · Обратная связь</a>
+    <a href="#easing">07 · Easing</a>
+  </nav>
+</header>
+
+<!-- ═══ 01 ENTRANCES ═══ -->
+<section id="entrances">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>Появление и исчезновение</h2>
+    <p class="sec-note">Fade · Slide · Scale · Pop · Reveal</p>
+  </div>
+  <p class="sec-intro">Пять базовых способов ввести элемент в кадр. Разница — не в идее (все идут от «невидимо» к «видимо»), а в <strong>кривой и добавленном свойстве</strong>. Pop добавляет перелёт (overshoot) через <code>cubic-bezier(.34,1.56,.64,1)</code>, Reveal вместо прозрачности использует <code>clip-path</code>.</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side">
+        <button class="replay" data-target=".ent-target">▶ Повторить</button>
+        <div class="demo-stage">
+          <div class="ent-item"><div class="chip d-fade ent-target"></div><span>Fade</span></div>
+          <div class="ent-item"><div class="chip d-slide ent-target"></div><span>Slide</span></div>
+          <div class="ent-item"><div class="chip d-scalein ent-target"></div><span>Scale</span></div>
+          <div class="ent-item"><div class="chip d-pop ent-target"></div><span>Pop</span></div>
+          <div class="ent-item"><div class="d-reveal ent-target"></div><span>Reveal</span></div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.fade</span>    { opacity:<span class="v">0</span>; transition:<span class="v">opacity .6s ease</span>; }
+<span class="p">.fade.in</span> { opacity:<span class="v">1</span>; }
+
+<span class="p">.slide</span>    { opacity:<span class="v">0</span>; transform:<span class="v">translateX(-36px)</span>;
+             transition:<span class="v">transform .55s cubic-bezier(.16,1,.3,1),
+                         opacity .55s ease</span>; }
+<span class="p">.slide.in</span> { opacity:<span class="v">1</span>; transform:<span class="v">translateX(0)</span>; }
+
+<span class="p">.scale-in</span>    { opacity:<span class="v">0</span>; transform:<span class="v">scale(.8)</span>;
+                transition:<span class="v">transform .5s ease, opacity .5s ease</span>; }
+<span class="p">.scale-in.in</span> { opacity:<span class="v">1</span>; transform:<span class="v">scale(1)</span>; }
+
+<span class="c">/* Pop: та же идея, но с "перелётом" через cubic-bezier */</span>
+<span class="p">.pop</span>    { opacity:<span class="v">0</span>; transform:<span class="v">scale(.4)</span>;
+           transition:<span class="v">transform .55s cubic-bezier(.34,1.56,.64,1),
+                       opacity .3s ease</span>; }
+<span class="p">.pop.in</span> { opacity:<span class="v">1</span>; transform:<span class="v">scale(1)</span>; }
+
+<span class="c">/* Reveal: прячем через clip-path, а не opacity */</span>
+<span class="p">.reveal</span>    { clip-path:<span class="v">inset(0 100% 0 0)</span>;
+              transition:<span class="v">clip-path .7s cubic-bezier(.65,0,.35,1)</span>; }
+<span class="p">.reveal.in</span> { clip-path:<span class="v">inset(0 0% 0 0)</span>; }
+
+<span class="c">// Проигрыш: снять .in, форсировать reflow, вернуть .in</span>
+el.classList.remove(<span class="v">'in'</span>);
+<span class="p">void</span> el.offsetWidth;
+el.classList.add(<span class="v">'in'</span>);</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 STAGGER ═══ -->
+<section id="stagger">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>Тайминг и последовательность</h2>
+    <p class="sec-note">Stagger · Orchestration</p>
+  </div>
+  <p class="sec-intro">Группа элементов входит не разом, а с небольшой задержкой друг за другом — создаёт ощущение «каскада». Технически — та же entrance-анимация, но у каждого следующего элемента <code>transition-delay</code> на 60–80ms больше.</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side">
+        <button class="replay" data-target=".stagger-row">▶ Повторить</button>
+        <div class="demo-stage">
+          <div class="stagger-row">
+            <div class="stagger-item"></div><div class="stagger-item"></div><div class="stagger-item"></div>
+            <div class="stagger-item"></div><div class="stagger-item"></div><div class="stagger-item"></div>
+          </div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.item</span> {
+  opacity:<span class="v">0</span>; transform:<span class="v">translateY(16px)</span>;
+  transition:<span class="v">opacity .45s ease, transform .45s ease</span>;
+}
+<span class="p">.row.in .item</span> { opacity:<span class="v">1</span>; transform:<span class="v">translateY(0)</span>; }
+
+<span class="c">/* Задержка растёт для каждого следующего элемента */</span>
+<span class="p">.row.in .item:nth-child(1)</span> { transition-delay: <span class="v">0ms</span>;   }
+<span class="p">.row.in .item:nth-child(2)</span> { transition-delay: <span class="v">70ms</span>;  }
+<span class="p">.row.in .item:nth-child(3)</span> { transition-delay: <span class="v">140ms</span>; }
+<span class="p">.row.in .item:nth-child(4)</span> { transition-delay: <span class="v">210ms</span>; }
+
+<span class="c">// Или программно, на любое число элементов:</span>
+items.forEach((el, i) => {
+  el.style.transitionDelay = <span class="v">`${i * 70}ms`</span>;
+});</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 TRANSFORMS ═══ -->
+<section id="transforms">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>Движение и трансформации</h2>
+    <p class="sec-note">Наведите курсор на фигуры</p>
+  </div>
+  <p class="sec-intro">Четыре базовых 2D-трансформации плюс их 3D-версия. <strong>3D tilt</strong> — тот же приём, что уже стоит на карточках нашего сайта: угол поворота считается от положения курсора внутри карточки. <strong>Perspective</strong> — не трансформация, а свойство контейнера: чем меньше значение, тем сильнее эффект глубины при том же повороте.</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side">
+        <span class="demo-label">Translate / Scale / Rotate / Skew</span>
+        <div class="demo-stage">
+          <div class="xform-grid">
+            <div class="xform-box"><div class="chip gold"></div><span>Translate</span></div>
+            <div class="xform-box"><div class="chip gold"></div><span>Scale</span></div>
+            <div class="xform-box"><div class="chip gold"></div><span>Rotate</span></div>
+            <div class="xform-box"><div class="chip gold"></div><span>Skew</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.box:hover</span> { transform: <span class="v">translateY(-14px)</span>; }
+<span class="p">.box:hover</span> { transform: <span class="v">scale(1.25)</span>;     }
+<span class="p">.box:hover</span> { transform: <span class="v">rotate(35deg)</span>;  }
+<span class="p">.box:hover</span> { transform: <span class="v">skew(-12deg, 4deg)</span>; }
+
+<span class="p">.box</span> { transition: <span class="v">transform .4s ease</span>; }</code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <span class="demo-label">3D tilt (mouse-follow) — как на карточках сайта</span>
+        <div class="demo-stage">
+          <div class="tilt-wrap"><div class="tilt-card" id="tiltDemo">двигайте курсором</div></div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.tilt</span> { transition: <span class="v">transform .12s ease-out</span>; will-change: <span class="v">transform</span>; }
+
+el.addEventListener(<span class="v">'mousemove'</span>, (e) => {
+  <span class="p">const</span> r = el.getBoundingClientRect();
+  <span class="p">const</span> px = (e.clientX - r.left) / r.width;   <span class="c">// 0..1</span>
+  <span class="p">const</span> py = (e.clientY - r.top) / r.height;  <span class="c">// 0..1</span>
+  <span class="p">const</span> rotateY = (px - <span class="v">0.5</span>) * <span class="v">20</span>;
+  <span class="p">const</span> rotateX = (<span class="v">0.5</span> - py) * <span class="v">20</span>;
+  el.style.transform =
+    <span class="v">`perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`</span>;
+});
+el.addEventListener(<span class="v">'mouseleave'</span>, () => { el.style.transform = <span class="v">''</span>; });</code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <span class="demo-label">Perspective: тот же поворот 48°, разная глубина</span>
+        <div class="demo-stage">
+          <div class="persp-row">
+            <div class="xform-box"><div class="persp-box persp-near"><div class="persp-inner"></div></div><span>180px</span></div>
+            <div class="xform-box"><div class="persp-box persp-far"><div class="persp-inner"></div></div><span>900px</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.wrap-near</span>  { perspective: <span class="v">180px</span>; }  <span class="c">/* сильный эффект */</span>
+<span class="p">.wrap-far</span>   { perspective: <span class="v">900px</span>; }  <span class="c">/* мягкий эффект */</span>
+<span class="p">.wrap-near .box, .wrap-far .box</span> { transform: <span class="v">rotateY(48deg)</span>; }</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 04 TRANSITIONS ═══ -->
+<section id="transitions">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>Переходы между состояниями</h2>
+    <p class="sec-note">Crossfade · Accordion · Layout move</p>
+  </div>
+  <p class="sec-intro">Не «появиться из ниоткуда», а <strong>перейти из одного состояния в другое</strong> — между двумя картинками, открыто/закрыто, позицией А и Б.</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side">
+        <button class="replay" id="xfadeBtn">▶ Переключить</button>
+        <div class="demo-stage">
+          <div class="xfade-stage" id="xfadeStage">
+            <div class="xfade-layer xfade-a">A</div>
+            <div class="xfade-layer xfade-b">B</div>
+          </div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.layer</span>   { position:<span class="v">absolute</span>; inset:<span class="v">0</span>; transition:<span class="v">opacity .5s ease</span>; }
+<span class="p">.layer-b</span> { opacity:<span class="v">0</span>; }
+<span class="p">.stage.show-b .layer-a</span> { opacity:<span class="v">0</span>; }
+<span class="p">.stage.show-b .layer-b</span> { opacity:<span class="v">1</span>; }
+
+<span class="c">// оба слоя абсолютно спозиционированы друг на друге —</span>
+<span class="c">// переключаем только opacity, layout не дёргается</span></code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <span class="demo-label">Accordion — высота через grid-template-rows</span>
+        <div class="demo-stage">
+          <div class="accordion" id="accDemo">
+            <button class="acc-trigger" id="accTrigger">Что входит в аудит?</button>
+            <div class="acc-body"><div class="acc-body-inner">
+              <p>Аудит ассортимента, кабинета и юнит-экономики — решение по каждому SKU, а не общие рекомендации.</p>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="c">/* Классический трюк: анимируем grid-template-rows 0fr → 1fr —</span>
+<span class="c">   работает без JS-измерения scrollHeight и без max-height-хаков */</span>
+<span class="p">.acc-body</span> {
+  display:<span class="v">grid</span>; grid-template-rows:<span class="v">0fr</span>;
+  transition:<span class="v">grid-template-rows .35s ease</span>;
+}
+<span class="p">.accordion.open .acc-body</span> { grid-template-rows:<span class="v">1fr</span>; }
+<span class="p">.acc-body-inner</span> { overflow:<span class="v">hidden</span>; }  <span class="c">/* обязателен для 0fr */</span></code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <button class="replay" id="layoutBtn">▶ Переместить</button>
+        <div class="demo-stage">
+          <div class="layout-track" id="layoutTrack"><div class="layout-dot"></div></div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="c">/* Layout animation: элемент едет к новой позиции,</span>
+<span class="c">   а не мгновенно "телепортируется" */</span>
+<span class="p">.dot</span> { position:<span class="v">absolute</span>; left:<span class="v">4px</span>;
+        transition:<span class="v">left .45s cubic-bezier(.65,0,.35,1)</span>; }
+<span class="p">.track.right .dot</span> { left:<span class="v">calc(100% - 48px)</span>; }
+
+<span class="c">// Для сложных случаев (разный родитель, размер) — техника FLIP:</span>
+<span class="c">// 1) First: запомнить getBoundingClientRect() до изменения</span>
+<span class="c">// 2) Last: применить изменение, снять новый rect</span>
+<span class="c">// 3) Invert: transform'ом визуально вернуть на старое место</span>
+<span class="c">// 4) Play: убрать transform с transition — элемент "едет" сам</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 05 SCROLL ═══ -->
+<section id="scroll">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>Скролл</h2>
+    <p class="sec-note">Прокрутите рамку внутри</p>
+  </div>
+  <p class="sec-intro">Два разных приёма внутри одного скролл-контейнера: <strong>Scroll reveal</strong> — карточки проявляются через <code>IntersectionObserver</code>, когда попадают в зону видимости. <strong>Parallax</strong> — фон едет медленнее контента (та же техника, что двигает панели геро на главной странице сайта).</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side">
+        <span class="demo-label">Scroll reveal + Parallax</span>
+        <div class="demo-stage" style="justify-content:center">
+          <div class="scroll-box" id="scrollBox">
+            <div class="scroll-inner">
+              <div class="scroll-parallax-bg" id="parallaxBg"></div>
+              <p class="scroll-hint">↓ скролл ниже ↓</p>
+              <div class="scroll-item">Аудит ассортимента</div>
+              <div class="scroll-item">Перестройка кабинета</div>
+              <div class="scroll-item">Контент и подача</div>
+              <div class="scroll-item">Чистая прибыль</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="c">// Reveal: наблюдатель area = сам скролл-контейнер (root),</span>
+<span class="c">// а не viewport — иначе сработает мгновенно</span>
+<span class="p">const</span> io = <span class="p">new</span> IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add(<span class="v">'in'</span>); });
+}, { root: scrollBox, threshold: <span class="v">0.3</span> });
+items.forEach(el => io.observe(el));
+
+<span class="c">// Parallax: фон едет медленнее (0.4×) скорости скролла контента</span>
+scrollBox.addEventListener(<span class="v">'scroll'</span>, () => {
+  bg.style.transform = <span class="v">`translateY(${scrollBox.scrollTop * 0.4}px)`</span>;
+}, { passive: <span class="p">true</span> });</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 06 FEEDBACK ═══ -->
+<section id="feedback">
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>Обратная связь</h2>
+    <p class="sec-note">Нажмите / потяните</p>
+  </div>
+  <p class="sec-intro">Реакция на действие пользователя, а не на появление в кадре — должна быть быстрой (100–200ms), иначе интерфейс кажется тяжёлым.</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side">
+        <span class="demo-label">Press feedback — зажмите кнопку</span>
+        <div class="demo-stage"><button class="press-btn">Обсудить проект</button></div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">.btn</span>         { transition: <span class="v">transform .12s ease</span>; }
+<span class="p">.btn:active</span>  { transform: <span class="v">scale(.93)</span>; }  <span class="c">/* только это, никакого JS */</span></code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <span class="demo-label">Ripple — кликните по кнопке</span>
+        <div class="demo-stage"><button class="ripple-btn" id="rippleBtn">Кликните сюда</button></div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code>btn.addEventListener(<span class="v">'click'</span>, (e) => {
+  <span class="p">const</span> r = btn.getBoundingClientRect();
+  <span class="p">const</span> size = Math.max(r.width, r.height) * <span class="v">2</span>;
+  <span class="p">const</span> dot = document.createElement(<span class="v">'span'</span>);
+  dot.className = <span class="v">'ripple-dot'</span>;
+  dot.style.width = dot.style.height = size + <span class="v">'px'</span>;
+  dot.style.left = (e.clientX - r.left - size / <span class="v">2</span>) + <span class="v">'px'</span>;
+  dot.style.top  = (e.clientY - r.top  - size / <span class="v">2</span>) + <span class="v">'px'</span>;
+  btn.appendChild(dot);
+  dot.addEventListener(<span class="v">'animationend'</span>, () => dot.remove());
+});
+
+<span class="p">.ripple-dot</span> {
+  position:<span class="v">absolute</span>; border-radius:<span class="v">50%</span>;
+  background:<span class="v">rgba(255,255,255,.5)</span>; transform:<span class="v">scale(0)</span>;
+  animation:<span class="v">ripple .6s ease-out forwards</span>; pointer-events:<span class="v">none</span>;
+}
+<span class="p">@keyframes ripple</span> { to { transform:<span class="v">scale(1)</span>; opacity:<span class="v">0</span>; } }</code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <span class="demo-label">Shake — сигнал ошибки, кликните</span>
+        <div class="demo-stage"><button class="shake-btn" id="shakeBtn">Неверный промокод</button></div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">@keyframes shake</span> {
+  <span class="v">10%, 90%</span> { transform: <span class="v">translateX(-2px)</span>; }
+  <span class="v">20%, 80%</span> { transform: <span class="v">translateX(4px)</span>;  }
+  <span class="v">30%, 50%, 70%</span> { transform: <span class="v">translateX(-8px)</span>; }
+  <span class="v">40%, 60%</span> { transform: <span class="v">translateX(8px)</span>;  }
+}
+<span class="p">.shake</span> { animation: <span class="v">shake .4s ease</span>; }
+
+el.addEventListener(<span class="v">'animationend'</span>, () => el.classList.remove(<span class="v">'shake'</span>));</code></pre>
+      </div>
+    </div>
+    <div class="panel-grid" style="border-top:1px solid var(--line-strong)">
+      <div class="demo-side">
+        <span class="demo-label">Rubber-banding — потяните и отпустите</span>
+        <div class="demo-stage">
+          <div class="rubber-track"><div class="rubber-dot" id="rubberDot"></div></div>
+        </div>
+      </div>
+      <div class="code">
+        <button class="copy">copy</button>
+        <pre><code><span class="p">let</span> startX, dx = <span class="v">0</span>;
+dot.addEventListener(<span class="v">'pointerdown'</span>, (e) => {
+  startX = e.clientX; dot.classList.add(<span class="v">'dragging'</span>);
+});
+window.addEventListener(<span class="v">'pointermove'</span>, (e) => {
+  <span class="p">if</span> (!dot.classList.contains(<span class="v">'dragging'</span>)) <span class="p">return</span>;
+  dx = (e.clientX - startX) * <span class="v">0.4</span>;         <span class="c">// 0.4 = сопротивление</span>
+  dot.style.transform = <span class="v">`translateX(${dx}px)`</span>;
+});
+window.addEventListener(<span class="v">'pointerup'</span>, () => {
+  dot.classList.remove(<span class="v">'dragging'</span>);
+  dot.style.transform = <span class="v">''</span>;                <span class="c">// transition вернёт на 0 пружиной</span>
+});
+
+<span class="p">.dot</span>           { transition: <span class="v">transform .5s cubic-bezier(.34,1.56,.64,1)</span>; }
+<span class="p">.dot.dragging</span> { transition: <span class="v">none</span>; cursor: <span class="v">grabbing</span>; }</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 07 EASING ═══ -->
+<section id="easing">
+  <div class="sec-head">
+    <span class="sec-num">07</span>
+    <h2>Easing</h2>
+    <p class="sec-note">Одна дистанция, разная кривая</p>
+  </div>
+  <p class="sec-intro">Все шарики проходят одинаковое расстояние за одинаковое время (1.1s) — разница только в кривой. <code>Linear</code> прибегает последним и выглядит механически; <code>ease-out</code> — то, что должно быть по умолчанию почти везде в UI.</p>
+
+  <div class="panel">
+    <div class="panel-grid">
+      <div class="demo-side" style="grid-column:1 / -1">
+        <button class="replay" id="easeBtn">▶ Повторить гонку</button>
+        <div class="ease-tracks">
+          <div class="ease-row"><span class="lbl">Linear</span><div class="ease-lane" style="--ez:linear"><div class="ease-ball"></div></div></div>
+          <div class="ease-row"><span class="lbl">Ease-in</span><div class="ease-lane" style="--ez:cubic-bezier(.42,0,1,1)"><div class="ease-ball"></div></div></div>
+          <div class="ease-row"><span class="lbl">Ease-out</span><div class="ease-lane" style="--ez:cubic-bezier(0,0,.58,1)"><div class="ease-ball"></div></div></div>
+          <div class="ease-row"><span class="lbl">Ease-in-out</span><div class="ease-lane" style="--ez:cubic-bezier(.42,0,.58,1)"><div class="ease-ball"></div></div></div>
+          <div class="ease-row"><span class="lbl">Back (overshoot)</span><div class="ease-lane" style="--ez:cubic-bezier(.34,1.56,.64,1)"><div class="ease-ball"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="code" style="border-top:1px solid var(--line-strong)">
+      <button class="copy">copy</button>
+      <pre><code><span class="p">.lane</span>          { transition: <span class="v">none</span>; }
+<span class="p">.lane.run</span>      { transition: <span class="v">transform 1.1s var(--ez)</span>; transform: <span class="v">translateX(100%)</span>; }
+
+<span class="c">/* Кривые, использованные выше — держите под рукой */</span>
+linear
+cubic-bezier(<span class="v">.42, 0, 1, 1</span>)      <span class="c">/* ease-in     — старт медленный, потом резко */</span>
+cubic-bezier(<span class="v">0, 0, .58, 1</span>)      <span class="c">/* ease-out    — default для UI */</span>
+cubic-bezier(<span class="v">.42, 0, .58, 1</span>)    <span class="c">/* ease-in-out — для объектов уже в движении */</span>
+cubic-bezier(<span class="v">.34, 1.56, .64, 1</span>) <span class="c">/* back        — перелёт и возврат, "живая" реакция */</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>27.12 Consulting · Библиотека анимаций</span>
+  <span>7 категорий · glossary: animation-vocabulary skill</span>
+</footer>
+
+</div>
+
+<script>
+// ── Replay: снять .in / принудительный reflow / вернуть .in ──
+document.querySelectorAll('.replay[data-target]').forEach(btn => {
+  const play = () => {
+    document.querySelectorAll(btn.dataset.target).forEach(el => {
+      el.classList.remove('in');
+      void el.offsetWidth;
+      requestAnimationFrame(() => el.classList.add('in'));
+    });
+  };
+  btn.addEventListener('click', play);
+  btn.dataset.autoplay === undefined && (btn._play = play);
+});
+
+// Auto-play every demo once it scrolls into view
+const autoObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const stage = entry.target;
+      stage.querySelectorAll('.ent-target, .stagger-row').forEach(el => {
+        requestAnimationFrame(() => el.classList.add('in'));
+      });
+      autoObserver.unobserve(stage);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px 80px 0px' });
+document.querySelectorAll('.demo-stage').forEach(s => autoObserver.observe(s));
+
+// ── 3D tilt ──
+const tiltEl = document.getElementById('tiltDemo');
+if (tiltEl) {
+  tiltEl.addEventListener('mousemove', (e) => {
+    const r = tiltEl.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    const rotateY = (px - 0.5) * 20;
+    const rotateX = (0.5 - py) * 20;
+    tiltEl.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+  tiltEl.addEventListener('mouseleave', () => { tiltEl.style.transform = ''; });
+}
+
+// ── Crossfade ──
+const xfadeBtn = document.getElementById('xfadeBtn');
+const xfadeStage = document.getElementById('xfadeStage');
+if (xfadeBtn) xfadeBtn.addEventListener('click', () => xfadeStage.classList.toggle('show-b'));
+
+// ── Accordion ──
+const accTrigger = document.getElementById('accTrigger');
+const accDemo = document.getElementById('accDemo');
+if (accTrigger) accTrigger.addEventListener('click', () => accDemo.classList.toggle('open'));
+
+// ── Layout move ──
+const layoutBtn = document.getElementById('layoutBtn');
+const layoutTrack = document.getElementById('layoutTrack');
+if (layoutBtn) layoutBtn.addEventListener('click', () => layoutTrack.classList.toggle('right'));
+
+// ── Ripple ──
+const rippleBtn = document.getElementById('rippleBtn');
+if (rippleBtn) {
+  rippleBtn.addEventListener('click', (e) => {
+    const r = rippleBtn.getBoundingClientRect();
+    const size = Math.max(r.width, r.height) * 2;
+    const dot = document.createElement('span');
+    dot.className = 'ripple-dot';
+    dot.style.width = dot.style.height = size + 'px';
+    dot.style.left = (e.clientX - r.left - size / 2) + 'px';
+    dot.style.top = (e.clientY - r.top - size / 2) + 'px';
+    rippleBtn.appendChild(dot);
+    dot.addEventListener('animationend', () => dot.remove());
+  });
+}
+
+// ── Shake ──
+const shakeBtn = document.getElementById('shakeBtn');
+if (shakeBtn) {
+  shakeBtn.addEventListener('click', () => {
+    shakeBtn.classList.remove('shake');
+    void shakeBtn.offsetWidth;
+    shakeBtn.classList.add('shake');
+  });
+  shakeBtn.addEventListener('animationend', () => shakeBtn.classList.remove('shake'));
+}
+
+// ── Rubber-band drag ──
+const rubberDot = document.getElementById('rubberDot');
+if (rubberDot) {
+  let startX = 0;
+  let dragging = false;
+  rubberDot.addEventListener('pointerdown', (e) => {
+    startX = e.clientX;
+    dragging = true;
+    rubberDot.classList.add('dragging');
+    rubberDot.setPointerCapture(e.pointerId);
+  });
+  rubberDot.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = (e.clientX - startX) * 0.4;
+    const clamped = Math.max(-70, Math.min(70, dx));
+    rubberDot.style.transform = `translateX(${clamped}px)`;
+  });
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    rubberDot.classList.remove('dragging');
+    rubberDot.style.transform = '';
+  };
+  rubberDot.addEventListener('pointerup', release);
+  rubberDot.addEventListener('pointercancel', release);
+}
+
+// ── Easing race ──
+const easeBtn = document.getElementById('easeBtn');
+if (easeBtn) {
+  easeBtn.addEventListener('click', () => {
+    document.querySelectorAll('.ease-lane').forEach(lane => {
+      lane.classList.remove('run');
+      void lane.offsetWidth;
+      requestAnimationFrame(() => lane.classList.add('run'));
+    });
+  });
+}
+
+// ── Copy buttons ──
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const code = btn.parentElement.querySelector('code').innerText;
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = code; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    btn.textContent = 'скопировано';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('done'); }, 1600);
+  });
+});
+
+// ── Scroll reveal + parallax (scoped to the mini scroll box) ──
+const scrollBox = document.getElementById('scrollBox');
+const parallaxBg = document.getElementById('parallaxBg');
+if (scrollBox) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { root: scrollBox, threshold: 0.3 });
+  scrollBox.querySelectorAll('.scroll-item').forEach(el => io.observe(el));
+
+  scrollBox.addEventListener('scroll', () => {
+    parallaxBg.style.transform = `translateY(${scrollBox.scrollTop * 0.4}px)`;
+  }, { passive: true });
+}
+</script>
+</body>
+</html>

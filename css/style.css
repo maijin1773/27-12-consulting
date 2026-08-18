@@ -2,12 +2,12 @@
   --bg: #f2f2e8;
   --ink: #1c1817;
   --muted: rgba(28, 24, 23, 0.64);
-  --card-bg: #30345a;
+  --card-bg: #283864;
   --accent: #f2f2e8;
   --muted-on-card: rgba(242, 242, 232, 0.72);
   --border: rgba(28, 24, 23, 0.24);
   --border-card: rgba(242, 242, 232, 0.3);
-  --ink-soft: #454a75;
+  --ink-soft: #3d4e7f;
   --navy-text: #f2f2e8;
   --gold: #d4a748;
   --font-display: 'Playfair Display', serif;
@@ -47,6 +47,98 @@ body {
   overflow-x: hidden;
 }
 
+/* Continuous background wash (annnimate.com "background-color" reference):
+   sits behind everything, script.js repaints it every scroll frame by
+   interpolating between each section's zone color as its boundary
+   crosses a fixed reference line — replacing the hard cut between cream
+   and navy sections with a smooth crossfade. .formats/.project/.terms
+   hand their background over to this layer (see their rules below);
+   text/border colors on those sections stay a hard switch, only the
+   background itself is continuous. */
+#bg-wash {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg);
+  pointer-events: none;
+}
+
+/* Persistent gold ray pattern — sits above #bg-wash (same z-index, later
+   in DOM order) and behind all real content, so it only ever touches the
+   page background, never card surfaces (cards paint their own opaque
+   background over it in normal flow). Populated once by script.js; each
+   ray fades in/out at its own random spot rather than one sweeping strip.
+   Kept faint everywhere so the wash's cream/navy alternation still reads
+   as the dominant background color — this is texture, not a new hue. */
+#bg-rays {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-ray {
+  position: absolute;
+  top: -15%;
+  left: var(--x);
+  width: var(--w);
+  height: 130%;
+  border-radius: 50%;
+  background: linear-gradient(180deg,
+    rgba(212, 167, 72, 0) 0%,
+    rgba(212, 167, 72, var(--o)) 22%,
+    rgba(255, 240, 205, calc(var(--o) * 1.5)) 38%,
+    rgba(212, 167, 72, var(--o)) 58%,
+    rgba(212, 167, 72, 0) 100%);
+  filter: blur(var(--blur));
+  opacity: 0;
+  animation: bg-ray-appear var(--dur) ease-in-out var(--delay) infinite;
+  transform-origin: center center;
+}
+
+@keyframes bg-ray-appear {
+  0%   { opacity: 0; transform: skewX(var(--tilt)) translate(0, -2%) scaleY(0.92); }
+  6%   { opacity: 1; }
+  38%  { opacity: 1; transform: skewX(var(--tilt)) translate(var(--drift), 2%) scaleY(1.04); }
+  58%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.bg-glint {
+  position: absolute;
+  top: var(--gy);
+  left: var(--gx);
+  width: var(--gs);
+  height: var(--gs);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff8e6 0%, rgba(212, 167, 72, 0.9) 35%, transparent 72%);
+  opacity: 0;
+  animation: bg-glint-flash var(--gdur) ease-in-out var(--gdelay) infinite;
+}
+
+@keyframes bg-glint-flash {
+  0%, 92%, 100% { opacity: 0; transform: scale(0.4); }
+  96%           { opacity: 1; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bg-wash {
+    display: none;
+  }
+  #bg-rays {
+    display: none;
+  }
+  /* script.js's scroll-driven wash never runs under reduced motion, so
+     these three sections need their own solid background back — without
+     it they'd render transparent (light --accent text on nothing). */
+  .formats,
+  .project,
+  .terms {
+    background: var(--card-bg);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -76,6 +168,66 @@ h1, h2, h3 {
   margin-inline: auto;
 }
 
+/* "Folding text" heading ("Нас трое"): each character starts folded flat
+   90° around its own LEFT or RIGHT edge — like a door swinging shut — and
+   unfolds upright as the heading crosses a fixed band of the viewport,
+   continuously scroll-scrubbed in script.js. Mirrors the annnimate.com
+   folding-text reference exactly: its two live instances use
+   data-anm-direction "fold-right" (rotationY, hinge on the right edge) and
+   "fold-left" (rotationY, hinge on the left edge) — rotationY around a
+   side edge, NOT rotationX around the baseline. "Нас" hinges left (reveals
+   left-to-right); "трое" hinges right (reveals right-to-left) — see
+   splitTextIntoFoldChars in script.js. */
+.fold-heading {
+  perspective: 1200px;
+}
+
+/* "Нас трое" stacked onto two lines and scaled up (live-mode typeset
+   session 59049536, carbonized): calc() around clamp() keeps the
+   responsive range intact instead of baking one fixed px value.
+   Selector must out-specify the shared ".who h2, .formats h2, ..." rule
+   (class+type, 0,1,1) or the override silently loses — .fold-heading
+   alone (0,1,0) is NOT enough. */
+.who h2.fold-heading {
+  font-size: calc(clamp(2.1rem, 5vw, 3.4rem) * 3.5);
+}
+
+.who-line {
+  display: block;
+}
+
+.who-line + .who-line {
+  margin-top: 0.2em;
+}
+
+.fold-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.fold-char {
+  display: inline-block;
+  transform-style: preserve-3d;
+  opacity: 0;
+}
+
+.fold-char--hinge-left {
+  transform-origin: 0% 50%;
+  transform: rotateY(-90deg);
+}
+
+.fold-char--hinge-right {
+  transform-origin: 100% 50%;
+  transform: rotateY(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fold-char {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 ul, ol {
   list-style: none;
 }
@@ -87,8 +239,9 @@ section {
 }
 
 /* Curtain-reveal on section entry: driven continuously from scroll position
-   in js/script.js, so it needs to stay in sync with the hero's own curtain
-   effect. Excluded from .hero, which runs its own split/settle transform. */
+   in js/script.js, so it needs to stay in sync with the hero's own scroll
+   effect. Excluded from .hero, which runs its own mask-reveal exit (own
+   will-change: clip-path, above). */
 main > section:not(.hero) {
   will-change: clip-path, transform;
 }
@@ -239,17 +392,16 @@ main > section:not(.hero) {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0;
   left: auto;
   width: min(300px, 78vw);
   z-index: 50;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   background: var(--card-bg);
   color: var(--accent);
   padding: clamp(1.5rem, 4vw, 3rem);
-  box-shadow: -24px 0 48px rgba(0, 0, 0, 0.28);
+  border-radius: 0 0 0 var(--radius);
+  box-shadow: -24px 24px 48px rgba(0, 0, 0, 0.28);
   opacity: 0;
   visibility: hidden;
   transform: translateX(100%);
@@ -261,6 +413,17 @@ main > section:not(.hero) {
   visibility: visible;
   transform: translateX(0);
   transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.site-menu-logo {
+  position: absolute;
+  top: clamp(1.5rem, 4vw, 3rem);
+  left: clamp(1.5rem, 4vw, 3rem);
+  font-family: var(--font-numerals);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--gold);
 }
 
 .site-menu-close {
@@ -297,7 +460,8 @@ main > section:not(.hero) {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin: auto 0;
+  margin-top: 4rem;
+  margin-bottom: 0;
 }
 
 .site-menu-nav a {
@@ -315,6 +479,7 @@ main > section:not(.hero) {
 
 .site-menu-cta {
   align-self: flex-start;
+  margin-top: 2.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -371,14 +536,102 @@ main > section:not(.hero) {
   color: var(--navy-text);
 }
 
+.btn:active {
+  transform: scale(0.97);
+  transition: transform 100ms ease-out;
+}
+
 /* ---------- hero ---------- */
 
-/* Первый экран — во всю ширину окна, ровно пополам, без зазора */
-.hero {
+/* Extra scroll room below the hero's own height so it can sit pinned
+   (.hero below is sticky) while the dissolve plays out in place, rather
+   than dissolving while also scrolling away — see script.js. The first
+   HOLD fraction of this room is: a bit of scroll that slides
+   .hero-panel-sub-inner up to reveal the subtitle/button (its content can
+   be taller than one screen at wide-short viewports — the large headline
+   alone can exceed the available height), then a held pause once it's
+   all visible, then the dissolve starts. */
+.hero-pin-track {
   position: relative;
+  height: calc(100svh - var(--header-h) + 190vh);
+}
+
+/* Первый экран — во всю ширину окна, ровно пополам, без зазора. Fixed to
+   exactly one screen (not min-height) so it pins in place instead of
+   scrolling away — see .hero-panel-sub-inner below for how taller content
+   still gets fully seen. */
+.hero {
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100svh - var(--header-h));
+  overflow: hidden;
   max-width: none;
   padding: 0;
   margin: 0;
+  will-change: clip-path;
+}
+
+.hero-panels {
+  height: 100%;
+}
+
+
+/* Holds the actual headline/subtitle/button — script.js slides this
+   vertically during the pin track's hold phase when it's taller than the
+   fixed .hero-panel-sub frame, instead of anything being clipped away. */
+.hero-panel-sub-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 100%;
+  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 4vw, 3.5rem) clamp(3rem, 8vh, 5.5rem);
+}
+
+/* When the content is taller than the frame, centering an overflow would
+   crop the headline's top by the same amount as the button's bottom —
+   start from the top instead, so script.js's slide is the only thing that
+   ever moves it. */
+.hero-panel-sub-inner.is-tall {
+  justify-content: flex-start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-pin-track {
+    height: auto;
+  }
+  .hero {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+  .hero-panels {
+    height: auto;
+    min-height: calc(100svh - var(--header-h));
+  }
+  .hero-panel-sub {
+    overflow: visible;
+  }
+  .hero-panel-sub-inner {
+    transform: none !important;
+  }
+}
+
+/* Organic dissolve boundary + its glowing seam (hero only) — see
+   #hero-dissolve-mask in index.html and the dissolve helper in script.js.
+   Hidden by default; JS raises opacity only while the section is actively
+   dissolving out on scroll. */
+.dissolve-glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 64px;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--gold) 45%, var(--gold) 55%, transparent);
+  filter: url(#dissolve-noise) blur(10px);
+  opacity: 0;
+  mix-blend-mode: screen;
+  z-index: 5;
 }
 
 .hero-panels {
@@ -400,7 +653,6 @@ main > section:not(.hero) {
 .hero-panel-photo {
   position: relative;
   border: none;
-  will-change: transform;
 }
 
 /* Светлая подложка сверху — чтобы тёмный текст логотипа читался поверх любого снимка */
@@ -558,15 +810,17 @@ main > section:not(.hero) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 12%;
+  /* Anchored fully to the top so nothing is ever cropped off the models'
+     heads — script.js pans this downward in sync with the text panel's
+     slide, so both sides of the hero visibly move together on scroll. */
+  object-position: 50% 0%;
 }
 
 .hero-panel-sub {
+  position: relative;
+  overflow: hidden;
   background: var(--card-bg);
   color: var(--accent);
-  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 4vw, 3.5rem);
-  justify-content: center;
-  will-change: transform;
 }
 
 .hero-panel-headline {
@@ -611,98 +865,223 @@ main > section:not(.hero) {
   padding-right: 0;
 }
 
-.who::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(to right, var(--border) 50%, var(--gold) 50%);
-}
-
 .who h2 {
-  margin-bottom: 2.5rem;
+  margin-bottom: clamp(4rem, 16vh, 10rem);
   text-align: center;
   padding-left: var(--gap);
   padding-right: var(--gap);
 }
 
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
+/* Pin track: the grid sticks in place for the height of this box minus one
+   viewport, so the whole fan-out sequence (script.js) has room to play out
+   over a long, deliberate scroll while the cards stay fully on screen —
+   without this the cards would finish settling only after they'd already
+   scrolled past the viewport. This is also most of what makes the page
+   "longer": the extra height lives here, not as empty padding. */
+.team-pin-track {
+  position: relative;
+  height: calc(100vh + 2300px);
 }
 
+/* Flexbox, not grid: grid-template-columns doesn't actually transition in
+   browsers (it snaps instantly, no matter what's declared), which is
+   exactly why the brinex.ru reference this hover-grow effect is modeled
+   on uses flex-basis instead — that property animates natively and
+   reliably. See .team-slot below for the hover rule itself. */
+.team-grid {
+  position: sticky;
+  top: calc(var(--header-h) + 6vh);
+  display: flex;
+  gap: 1.75rem;
+  max-width: 920px;
+  width: 100%;
+  padding: 0 var(--gap);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-pin-track {
+    height: auto;
+  }
+  .team-grid {
+    position: static;
+  }
+}
+
+.team-slot {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 calc(33.333% - 1.1667rem);
+  transition: flex-basis 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .team-slot:has(.team-card-face:hover) {
+    flex-basis: 50%;
+    flex-shrink: 0;
+  }
+}
+
+/* Always fully opaque — never animated via opacity. script.js toggles
+   visibility (a binary switch, not a gradual blend) once scroll reaches
+   SETTLE_START, so the card either doesn't render at all or is fully
+   solid — never a translucent in-between state. Only position/rotation
+   are ever animated. */
 .team-card {
   position: relative;
+  height: 100%;
+  opacity: 1;
+  visibility: hidden;
+  will-change: transform;
+}
+
+/* "Multi Flip" starting pile: each card sits offset and rotated toward the
+   centre, overlapping its neighbours. script.js reads this exact pose (kept
+   in sync with the PILE array there) and interpolates it down to
+   translate(0,0) rotate(0) continuously as the user scrolls, so the fan
+   only fully settles after a long, deliberate scroll — no fixed-duration
+   transition here, every frame is driven directly off scroll position. */
+.team-slot:nth-child(1) .team-card {
+  transform: translate(45%, 8%) rotate(-8deg);
+}
+
+.team-slot:nth-child(2) .team-card {
+  transform: translate(-4%, 8%) rotate(3deg);
+}
+
+.team-slot:nth-child(3) .team-card {
+  transform: translate(-46%, 12%) rotate(7deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-card {
+    visibility: visible;
+    transform: none !important;
+  }
+}
+
+.team-card-face {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   text-align: left;
   background: var(--card-bg);
   color: var(--accent);
   border: 1px solid var(--border-card);
-  border-radius: 0;
-  padding: 2rem;
-  will-change: clip-path;
-}
-
-.team-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--gold);
-  transform-origin: left;
-  transform: scaleX(var(--line-scale, 0));
+  border-radius: var(--radius);
+  padding: 1.4rem;
 }
 
 .team-avatar {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Fixed height, not aspect-ratio: the hover-grow effect below only ever
+     changes a card's width (its grid column), never its height — an
+     aspect-ratio here would make the photo taller too as it widens,
+     overflowing the pinned section and forcing a scroll that immediately
+     trips the close/dissolve trigger. object-fit: cover on the img just
+     shows more or less of the photo horizontally as this stays put. */
+  /* Scales with viewport height, not a single fixed value: short screens
+     (small vh) shrink it enough to still fit the whole card in the pinned
+     section without scrolling; normal/tall screens grow it toward the
+     original, more spacious first-version crop. */
+  height: clamp(15rem, 32vh, 22.5rem);
+  /* Room for .team-tags below to overlap the photo's bottom edge without
+     crowding the name/description that follow. */
+  margin-bottom: 2.9rem;
+}
+
+/* Clips the photo only — kept separate from .team-avatar itself so
+   .team-tags (a sibling) can overflow past the photo's bottom edge
+   instead of being cropped along with it. */
+.team-avatar-photo {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   border-radius: calc(var(--radius) - 2px);
-  font-family: var(--font-heading);
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 1.25rem;
-  will-change: clip-path;
 }
 
 .team-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Anchored toward the top so heads are never cropped off — default
+     center anchoring was cutting into hair/foreheads once the fixed
+     avatar height (above) made the crop tighter than a plain aspect-ratio
+     would have. */
+  object-position: 50% 12%;
   display: block;
 }
 
-.team-card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.3rem;
-  color: var(--gold);
+/* Activity tags, one per line — overlaps the photo's bottom-left corner,
+   half on the image and half below it. */
+.team-tags {
+  position: absolute;
+  left: 0.9rem;
+  bottom: -1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--gold);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
 }
 
-.team-role {
-  font-size: 0.85rem;
-  letter-spacing: 0.03em;
+.team-tags span {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  margin-bottom: 0.9rem;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.team-name {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+  color: var(--accent);
+  transition: font-size 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .team-desc {
   color: var(--muted-on-card);
-  font-size: 0.95rem;
-  margin-bottom: 1.25rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  transition: font-size 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hover-grow text sizing (brinex.ru reference): the hovered card's name/
+   description grow, while the other two shrink to match their squeezed
+   columns (see .team-slot's flex-basis hover rule above). The shrink rule
+   targets :not(:hover) cards specifically, so it can never fight the grow
+   rule for the hovered card itself regardless of specificity. */
+@media (hover: hover) and (pointer: fine) {
+  .team-grid:has(.team-card-face:hover) .team-card-face:not(:hover) .team-name {
+    font-size: 1.15rem;
+  }
+  .team-grid:has(.team-card-face:hover) .team-card-face:not(:hover) .team-desc {
+    font-size: 0.76rem;
+  }
+
+  .team-card-face:hover .team-name {
+    font-size: 1.75rem;
+  }
+  .team-card-face:hover .team-desc {
+    font-size: 0.95rem;
+  }
 }
 
 /* ---------- formats ---------- */
 
 .formats {
-  background: var(--card-bg);
   color: var(--accent);
   border-top: 1px solid var(--border-card);
 }
@@ -714,66 +1093,95 @@ main > section:not(.hero) {
 }
 
 .formats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-.format-tile {
   display: flex;
   flex-direction: column;
-  min-height: 15rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2.25rem 2rem 1.25rem;
-  background: var(--bg);
-  color: var(--ink);
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.format-tile:hover {
-  border-color: var(--gold);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.24);
+/* "Строка" treatment — no card box. Each format is a full-width row on the
+   section's own navy background; a cream fill sweeps in from the left on
+   hover and the text inverts to ink, instead of a boxed card lifting. */
+.format-tile {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border-card);
+  color: var(--accent);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.format-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: -1;
+}
+
+.format-num {
+  transition: color 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .format-label,
-.format-tile h3,
+.format-tile h3 {
+  transition: color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.format-text,
+.format-link {
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Labels/price/link are small uppercase UI text — Oswald, matching the
+   site's other condensed-caps labels. Titles are headings — Golos Text,
+   same as every other card h3 on the site (team/service/project/stage),
+   instead of the one-off Unbounded that only ever appeared here. */
+.format-label,
 .format-price,
 .format-link {
-  font-family: 'Unbounded', sans-serif;
+  font-family: var(--font-title);
   font-size: clamp(0.7rem, 1.1vw, 0.85rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
-.format-label,
-.format-tile h3,
-.format-price {
-  text-align: center;
-}
-
-.format-tile h3,
-.format-price {
-  color: var(--gold);
-}
-
-.format-label {
-  color: var(--ink);
+.format-num {
+  display: block;
+  color: var(--accent);
+  font-family: var(--font-heading);
   font-weight: 800;
-  line-height: 1.3;
-  min-height: 2.6em;
-  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  margin: 0;
 }
 
-.format-tile:first-child .format-label,
-.format-tile:nth-child(2) .format-label,
-.format-tile:nth-child(3) .format-label {
-  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+.format-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
 }
 
 .format-tile h3 {
-  margin-bottom: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin: 0;
+}
+
+.format-label {
+  color: var(--muted-on-card);
+  font-weight: 600;
+  margin: 0;
 }
 
 .format-price {
@@ -781,7 +1189,26 @@ main > section:not(.hero) {
 }
 
 .format-link {
-  margin-top: auto;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .format-tile:hover::before {
+    transform: scaleX(1);
+  }
+  .format-tile:hover .format-num,
+  .format-tile:hover .format-label,
+  .format-tile:hover h3 {
+    color: var(--ink);
+  }
+  .format-tile:hover .format-num,
+  .format-tile:hover .format-text {
+    transform: translateX(0.6rem);
+  }
+  .format-tile:hover .format-link {
+    transform: translateX(-0.6rem);
+  }
 }
 
 /* ---------- services ---------- */
@@ -795,16 +1222,43 @@ main > section:not(.hero) {
   text-align: center;
 }
 
+/* Horizontal scroll-snap instead of a 3x2 grid: "Начни с одного шага"
+   promised one step at a time, but a static grid showed all 6 cards (plus
+   the promo block) simultaneously — well past the ~4-item working-memory
+   guideline. Scroll-snap shows one or two at once, matching the heading,
+   without cutting a word of the existing copy. Native CSS, no JS/library
+   needed — consistent with the rest of the site. */
 .services-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 1.75rem;
   margin-bottom: 3rem;
+  padding-bottom: 0.9rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+
+.services-grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.services-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.services-grid::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 999px;
 }
 
 .service-card {
   display: flex;
   flex-direction: column;
+  flex: 0 0 min(320px, 82vw);
+  scroll-snap-align: start;
   border: 1px solid var(--border-card);
   border-radius: var(--radius);
   padding: 2rem;
@@ -813,34 +1267,88 @@ main > section:not(.hero) {
 }
 
 .service-zone {
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  color: var(--muted-on-card);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 0.6rem;
 }
 
+/* Titles run one line ("Нейрофотосессия") to three ("Сезонная матрица +
+   персональный трендбук") — without a fixed height, .service-price below
+   lands at a different Y on every card. min-height reserves room for the
+   longest title so price sits at the same level card to card. */
 .service-card h3 {
-  font-size: 1.15rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  min-height: 2.86rem;
+  margin-bottom: 0.65rem;
 }
 
+/* Container for the price line's qualifier words ("от", "1 час ·", "за
+   артикул") — stays small and quiet. The actual figure is .price-num,
+   the only thing that should read as "the number a prospect is scanning
+   for". Some cards (Нейрофотосессия) carry two tiered prices in one
+   line — sizing the whole line like a headline made the qualifier text
+   as loud as the number itself. */
+/* min-height reserves room for the longest real price line (Нейрофото-
+   сессия's two-tier "от 10 000 ₽ за 1 артикул · от 3 артикулов — 8 000 ₽
+   за артикул", the only one that wraps to 3 lines) so border-bottom below
+   lands at the same level on every card, not just the short one-line
+   prices. align-content keeps short prices packed at the top of that
+   reserved space instead of centering into the gap. */
 .service-price {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  column-gap: 0.4em;
+  row-gap: 0.3em;
+  min-height: 5.4rem;
+  border-bottom: 1px solid var(--border-card);
+  color: var(--accent);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  padding-bottom: 0.75rem;
   margin-bottom: 1rem;
 }
 
+.price-num {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+  padding: 0.08em 0.45em;
+  border-radius: var(--radius);
+}
+
+/* Loose leading on the flowing prose, tight leading on the stamped label
+   below (.service-format) — opposite textures, not just opposite sizes.
+   Also compensates light-on-navy text, which reads better with a touch
+   more leading than dark-on-light needs. */
 .service-desc {
-  color: var(--muted-on-card);
-  font-size: 0.92rem;
-  margin-bottom: 0.75rem;
+  color: var(--accent);
+  font-size: 0.94rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
   flex-grow: 1;
 }
 
+/* Logistics metadata, not prose — matches .service-zone's tracking
+   (0.1em) exactly, so the two label rows bookend the card with the same
+   stamped cadence instead of two slightly different ones. */
 .service-format {
-  color: var(--muted-on-card);
-  font-size: 0.82rem;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.4;
   margin-bottom: 1.25rem;
 }
 
@@ -895,7 +1403,6 @@ main > section:not(.hero) {
 /* ---------- project ---------- */
 
 .project {
-  background: var(--card-bg);
   color: var(--accent);
   border-top: 1px solid var(--border-card);
   text-align: center;
@@ -997,6 +1504,7 @@ main > section:not(.hero) {
 }
 
 .stage-number {
+  color: var(--accent);
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.3rem;
@@ -1031,7 +1539,6 @@ main > section:not(.hero) {
 /* ---------- terms ---------- */
 
 .terms {
-  background: var(--card-bg);
   color: var(--accent);
   border-top: 1px solid var(--border-card);
 }
@@ -1096,6 +1603,7 @@ main > section:not(.hero) {
 
 .step-num {
   display: block;
+  color: var(--accent);
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.3rem;
@@ -1173,9 +1681,6 @@ main > section:not(.hero) {
     width: 100%;
     justify-self: stretch;
   }
-  .team-grid,
-  .formats-grid,
-  .services-grid,
   .project-grid,
   .stages-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1186,17 +1691,30 @@ main > section:not(.hero) {
   .steps-list {
     grid-template-columns: repeat(2, 1fr);
   }
+  .team-grid {
+    flex-wrap: wrap;
+  }
+  .team-slot {
+    flex-basis: calc(50% - 0.875rem);
+  }
+
+  /* Same reasoning as the 600px override below: desktop's +1500px pin-track
+     was tuned for the full 3-across fan-out and is excessive once the grid
+     itself has already stepped down. */
+  .team-pin-track {
+    height: calc(100vh + 1400px);
+  }
 }
 
 @media (max-width: 600px) {
-  .team-grid,
-  .formats-grid,
-  .services-grid,
   .project-grid,
   .stages-grid,
   .steps-list,
   .promo-list {
     grid-template-columns: 1fr;
+  }
+  .team-slot {
+    flex-basis: 100%;
   }
   .site-header {
     padding: 1.1rem 1.25rem;
@@ -1208,6 +1726,35 @@ main > section:not(.hero) {
   .site-header .btn {
     padding: 0.6rem 1.1rem;
     font-size: 0.82rem;
+  }
+
+  /* Single-column team grid: cards are nearly full-viewport-width AND tall
+     (avatar + text), so bounding-box growth from rotation is dominated by
+     height*sin(angle) — even a modest angle adds real horizontal overflow.
+     Keep both the offset and the angle small, and clip locally here (not
+     on desktop, where it visibly framed/cropped the pile — see the
+     .team-grid rule above) as a second line of defence. */
+  .team-grid {
+    overflow: hidden;
+  }
+  .team-slot:nth-child(1) .team-card {
+    transform: translate(5%, 4%) rotate(-3deg);
+  }
+  .team-slot:nth-child(2) .team-card {
+    transform: translate(-4%, -4%) rotate(3deg);
+  }
+  .team-slot:nth-child(3) .team-card {
+    transform: translate(4%, 3%) rotate(-3deg);
+  }
+
+  /* Desktop's +1500px of pin-track exists to hold a wide 3-across fan-out
+     on screen for a long, deliberate scroll. Single-column mobile only
+     ever shows the pile settling in place with far smaller offsets (see
+     the poses above) — 1500px here bought 3 empty screens of scroll for
+     no new content. script.js reads offsetHeight every frame, so this
+     needs no JS change. */
+  .team-pin-track {
+    height: calc(100vh + 800px);
   }
 }
 
@@ -1235,6 +1782,71 @@ main > section:not(.hero) {
     transition: none;
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ---------- group-entrance stagger (card grids) ----------
+   .reveal/.stagger already sat unused in the markup on every one of these
+   grids. team-grid is deliberately excluded — its .reveal children are
+   driven every frame by the JS-scrubbed fan-out above, and layering a CSS
+   transition on top would smear that scrub into a laggy trail. */
+.formats-grid > .reveal,
+.services-grid > .reveal,
+.project-grid > .reveal,
+.stages-grid > .reveal,
+.steps-list > .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.formats-grid > .reveal.is-visible,
+.services-grid > .reveal.is-visible,
+.project-grid > .reveal.is-visible,
+.stages-grid > .reveal.is-visible,
+.steps-list > .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.formats-grid > .reveal:nth-child(2),
+.services-grid > .reveal:nth-child(2),
+.project-grid > .reveal:nth-child(2),
+.stages-grid > .reveal:nth-child(2),
+.steps-list > .reveal:nth-child(2) {
+  transition-delay: 40ms;
+}
+
+.formats-grid > .reveal:nth-child(3),
+.services-grid > .reveal:nth-child(3),
+.project-grid > .reveal:nth-child(3),
+.stages-grid > .reveal:nth-child(3),
+.steps-list > .reveal:nth-child(3) {
+  transition-delay: 80ms;
+}
+
+.services-grid > .reveal:nth-child(4),
+.steps-list > .reveal:nth-child(4) {
+  transition-delay: 120ms;
+}
+
+.services-grid > .reveal:nth-child(5) {
+  transition-delay: 160ms;
+}
+
+.services-grid > .reveal:nth-child(6) {
+  transition-delay: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formats-grid > .reveal,
+  .services-grid > .reveal,
+  .project-grid > .reveal,
+  .stages-grid > .reveal,
+  .steps-list > .reveal {
+    transform: none !important;
+    transition: opacity 200ms ease !important;
+    transition-delay: 0ms !important;
   }
 }
 

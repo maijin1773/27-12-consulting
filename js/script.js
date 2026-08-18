@@ -15,45 +15,137 @@ if (siteHeader) {
   }
 }
 
-// Curtain-split scroll effect: as the hero (split into two halves) scrolls
-// past, the halves visibly part like doors — driven continuously by scroll
-// position, so it reverses smoothly when scrolling back up.
-const heroSplitSection = document.querySelector('.hero');
-const heroSplitPhoto = document.querySelector('.hero-panel-photo');
-const heroSplitSub = document.querySelector('.hero-panel-sub');
 const prefersReducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-if (heroSplitSection && heroSplitPhoto && heroSplitSub && !prefersReducedMotionQuery.matches) {
-  const MAX_SPLIT_PERCENT = 38;
-  let heroSplitTicking = false;
+// Image Dissolve Scroll (annnimate.com reference): a section dissolves away
+// from the bottom edge upward, but along an irregular, organic boundary
+// instead of a straight line, with a glowing seam riding that boundary.
+// Everywhere else — the top edge and most of the left/right edges — must
+// stay perfectly straight, so the mask is two shapes: a plain "core" rect
+// (no filter, always exactly the target's own box down to the boundary)
+// plus a thin "band" rect that alone gets run through feTurbulence +
+// feDisplacementMap (#dissolve-noise in index.html), riding the boundary.
+// Only the band distorts, so raggedness never spreads to the top edge —
+// the same filter also distorts the glow bar, so its wobble matches.
+// Returns a sync(progress) fn: 0 = fully intact, 1 = fully dissolved.
+function createDissolveSync(targetSelector, maskId, coreId, bandId) {
+  const target = document.querySelector(targetSelector);
+  const maskEl = document.getElementById(maskId);
+  const coreRect = document.getElementById(coreId);
+  const bandRect = document.getElementById(bandId);
+  const glow = target ? target.querySelector('.dissolve-glow') : null;
+  if (!target || !maskEl || !coreRect || !bandRect || !glow) return null;
 
-  const updateHeroSplit = () => {
-    heroSplitTicking = false;
+  const FEATHER = 55; // px of organic band straddling the boundary, each side
 
-    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
-    const heroRect = heroSplitSection.getBoundingClientRect();
-    const heroHeight = heroSplitSection.offsetHeight || 1;
-    const splitProgress = Math.min(Math.max((headerH - heroRect.top) / heroHeight, 0), 1);
-    const shift = splitProgress * MAX_SPLIT_PERCENT;
+  return (progress) => {
+    if (progress <= 0.002) {
+      target.style.maskImage = '';
+      target.style.webkitMaskImage = '';
+      glow.style.opacity = '0';
+      return;
+    }
 
-    heroSplitPhoto.style.transform = `translateX(${-shift}%)`;
-    heroSplitSub.style.transform = `translateX(${shift}%)`;
+    const w = target.offsetWidth || 1;
+    const h = target.offsetHeight || 1;
+    const visibleH = h * (1 - progress);
+    const coreHeight = Math.max(0, visibleH - FEATHER);
+    const bandY = Math.max(0, visibleH - FEATHER * 2);
+    const bandHeight = Math.min(h - bandY, FEATHER * 3);
+
+    maskEl.setAttribute('x', '0');
+    maskEl.setAttribute('y', '0');
+    maskEl.setAttribute('width', w);
+    maskEl.setAttribute('height', h);
+    coreRect.setAttribute('width', w);
+    coreRect.setAttribute('height', coreHeight);
+    bandRect.setAttribute('y', bandY);
+    bandRect.setAttribute('width', w);
+    bandRect.setAttribute('height', Math.max(0, bandHeight));
+
+    target.style.maskImage = `url(#${maskId})`;
+    target.style.webkitMaskImage = `url(#${maskId})`;
+    target.style.maskRepeat = 'no-repeat';
+    target.style.webkitMaskRepeat = 'no-repeat';
+
+    glow.style.top = `${visibleH - 32}px`;
+    glow.style.opacity = progress < 0.05 ? String(progress / 0.05)
+      : progress > 0.92 ? String((1 - progress) / 0.08)
+      : '1';
+  };
+}
+
+// Hero exit: the hero pins in place (.hero-pin-track / .hero — sticky, same
+// pattern as .team-pin-track / .team-grid below) for a short stretch of
+// scroll so it dissolves while stationary, matching the reference — not
+// dissolving while also scrolling away underneath the mask.
+const heroExitSection = document.querySelector('.hero');
+const heroPinTrack = document.querySelector('.hero-pin-track');
+
+const heroPanelSubInner = document.querySelector('.hero-panel-sub-inner');
+const heroPanelSub = document.querySelector('.hero-panel-sub');
+const heroPanelPhotoImg = document.querySelector('.hero-panel-photo img');
+
+if (heroExitSection && heroPinTrack && heroPanelSubInner && heroPanelSub && !prefersReducedMotionQuery.matches) {
+  const syncHeroDissolve = createDissolveSync('.hero', 'hero-dissolve-mask', 'hero-dissolve-core', 'hero-dissolve-band');
+  // First HOLD of the pin track's scroll room happens before any dissolve:
+  // the first SLIDE_PORTION of that slides .hero-panel-sub-inner up (only
+  // as far as it needs to — zero on most viewports) so the subtitle/button
+  // are fully on screen even when the headline alone is taller than one
+  // viewport, then the rest of HOLD is a held pause with everything
+  // visible, and only after HOLD does the dissolve begin.
+  const HOLD = 0.6;
+  const SLIDE_PORTION = 0.35;
+  let heroExitTicking = false;
+
+  const updateHeroExit = () => {
+    heroExitTicking = false;
+
+    const trackRect = heroPinTrack.getBoundingClientRect();
+    const scrubRoom = heroPinTrack.offsetHeight - window.innerHeight;
+    // .hero sticks at `top: header-h`, not the viewport's very top edge —
+    // zero the curve at the moment it actually locks in place (same fix
+    // team-grid needs below).
+    const stickyOffset = parseFloat(getComputedStyle(heroExitSection).top) || 0;
+    const overall = scrubRoom > 0 ? Math.min(Math.max((stickyOffset - trackRect.top) / scrubRoom, 0), 1) : 0;
+
+    const holdProgress = Math.min(overall / HOLD, 1);
+    const slideProgress = Math.min(holdProgress / SLIDE_PORTION, 1);
+    const slideMax = Math.max(0, heroPanelSubInner.scrollHeight - heroPanelSub.clientHeight);
+    heroPanelSubInner.classList.toggle('is-tall', slideMax > 0);
+    heroPanelSubInner.style.transform = slideMax > 0 ? `translateY(${-slideMax * slideProgress}px)` : '';
+
+    // Photo pans in step with the text panel's slide (same slideProgress)
+    // so both halves of the hero visibly move together instead of only
+    // the text side reacting to scroll. Stays anchored at the top at
+    // rest (object-position 50% 0% in CSS — nothing is ever cropped off
+    // the models' heads) and only ever pans further down from there.
+    if (heroPanelPhotoImg) {
+      heroPanelPhotoImg.style.objectPosition = `50% ${slideProgress * 22}%`;
+    }
+
+    const dissolveProgress = Math.min(Math.max((overall - HOLD) / (1 - HOLD), 0), 1);
+    if (syncHeroDissolve) syncHeroDissolve(dissolveProgress);
   };
 
   window.addEventListener('scroll', () => {
-    if (!heroSplitTicking) {
-      heroSplitTicking = true;
-      requestAnimationFrame(updateHeroSplit);
+    if (!heroExitTicking) {
+      heroExitTicking = true;
+      requestAnimationFrame(updateHeroExit);
     }
   }, { passive: true });
 
-  updateHeroSplit();
+  window.addEventListener('resize', updateHeroExit);
+
+  updateHeroExit();
 }
 
 // Section curtain-reveal: every main section after the hero wipes down into
 // place as it crosses into view (clip-path 0% -> 100% height) with a small
-// upward settle, most sections now alternate cream/navy backgrounds, so the
-// wipe reads as the new color being drawn in rather than an abrupt cut.
+// upward settle. Section backgrounds used to alternate cream/navy in hard
+// per-section blocks, so the wipe read as the new color being drawn in —
+// now the background itself is a continuous wash (see updateBgWash below),
+// so the wipe reveals content over an already-transitioning backdrop.
 const curtainSections = Array.from(document.querySelectorAll('main > section:not(.hero)'));
 
 if (curtainSections.length && !prefersReducedMotionQuery.matches) {
@@ -68,7 +160,12 @@ if (curtainSections.length && !prefersReducedMotionQuery.matches) {
 
     curtainSections.forEach((section) => {
       const rect = section.getBoundingClientRect();
-      const progress = Math.min(Math.max((triggerY - rect.top) / ENTRY_DISTANCE, 0), 1);
+      const linear = Math.min(Math.max((triggerY - rect.top) / ENTRY_DISTANCE, 0), 1);
+      // Ease-out cubic on the motion itself (not the trigger math above) —
+      // the wipe starts fast and decelerates into place instead of moving
+      // at the same constant speed all the way through, which read as
+      // mechanical next to every other eased transition on the site.
+      const progress = 1 - Math.pow(1 - linear, 3);
       section.style.clipPath = `inset(0 0 ${(1 - progress) * 100}% 0)`;
       section.style.transform = `translateY(${(1 - progress) * ENTRY_SETTLE_PX}px)`;
     });
@@ -84,45 +181,208 @@ if (curtainSections.length && !prefersReducedMotionQuery.matches) {
   updateCurtainSections();
 }
 
-// Team card reveal ("Нас трое"): each card wipes in top-down with a
-// staggered gold top-line draw, and its photo wipes in with a slight
-// offset — layered on top of the section-level curtain above.
-const teamCards = Array.from(document.querySelectorAll('.team-card'));
+// Continuous background wash (annnimate.com "background-color" reference):
+// #bg-wash is a fixed layer behind everything (see style.css). Instead of
+// each section painting its own hard cream/navy block, this repaints the
+// wash every scroll frame, interpolating smoothly between a section's zone
+// color and the next one's as their shared boundary crosses a fixed
+// reference line — no seam at the handoff. Hero is excluded: it has its
+// own photo/navy split, not part of this cream/navy body alternation.
+const bgWash = document.getElementById('bg-wash');
+const bgWashSections = Array.from(document.querySelectorAll('main > section:not(.hero)'));
 
-if (teamCards.length && !prefersReducedMotionQuery.matches) {
-  const CARD_TRIGGER_RATIO = 0.85;
-  const CARD_ENTRY_DISTANCE = 260;
-  const CARD_STAGGER_PX = 40;
-  let teamCardTicking = false;
+if (bgWash && bgWashSections.length && !prefersReducedMotionQuery.matches) {
+  // Mirrors each section's actual CSS background (var(--bg) cream / var(--card-bg)
+  // navy) in DOM order — kept as literal hex here since the wash paints
+  // between scroll frames and can't afford a getComputedStyle() read per section
+  // per frame.
+  const ZONE_CREAM = '#f2f2e8';
+  const ZONE_NAVY = '#283864';
+  const bgWashZones = bgWashSections.map((section) =>
+    section.matches('.formats, .project, .terms') ? ZONE_NAVY : ZONE_CREAM
+  );
+  const REFERENCE_RATIO = 0.4; // how far down the viewport the "trigger line" sits
+  const TRANSITION_PX = 320; // how much scroll distance the crossfade spans
 
-  const updateTeamCards = () => {
-    teamCardTicking = false;
-    const triggerY = window.innerHeight * CARD_TRIGGER_RATIO;
+  const hexToRgb = (hex) => [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
 
-    teamCards.forEach((card, i) => {
-      const rect = card.getBoundingClientRect();
-      const raw = (triggerY - rect.top - i * CARD_STAGGER_PX) / CARD_ENTRY_DISTANCE;
-      const progress = Math.min(Math.max(raw, 0), 1);
+  const lerpColor = (hexA, hexB, t) => {
+    const a = hexToRgb(hexA);
+    const b = hexToRgb(hexB);
+    const r = Math.round(a[0] + (b[0] - a[0]) * t);
+    const g = Math.round(a[1] + (b[1] - a[1]) * t);
+    const bch = Math.round(a[2] + (b[2] - a[2]) * t);
+    return `rgb(${r}, ${g}, ${bch})`;
+  };
 
-      card.style.clipPath = `inset(0 0 ${(1 - progress) * 100}% 0)`;
-      card.style.setProperty('--line-scale', Math.min(progress * 1.6, 1));
+  let bgWashTicking = false;
 
-      const avatar = card.querySelector('.team-avatar');
-      if (avatar) {
-        const photoProgress = Math.min(Math.max((progress - 0.3) / 0.7, 0), 1);
-        avatar.style.clipPath = `inset(0 0 ${(1 - photoProgress) * 100}% 0)`;
+  const updateBgWash = () => {
+    bgWashTicking = false;
+    const refY = window.innerHeight * REFERENCE_RATIO;
+
+    let idx = -1;
+    for (let i = 0; i < bgWashSections.length; i += 1) {
+      if (bgWashSections[i].getBoundingClientRect().top <= refY) idx = i;
+    }
+
+    if (idx === -1) {
+      bgWash.style.backgroundColor = bgWashZones[0];
+      return;
+    }
+
+    let color = bgWashZones[idx];
+    if (idx + 1 < bgWashSections.length) {
+      const nextTop = bgWashSections[idx + 1].getBoundingClientRect().top;
+      const dist = nextTop - refY;
+      if (dist < TRANSITION_PX) {
+        const t = 1 - Math.max(dist, 0) / TRANSITION_PX;
+        color = lerpColor(bgWashZones[idx], bgWashZones[idx + 1], t);
       }
-    });
+    }
+    bgWash.style.backgroundColor = color;
   };
 
   window.addEventListener('scroll', () => {
-    if (!teamCardTicking) {
-      teamCardTicking = true;
-      requestAnimationFrame(updateTeamCards);
+    if (!bgWashTicking) {
+      bgWashTicking = true;
+      requestAnimationFrame(updateBgWash);
     }
   }, { passive: true });
 
-  updateTeamCards();
+  updateBgWash();
+}
+
+// Persistent gold ray pattern for #bg-rays (see style.css) — thin skewed
+// rays that fade in and out at their own random spot and timing, plus
+// quick twinkling glints. Static once seeded (not scroll-driven): it's
+// ambient texture behind the whole page, not tied to any one section.
+const bgRays = document.getElementById('bg-rays');
+
+if (bgRays && !prefersReducedMotionQuery.matches) {
+  const RAY_COUNT = 16;
+  const GLINT_COUNT = 20;
+  let html = '';
+
+  for (let i = 0; i < RAY_COUNT; i += 1) {
+    const w = (Math.random() * 5 + 2).toFixed(1);
+    // Stratified, not pure random: one ray per (100 / RAY_COUNT)% slice of
+    // the width, jittered within its slice — guarantees coverage across
+    // the full width (including the left edge) instead of leaving gaps
+    // pure randomness can produce with only 16 samples.
+    const slice = 100 / RAY_COUNT;
+    const x = (i * slice + Math.random() * slice).toFixed(1);
+    const dur = (Math.random() * 3.5 + 3.5).toFixed(1);
+    const delay = (Math.random() * -12).toFixed(1);
+    const blur = (Math.random() * 3 + 2).toFixed(1);
+    const drift = (Math.random() * 3 - 1.5).toFixed(1) + '%';
+    const tilt = (Math.random() * 24 - 12).toFixed(1) + 'deg';
+    const o = (Math.random() * 0.3 + 0.14).toFixed(2);
+    html += `<span class="bg-ray" style="--w:${w}px; --x:${x}%; --dur:${dur}s; --delay:${delay}s; --blur:${blur}px; --drift:${drift}; --tilt:${tilt}; --o:${o};"></span>`;
+  }
+
+  for (let i = 0; i < GLINT_COUNT; i += 1) {
+    const gs = (Math.random() * 5 + 3).toFixed(1);
+    const gx = (Math.random() * 98 + 1).toFixed(1);
+    const gy = (Math.random() * 98 + 1).toFixed(1);
+    const gdur = (Math.random() * 2.5 + 2.5).toFixed(1);
+    const gdelay = (Math.random() * -6).toFixed(1);
+    html += `<span class="bg-glint" style="--gs:${gs}px; --gx:${gx}%; --gy:${gy}%; --gdur:${gdur}s; --gdelay:${gdelay}s;"></span>`;
+  }
+
+  bgRays.innerHTML = html;
+}
+
+// "Multi Flip" team-card reveal ("Нас трое"): the grid pins in place
+// (.team-pin-track / .team-grid — see style.css) for a long stretch of
+// scroll, so the cards stay fully on screen for the whole sequence instead
+// of finishing after they've already scrolled past. The whole fan fades in
+// together while still piled/rotated (see .team-card:nth-child in style.css
+// — PILE below mirrors those exact values), then each card settles into its
+// grid slot with a stagger. Continuously scrubbed off how much of the pin
+// track has been scrolled through (no fixed-duration transition), so it
+// plays out exactly as fast or slow as the user scrolls and reverses
+// cleanly when scrolling back up.
+const teamCardsFlip = Array.from(document.querySelectorAll('.team-card'));
+const teamGridFlip = document.querySelector('.team-grid');
+const teamPinTrack = document.querySelector('.team-pin-track');
+
+if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotionQuery.matches) {
+  const PILE_DESKTOP = [
+    { x: 45, y: 8, r: -8 },
+    { x: -4, y: 8, r: 3 },
+    { x: -46, y: 12, r: 7 },
+  ];
+  const PILE_MOBILE = [
+    { x: 5, y: 4, r: -3 },
+    { x: -4, y: -4, r: 3 },
+    { x: 4, y: 3, r: -3 },
+  ];
+  const SETTLE_START = 0.03; // scroll fraction before any card is shown or starts settling
+  const STAGGER = 0.1; // per-card offset once settling starts
+  const SETTLE_END = 0.82; // last card must be fully in place by here — see settleSpan below. Pushed later still, and .team-pin-track's scroll room was also increased, so the piled/fanned pose holds and unfurls over a long, deliberate stretch of scroll.
+  const CLOSE_START = 0.9; // mask exit starts here — the 0.82-0.9 gap is a held pause with all three cards fully settled and visible
+  let teamFlipTicking = false;
+
+  const updateTeamFlip = () => {
+    teamFlipTicking = false;
+
+    const pile = window.innerWidth <= 600 ? PILE_MOBILE : PILE_DESKTOP;
+    const trackRect = teamPinTrack.getBoundingClientRect();
+    const scrubRoom = teamPinTrack.offsetHeight - window.innerHeight;
+    // .team-grid sticks at `top: header-h + 6vh`, not at the viewport's very
+    // top edge — without this offset, progress stays at 0 (cards invisible)
+    // for that whole stretch even though the grid is already pinned and
+    // on screen. Zero the curve at the moment it actually locks in place.
+    const stickyOffset = parseFloat(getComputedStyle(teamGridFlip).top) || 0;
+    const overall = scrubRoom > 0 ? Math.min(Math.max((stickyOffset - trackRect.top) / scrubRoom, 0), 1) : 1;
+    // Settle must finish by SETTLE_END (well before CLOSE_START), otherwise
+    // the last (most-staggered) card is still sliding into place while the
+    // mask exit below has already started eating the grid from the bottom.
+    const settleSpan = SETTLE_END - SETTLE_START - (teamCardsFlip.length - 1) * STAGGER;
+
+    teamCardsFlip.forEach((card, i) => {
+      const settleStart = SETTLE_START + i * STAGGER;
+      const settleProgress = Math.min(Math.max((overall - settleStart) / settleSpan, 0), 1);
+      const p = pile[i];
+
+      // Binary visibility snap, not a gradual opacity fade: the card is
+      // either fully opaque or not rendered at all, never translucent.
+      card.style.visibility = overall > SETTLE_START ? 'visible' : 'hidden';
+      card.style.transform = `translate(${p.x * (1 - settleProgress)}%, ${p.y * (1 - settleProgress)}%) rotate(${p.r * (1 - settleProgress)}deg)`;
+    });
+
+    // Mask-reveal exit (annnimate.com "mask-reveal" reference, run in
+    // reverse): once the fan has fully settled, the last stretch of the
+    // pin track's scroll room erases the whole grid from the bottom edge
+    // upward — same inset() clip-path curtainSections uses to reveal a
+    // section, just growing instead of shrinking, so it reads as
+    // dissolving away rather than sliding off. Finishes right as the grid
+    // is about to unstick, so the release itself is never seen.
+    //
+    // clipPath must stay fully unset (not "inset(0 0 0% 0)") outside the
+    // closing zone: any clip-path at all — even a nominal 0% inset — clips
+    // the piled cards' rotated/translated overflow to .team-grid's own
+    // box, which is exactly the overflow the pile pose depends on being
+    // visible past.
+    const closeProgress = Math.min(Math.max((overall - CLOSE_START) / (1 - CLOSE_START), 0), 1);
+    teamGridFlip.style.clipPath = closeProgress > 0 ? `inset(0 0 ${closeProgress * 100}% 0)` : '';
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!teamFlipTicking) {
+      teamFlipTicking = true;
+      requestAnimationFrame(updateTeamFlip);
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', updateTeamFlip);
+
+  updateTeamFlip();
 }
 
 // Letter-by-letter reveal for body text outside the first screen (.hero).
@@ -164,7 +424,7 @@ function splitTextIntoLetters(root) {
 
 const letterTargets = Array.from(
   document.querySelectorAll('h2, h3, p, li, .format-link, .step-num, .step-text')
-).filter((el) => !el.closest('.hero'));
+).filter((el) => !el.closest('.hero') && !el.classList.contains('fold-heading'));
 
 letterTargets.forEach((el) => {
   if (el.dataset.lettered) return;
@@ -183,10 +443,143 @@ const letterObserver = new IntersectionObserver((entries) => {
 
 letterTargets.forEach((el) => letterObserver.observe(el));
 
+// Group-entrance stagger for card grids (formats, services, project,
+// partnership stages, start steps): the .reveal/.stagger classes already
+// sat on these in the markup with nothing behind them (see style.css) —
+// team-grid is excluded on purpose, its .reveal children are already
+// driven every frame by the scroll-scrubbed fan-out above.
+const staggerRevealEls = Array.from(
+  document.querySelectorAll(
+    '.formats-grid > .reveal, .services-grid > .reveal, .project-grid > .reveal, .stages-grid > .reveal, .steps-list > .reveal'
+  )
+);
+
+const staggerObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      staggerObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+staggerRevealEls.forEach((el) => staggerObserver.observe(el));
+
+// "Folding text" heading ("Нас трое"): each character starts folded flat
+// at its own baseline hinge (rotateX 90°, invisible) and unfolds upright
+// as the heading crosses a fixed band of the viewport — continuously
+// scroll-scrubbed off scroll position, not a fixed-duration animation.
+// Reimplements GSAP's folding-text reference without GSAP: SplitText
+// chars → ScrollTrigger start:"top 80%" end:"top 20%" → each char gets an
+// equal 1/charCount slice of that range, eased with power2.out.
+function splitTextIntoFoldChars(root) {
+  const chars = [];
+
+  // "Нас трое" (live-mode typeset session 59049536) stacks onto two lines
+  // via child .who-line spans — split each line's own text separately so
+  // the block stacking survives, instead of flattening root.textContent
+  // (which would merge both lines back into one run). Any other heading
+  // that reuses .fold-heading without .who-line children still works: it
+  // falls back to treating the whole root as a single container.
+  const lineEls = root.querySelectorAll(':scope > .who-line');
+  const containers = lineEls.length ? Array.from(lineEls) : [root];
+
+  containers.forEach((container, lineIndex) => {
+    const text = container.textContent;
+    container.textContent = '';
+    const lineChars = [];
+
+    text.split(/(\s+)/).forEach((part) => {
+      if (part === '') return;
+      if (/^\s+$/.test(part)) {
+        container.appendChild(document.createTextNode(part));
+        return;
+      }
+      // "Нас" (line 0) hinges on its LEFT edge (rotateY -90°→0, matching
+      // the reference's "fold-left"); "трое" (line 1) hinges on its RIGHT
+      // edge ("fold-right", rotateY 90°→0) — a mirrored pair, paired below
+      // with a matching reveal-order reversal so each line's hinge side
+      // agrees with the direction it fills in from.
+      const hingeRight = lineIndex % 2 === 1;
+      const wordSpan = document.createElement('span');
+      wordSpan.className = 'fold-word';
+      Array.from(part).forEach((char) => {
+        const charSpan = document.createElement('span');
+        charSpan.className = `fold-char ${hingeRight ? 'fold-char--hinge-right' : 'fold-char--hinge-left'}`;
+        charSpan.textContent = char;
+        charSpan.dataset.foldSign = hingeRight ? '1' : '-1';
+        wordSpan.appendChild(charSpan);
+        lineChars.push(charSpan);
+      });
+      container.appendChild(wordSpan);
+    });
+
+    // "Нас" reveals left-to-right, in DOM order. "трое" reveals
+    // right-to-left — only the ORDER each character is handed its
+    // scroll-progress slot is reversed here; the DOM stays in normal
+    // left-to-right reading order, so the letters themselves don't move.
+    const timingOrder = lineIndex % 2 === 1 ? lineChars.slice().reverse() : lineChars;
+    chars.push(...timingOrder);
+  });
+
+  return chars;
+}
+
+const foldHeading = document.querySelector('.fold-heading');
+
+if (foldHeading && !prefersReducedMotionQuery.matches) {
+  const foldChars = splitTextIntoFoldChars(foldHeading);
+  const charSpan = foldChars.length ? 1 / foldChars.length : 1;
+  const powerOut2 = (t) => 1 - (1 - t) * (1 - t);
+  let foldTicking = false;
+
+  const updateFold = () => {
+    foldTicking = false;
+    const vh = window.innerHeight;
+    const rect = foldHeading.getBoundingClientRect();
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
+    // Widened from the reference's 0.8vh→0.2vh band (0.6vh of scroll) to a
+    // full viewport height of scroll, so the reveal reads as deliberate
+    // rather than snappy. End is pinned just below the sticky header (not
+    // 0) — ending at the bare viewport top let the reveal finish only
+    // after the heading had already scrolled behind the header, so the
+    // "fully unfolded" state was never actually seen.
+    const start = vh * 1.0;
+    const end = headerH + 40;
+    const overall = Math.min(Math.max((start - rect.top) / (start - end), 0), 1);
+
+    foldChars.forEach((el, i) => {
+      const local = Math.min(Math.max((overall - i * charSpan) / charSpan, 0), 1);
+      const eased = powerOut2(local);
+      const sign = el.dataset.foldSign === '1' ? 1 : -1;
+      el.style.opacity = String(eased);
+      el.style.transform = `rotateY(${sign * 90 * (1 - eased)}deg)`;
+    });
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!foldTicking) {
+      foldTicking = true;
+      requestAnimationFrame(updateFold);
+    }
+  }, { passive: true });
+
+  updateFold();
+}
+
 // 3D cursor-follow tilt for every card outside the first screen (.hero).
+// .team-card is excluded: its transform is already driven continuously by
+// the scroll-scrubbed fan-out above, and this effect's direct
+// el.style.transform writes (including clearing it to '' on mouseleave)
+// would fight that — e.g. mouseleave would wipe the settled state back to
+// the CSS-authored pile pose.
+// .format-tile is excluded: it's a full-bleed text row now (the "Строка"
+// treatment), not a boxed card, and a 3D perspective tilt across a thin
+// horizontal strip looks broken — its own fill-sweep hover already gives it
+// directional feedback.
 const tiltEls = Array.from(
   document.querySelectorAll(
-    '.team-card, .format-tile, .service-card, .promo-block, .project-col, .stage-card, .steps-list li'
+    '.service-card, .promo-block, .project-col, .stage-card, .steps-list li'
   )
 ).filter((el) => !el.closest('.hero'));
 
@@ -261,4 +654,35 @@ if (menuToggle && siteMenu) {
       closeMenu();
     }
   });
+}
+
+// Services scroll-snap strip: while the cursor is over the cards, redirect
+// vertical wheel input into horizontal scroll (both directions) instead of
+// letting it scroll the page straight past the strip to the next section.
+// Moving the cursor off the cards immediately hands scrolling back to the
+// page. Trackpad/shift-wheel gestures that already carry a deltaX are left
+// alone — the browser already routes those horizontally on their own.
+const servicesGrid = document.querySelector('.services-grid');
+
+if (servicesGrid) {
+  let servicesWheelTimer = null;
+
+  servicesGrid.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+
+      // scroll-snap-type fights small JS-driven scrollLeft changes — the
+      // browser snaps back to the nearest card after almost every tick,
+      // making wheel input feel like it does nothing. Suspend snapping
+      // while wheel events are actively arriving, then let it resettle
+      // shortly after the user stops turning the wheel.
+      servicesGrid.style.scrollSnapType = 'none';
+      clearTimeout(servicesWheelTimer);
+      servicesWheelTimer = setTimeout(() => {
+        servicesGrid.style.scrollSnapType = '';
+      }, 150);
+
+      servicesGrid.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
 }

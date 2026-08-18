@@ -3,8 +3,8 @@ name: 27.12 Consulting
 description: Бюро для fashion-брендов на маркетплейсах — от текущих продаж к управляемой чистой прибыли
 colors:
   brass-gold: "#d4a748"
-  ledger-navy: "#30345a"
-  navy-soft: "#454a75"
+  ledger-navy: "#283864"
+  navy-soft: "#3d4e7f"
   bone-cream: "#f2f2e8"
   espresso-ink: "#1c1817"
   ink-muted: "rgba(28, 24, 23, 0.64)"
@@ -91,8 +91,8 @@ Two structural surfaces (cream, navy) that swap section by section, one accent s
 - **Brass Gold** (#d4a748): The only accent in the system. Reserved for the single emphasized word in the hero headline, the logo numeral, price call-outs, and the header ticker's separator dots. Never used as a background or for large surfaces.
 
 ### Secondary
-- **Ledger Navy** (#30345a): The alternating "dark" section background and the default card fill on cream sections. Carries most of the page's structural weight.
-- **Navy Soft** (#454a75): One step lighter than Ledger Navy. Hover state only — never a resting color.
+- **Ledger Navy** (#283864): The alternating "dark" section background and the default card fill on cream sections. Carries most of the page's structural weight.
+- **Navy Soft** (#3d4e7f): One step lighter than Ledger Navy. Hover state only — never a resting color.
 
 ### Neutral
 - **Bone Cream** (#f2f2e8): The alternating "light" section background, and the card fill used inside navy sections (same value, reused as a light foreground). This is the page's true neutral — cream, not white.

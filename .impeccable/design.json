@@ -5,8 +5,8 @@
   "extensions": {
     "colorMeta": {
       "brass-gold": { "role": "primary", "displayName": "Brass Gold", "canonical": "#d4a748", "tonalRamp": ["#3d2f10", "#5c4419", "#7d5d22", "#a17a2e", "#c4953b", "#d4a748", "#e0bc6f", "#f0dcb0"] },
-      "ledger-navy": { "role": "secondary", "displayName": "Ledger Navy", "canonical": "#30345a", "tonalRamp": ["#0e0f1e", "#181b34", "#232748", "#2b2f52", "#30345a", "#454a75", "#6b709a", "#9a9ec0"] },
-      "navy-soft": { "role": "secondary", "displayName": "Navy Soft", "canonical": "#454a75" },
+      "ledger-navy": { "role": "secondary", "displayName": "Ledger Navy", "canonical": "#283864", "tonalRamp": ["#0d121f", "#161e36", "#1f2b4d", "#243259", "#283864", "#3d4e7f", "#6476a8", "#8a9dd0"] },
+      "navy-soft": { "role": "secondary", "displayName": "Navy Soft", "canonical": "#3d4e7f" },
       "bone-cream": { "role": "neutral", "displayName": "Bone Cream", "canonical": "#f2f2e8", "tonalRamp": ["#7d7d70", "#9d9d8f", "#bcbcae", "#d6d6c8", "#e6e6da", "#f2f2e8", "#f7f7f0", "#fbfbf6"] },
       "espresso-ink": { "role": "neutral", "displayName": "Espresso Ink", "canonical": "#1c1817", "tonalRamp": ["#000000", "#0d0b0a", "#1c1817", "#2e2927", "#453f3c", "#5f5854", "#7a726d", "#978e88"] },
       "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "rgba(28, 24, 23, 0.64)" },
@@ -40,7 +40,7 @@
       "refersTo": "button-primary",
       "description": "Main CTA — Ledger Navy fill, Bone Cream text, full pill.",
       "html": "<button class=\"ds-btn-primary\">Обсудить проект</button>",
-      "css": ".ds-btn-primary { display: inline-block; padding: 0.9rem 2rem; border-radius: 999px; font-size: 0.95rem; letter-spacing: 0.01em; background: #30345a; color: #f2f2e8; border: none; transition: transform 0.2s, background 0.2s; } .ds-btn-primary:hover { transform: translateY(-2px); background: #454a75; }"
+      "css": ".ds-btn-primary { display: inline-block; padding: 0.9rem 2rem; border-radius: 999px; font-size: 0.95rem; letter-spacing: 0.01em; background: #283864; color: #f2f2e8; border: none; transition: transform 0.2s, background 0.2s; } .ds-btn-primary:hover { transform: translateY(-2px); background: #3d4e7f; }"
     },
     {
       "name": "On-Navy Button",
@@ -48,7 +48,7 @@
       "refersTo": "button-on-navy",
       "description": "Inverted primary for use when the button itself sits on a navy surface (hero).",
       "html": "<button class=\"ds-btn-on-navy\">Обсудить проект</button>",
-      "css": ".ds-btn-on-navy { display: inline-block; padding: 0.9rem 2rem; border-radius: 999px; font-size: 0.95rem; letter-spacing: 0.01em; background: #f2f2e8; color: #1c1817; border: none; transition: transform 0.2s, background 0.2s, color 0.2s; } .ds-btn-on-navy:hover { transform: translateY(-2px); background: #454a75; color: #f2f2e8; }"
+      "css": ".ds-btn-on-navy { display: inline-block; padding: 0.9rem 2rem; border-radius: 999px; font-size: 0.95rem; letter-spacing: 0.01em; background: #f2f2e8; color: #1c1817; border: none; transition: transform 0.2s, background 0.2s, color 0.2s; } .ds-btn-on-navy:hover { transform: translateY(-2px); background: #3d4e7f; color: #f2f2e8; }"
     },
     {
       "name": "Ghost Button",
@@ -64,7 +64,7 @@
       "refersTo": "card",
       "description": "Canonical card — fill is always the inverse of its section's background (shown here as it sits on a cream section).",
       "html": "<article class=\"ds-card\"><p class=\"ds-card-zone\">Ассортимент и товар</p><h3 class=\"ds-card-title\">Ассортиментный аудит</h3><p class=\"ds-card-price\">от 40 000 ₽</p><p class=\"ds-card-desc\">Какие модели локомотивы, какие дорабатывать, какие выводить.</p></article>",
-      "css": ".ds-card { background: #30345a; color: #f2f2e8; border: 1px solid rgba(242,242,232,0.3); border-radius: 6px; padding: 2rem; font-family: Inter, sans-serif; } .ds-card-zone { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem; } .ds-card-title { font-family: 'Golos Text', sans-serif; font-weight: 500; font-size: 1.15rem; margin: 0 0 0.5rem; } .ds-card-price { font-weight: 700; margin-bottom: 1rem; } .ds-card-desc { color: rgba(242,242,232,0.72); font-size: 0.92rem; margin: 0; }"
+      "css": ".ds-card { background: #283864; color: #f2f2e8; border: 1px solid rgba(242,242,232,0.3); border-radius: 6px; padding: 2rem; font-family: Inter, sans-serif; } .ds-card-zone { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.6rem; } .ds-card-title { font-family: 'Golos Text', sans-serif; font-weight: 500; font-size: 1.15rem; margin: 0 0 0.5rem; } .ds-card-price { font-weight: 700; margin-bottom: 1rem; } .ds-card-desc { color: rgba(242,242,232,0.72); font-size: 0.92rem; margin: 0; }"
     }
   ],
   "narrative": {
