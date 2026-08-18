@@ -15,7 +15,126 @@ if (siteHeader) {
   }
 }
 
+// Reading-progress hairline: width tracks overall scroll position directly,
+// no easing — it's a 1:1 readout of where you are on the page, not a
+// decorative animation, so it stays accurate every frame rather than
+// trailing behind.
+const scrollProgress = document.getElementById('scroll-progress');
+
+if (scrollProgress) {
+  let scrollProgressTicking = false;
+
+  const updateScrollProgress = () => {
+    scrollProgressTicking = false;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
+    scrollProgress.style.transform = `scaleX(${progress})`;
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!scrollProgressTicking) {
+      scrollProgressTicking = true;
+      requestAnimationFrame(updateScrollProgress);
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', updateScrollProgress);
+  updateScrollProgress();
+}
+
+// Long headings ("Полная пересборка бренда на маркетплейсе", "От
+// диагностики к системному росту") are set to white-space: nowrap in CSS
+// so they never wrap to a second line, but no single clamp() formula fits
+// them on one line at every viewport width without either overflowing on
+// some or looking too small on others. Measure the actual rendered width
+// against its available space and shrink font-size just enough to fit —
+// same idea as syncHeaderHeight above.
+const fitHeadingToOneLine = (heading) => {
+  heading.style.fontSize = '';
+  const available = heading.parentElement.clientWidth;
+  const natural = heading.scrollWidth;
+  if (natural > available) {
+    const currentSize = parseFloat(getComputedStyle(heading).fontSize);
+    heading.style.fontSize = `${(currentSize * available / natural) * 0.95}px`;
+  }
+  // Font-size-to-width isn't perfectly linear (hinting/rounding differ
+  // across real devices vs. this being tuned in a desktop browser) — a
+  // single pass can still slightly overflow on some phones, which
+  // body{overflow-x:hidden} would then silently clip. Re-check once and
+  // shrink a bit further if needed, rather than trusting the first guess.
+  if (heading.scrollWidth > heading.parentElement.clientWidth) {
+    const currentSize = parseFloat(getComputedStyle(heading).fontSize);
+    heading.style.fontSize = `${currentSize * 0.95}px`;
+  }
+};
+
+const oneLineHeadings = Array.from(
+  document.querySelectorAll('.project h2, .partnership h2')
+);
+
+if (oneLineHeadings.length) {
+  const fitAllOneLineHeadings = () => oneLineHeadings.forEach(fitHeadingToOneLine);
+
+  fitAllOneLineHeadings();
+  window.addEventListener('resize', fitAllOneLineHeadings);
+  window.addEventListener('load', fitAllOneLineHeadings);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitAllOneLineHeadings);
+  }
+}
+
 const prefersReducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// Every CTA on the site opens Telegram in a new tab — a click can have a
+// brief gap before that tab actually appears, separate from :active (which
+// only lasts while the mouse button is physically held). Restart a fixed,
+// guaranteed-visible pulse (.is-tapped, see style.css) on every click so
+// the click always visibly registers, even on a very fast tap.
+document.querySelectorAll('a.btn[target="_blank"]').forEach((link) => {
+  link.addEventListener('click', () => {
+    link.classList.remove('is-tapped');
+    void link.offsetWidth;
+    link.classList.add('is-tapped');
+  });
+});
+
+// One-time idle invitation on the hero's primary CTA: two very soft pulses
+// (.is-inviting, see style.css) if the visitor hasn't touched the page in
+// ~4.5s while the button is on screen — then never again this visit. The
+// idle timer only runs while the button is actually visible, so scrolling
+// past it doesn't queue up an invite that fires somewhere off-screen.
+const heroCta = document.querySelector('.hero-actions .btn');
+
+if (heroCta && !prefersReducedMotionQuery.matches) {
+  let ctaIdleTimer = null;
+  let ctaHasInvited = false;
+
+  const triggerCtaInvite = () => {
+    if (ctaHasInvited) return;
+    ctaHasInvited = true;
+    heroCta.classList.add('is-inviting');
+  };
+
+  const resetCtaIdleTimer = () => {
+    if (ctaHasInvited) return;
+    clearTimeout(ctaIdleTimer);
+    ctaIdleTimer = setTimeout(triggerCtaInvite, 4500);
+  };
+
+  new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        resetCtaIdleTimer();
+      } else {
+        clearTimeout(ctaIdleTimer);
+      }
+    });
+  }).observe(heroCta);
+
+  ['mousemove', 'scroll', 'keydown', 'touchstart'].forEach((evt) => {
+    window.addEventListener(evt, resetCtaIdleTimer, { passive: true });
+  });
+}
 
 // Image Dissolve Scroll (annnimate.com reference): a section dissolves away
 // from the bottom edge upward, but along an irregular, organic boundary
@@ -138,6 +257,20 @@ if (heroExitSection && heroPinTrack && heroPanelSubInner && heroPanelSub && !pre
   window.addEventListener('resize', updateHeroExit);
 
   updateHeroExit();
+}
+
+// Header condenses once scrolled fully past the hero — a purely visual
+// transform: scale() on the logo (no padding/font-size change), so it
+// never touches layout or needs --header-h resynced. Signals "you're past
+// the intro" without affecting anything the hero/team pin-tracks depend on.
+if (siteHeader && heroPinTrack) {
+  const headerCondenseObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      siteHeader.classList.toggle('is-condensed', !entry.isIntersecting);
+    });
+  }, { threshold: 0 });
+
+  headerCondenseObserver.observe(heroPinTrack);
 }
 
 // Section curtain-reveal: every main section after the hero wipes down into
@@ -478,14 +611,18 @@ const letterObserver = new IntersectionObserver((entries) => {
 
 letterTargets.forEach((el) => letterObserver.observe(el));
 
-// Group-entrance stagger for card grids (formats, services, project,
-// partnership stages, start steps): the .reveal/.stagger classes already
-// sat on these in the markup with nothing behind them (see style.css) —
-// team-grid is excluded on purpose, its .reveal children are already
-// driven every frame by the scroll-scrubbed fan-out above.
+// Group-entrance stagger for card grids (formats, services, partnership
+// stages, start steps): the .reveal/.stagger classes already sat on these
+// in the markup with nothing behind them (see style.css) — team-grid is
+// excluded on purpose, its .reveal children are already driven every frame
+// by the scroll-scrubbed fan-out above. .promo-block rides the same
+// observer but has its own transform/shimmer in CSS ("Marquee Slide-Stop" +
+// shimmer sweep) rather than the shared fade-up. .project-grid is excluded
+// here — its whole section (heading group + cards + CTA) has its own WAAPI
+// entrance below instead of this CSS-transition one.
 const staggerRevealEls = Array.from(
   document.querySelectorAll(
-    '.formats-grid > .reveal, .services-grid > .reveal, .project-grid > .reveal, .stages-grid > .reveal, .steps-list > .reveal'
+    '.formats-grid > .reveal, .services-grid > .reveal, .stages-grid > .reveal, .steps-list > .reveal, .promo-block.reveal'
   )
 );
 
@@ -499,6 +636,61 @@ const staggerObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 
 staggerRevealEls.forEach((el) => staggerObserver.observe(el));
+
+// "Проектная работа за 28 дней" entrance: Web Animations API instead of a
+// CSS transition — one hardware-accelerated element.animate() call per
+// piece (eyebrow, heading, intro, each card, CTA), staggered 70ms apart.
+// Fires once via IntersectionObserver, same as staggerObserver above, just
+// through WAAPI rather than a toggled class. Button hover colors are pure
+// CSS (:hover) and untouched by this — WAAPI here only ever animates
+// opacity/transform, never background or border-color.
+const projectSection = document.querySelector('.project');
+const projectInner = projectSection ? projectSection.querySelector('.project-inner') : null;
+
+if (projectSection && projectInner) {
+  const projectParts = [
+    projectSection.querySelector('.section-eyebrow'),
+    projectSection.querySelector('h2'),
+    projectSection.querySelector('.project-intro'),
+    ...projectSection.querySelectorAll('.project-col'),
+    projectSection.querySelector('.project-terms'),
+  ].filter(Boolean);
+
+  if (prefersReducedMotionQuery.matches) {
+    projectParts.forEach((el) => { el.style.opacity = '1'; });
+  } else {
+    // The section itself is much taller than a single card grid, so a plain
+    // area-ratio threshold (like staggerObserver's 0.15 above) would fire
+    // while it's still mostly below the fold — the section's top edge alone
+    // can satisfy 15% of its own height before any text is readable.
+    // rootMargin shrinks the effective viewport from the bottom instead, so
+    // this fires once the section has actually scrolled up into view.
+    const projectObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        projectInner.animate(
+          [{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }],
+          { duration: 650, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
+        );
+
+        projectParts.forEach((el, i) => {
+          el.animate(
+            [
+              { opacity: 0, transform: 'translateY(14px)' },
+              { opacity: 1, transform: 'translateY(0)' },
+            ],
+            { duration: 460, delay: 140 + i * 70, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
+          );
+        });
+
+        projectObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0, rootMargin: '0px 0px -25% 0px' });
+
+    projectObserver.observe(projectSection);
+  }
+}
 
 // "Folding text" heading ("Нас трое"): each character starts folded flat
 // at its own baseline hinge (rotateX 90°, invisible) and unfolds upright
@@ -725,20 +917,20 @@ if (servicesGrid) {
     }
   }, { passive: false });
 
-  // "Scroll right" hint badges (.card-hint, one per card except the last —
-  // see style.css): dismissed for good the first time this strip is
-  // actually scrolled, by any input (wheel, drag, touch, scrollbar). Once
-  // the visitor has demonstrated they know to scroll, repeating the hint
-  // would just be noise.
-  const serviceHints = servicesGrid.querySelectorAll('.card-hint');
-  if (serviceHints.length) {
-    let hintsDismissed = false;
+  // Blur-mask crossfade (see .services-grid.is-transitioning in style.css):
+  // cards differ in content length, so a bare scroll-snap cut between them
+  // can look like a harder jump than intended. A brief blur while actually
+  // in motion — cleared once scrolling settles — smooths that cut without
+  // slowing the scroll itself. Listens to the native scroll event so it
+  // catches wheel, drag/touch, and scrubber-driven scrolling all at once.
+  if (!prefersReducedMotionQuery.matches) {
+    let servicesBlurTimer = null;
     servicesGrid.addEventListener('scroll', () => {
-      if (hintsDismissed) return;
-      if (servicesGrid.scrollLeft > 20) {
-        hintsDismissed = true;
-        serviceHints.forEach((hint) => hint.classList.add('is-dismissed'));
-      }
+      servicesGrid.classList.add('is-transitioning');
+      clearTimeout(servicesBlurTimer);
+      servicesBlurTimer = setTimeout(() => {
+        servicesGrid.classList.remove('is-transitioning');
+      }, 120);
     }, { passive: true });
   }
 }
