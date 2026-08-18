@@ -450,10 +450,18 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
     { x: -4, y: 8, r: 3 },
     { x: -46, y: 12, r: 7 },
   ];
+  // Pulled in slightly from the original {5,4,-3}/{-4,-4,3}/{4,3,-3} — at
+  // those values the piled/rotated last card's bounding box could exceed
+  // .team-grid's own natural height by a few px, and overflow:hidden
+  // (style.css, single-column breakpoint) would clip a sliver off its
+  // bottom edge while still piled. Smaller offsets keep every pose inside
+  // the box without needing to grow .team-grid itself — its height feeds
+  // directly into the sticky-release timing the exit-dissolve depends on,
+  // so padding it was a worse fix than it looked (see style.css comment).
   const PILE_MOBILE = [
-    { x: 5, y: 4, r: -3 },
-    { x: -4, y: -4, r: 3 },
-    { x: 4, y: 3, r: -3 },
+    { x: 4, y: 3, r: -2.5 },
+    { x: -3, y: -3, r: 2.5 },
+    { x: 3, y: 2, r: -2.5 },
   ];
   // Fractions below are sized against .team-pin-track's scroll room (now
   // 2000px — just enough for the pile-in/settle sequence itself, no held
@@ -467,6 +475,22 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
   const SETTLE_END = 0.943; // last card must be fully in place by here — see settleSpan below.
   let teamFlipTicking = false;
 
+  // Exit dissolve (once the pile has settled, .team-grid dissolves away —
+  // same inset() mask-reveal technique curtainSections uses for entrances,
+  // run as an exit) used to compute its own progress independently, from
+  // .team-grid's own getBoundingClientRect() vs its sticky offset. That
+  // reads whether the grid is *currently still stuck*, which depends on
+  // native CSS sticky release — a separate thing from `overall` above,
+  // governed by .team-pin-track's fixed height vs .team-grid's actual
+  // content height. On the single-column mobile layout the stacked grid
+  // (3 full cards) is taller than the pin-track's extra scroll room can
+  // hold stuck for, so native sticky released — and the exit clip-path
+  // reached 100% — well before `overall` (and the pile settle it drives)
+  // had actually reached SETTLE_END. Мария (last card, last to settle)
+  // was getting dissolved away before she'd finished arriving. Deriving
+  // exit progress from the same `overall` the pile animation already uses
+  // guarantees the two stay in lockstep regardless of content height or
+  // native sticky's own release point.
   const updateTeamFlip = () => {
     teamFlipTicking = false;
 
@@ -496,7 +520,20 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
     // style.css) are gated to this class: hovering mid-flip would otherwise
     // fight the pile/fan transform above with a layout change it was never
     // designed to combine with.
-    teamGridFlip.classList.toggle('is-settled', overall >= SETTLE_END);
+    const isSettled = overall >= SETTLE_END;
+    teamGridFlip.classList.toggle('is-settled', isSettled);
+
+    // Explicitly gated on isSettled, not just on exitProgress being 0: any
+    // clip-path at all — even a nominal 0% inset — would clip the piled
+    // cards' rotated/translated overflow to the grid's own untransformed
+    // box (a hard rectangular "frame" around the fan), so this must never
+    // even momentarily apply before the pile has actually settled.
+    if (!isSettled) {
+      teamGridFlip.style.clipPath = '';
+    } else {
+      const exitProgress = Math.min(Math.max((overall - SETTLE_END) / (1 - SETTLE_END), 0), 1);
+      teamGridFlip.style.clipPath = exitProgress > 0 ? `inset(0 0 ${exitProgress * 100}% 0)` : '';
+    }
   };
 
   window.addEventListener('scroll', () => {
@@ -509,43 +546,6 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
   window.addEventListener('resize', updateTeamFlip);
 
   updateTeamFlip();
-
-  // Exit dissolve: once the pin above releases, .team-grid resumes normal
-  // document flow and scrolls up with the page like any other content —
-  // deliberately no held pause first, cards should already be moving. This
-  // is what makes leaving the section read as dissolving away (same
-  // inset() mask-reveal technique curtainSections uses for entrances, just
-  // run as an exit) rather than a hard cut against the viewport edge.
-  // Explicitly gated on is-settled, not just on `stickyOffset - rect.top`
-  // being 0 while pinned: any clip-path at all — even a nominal 0% inset —
-  // would clip the piled cards' rotated/translated overflow to the grid's
-  // own untransformed box (a hard rectangular "frame" around the fan), so
-  // this must never even momentarily apply before the pile has settled.
-  const EXIT_DISTANCE = 320;
-  let teamExitTicking = false;
-
-  const updateTeamExit = () => {
-    teamExitTicking = false;
-    if (!teamGridFlip.classList.contains('is-settled')) {
-      teamGridFlip.style.clipPath = '';
-      return;
-    }
-    const stickyOffset = parseFloat(getComputedStyle(teamGridFlip).top) || 0;
-    const rect = teamGridFlip.getBoundingClientRect();
-    const exitProgress = Math.min(Math.max((stickyOffset - rect.top) / EXIT_DISTANCE, 0), 1);
-    teamGridFlip.style.clipPath = exitProgress > 0 ? `inset(0 0 ${exitProgress * 100}% 0)` : '';
-  };
-
-  window.addEventListener('scroll', () => {
-    if (!teamExitTicking) {
-      teamExitTicking = true;
-      requestAnimationFrame(updateTeamExit);
-    }
-  }, { passive: true });
-
-  window.addEventListener('resize', updateTeamExit);
-
-  updateTeamExit();
 } else if (teamGridFlip) {
   // No flip sequence to gate hover behind when motion is reduced — cards
   // are shown at rest from the start (see the reduced-motion override in

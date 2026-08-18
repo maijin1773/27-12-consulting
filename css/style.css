@@ -2071,25 +2071,28 @@ main > section:not(.hero) {
      Keep both the offset and the angle small, and clip locally here (not
      on desktop, where it visibly framed/cropped the pile — see the
      .team-grid rule above) as a second line of defence.
-     padding-bottom: the stacked cards' combined natural height (3 full
-     cards) is much taller than the viewport, so while piled/not yet
-     settled the last card's own translated bottom edge can sit past the
-     grid's own bottom edge — overflow:hidden was then clipping a real
-     slice off Мария's card for most of the scroll-through, not just an
-     invisible sliver. This buffer gives the pile transform room to move
-     without cutting into the card itself. */
+     No padding here on purpose — .team-grid's own height feeds directly
+     into the sticky-release timing that script.js's exit-dissolve depends
+     on (EXIT_DISTANCE, tuned against .team-pin-track's fixed height).
+     Growing the box by even 40px shifted native CSS sticky's own unstick
+     point earlier than the JS's settle timeline expected, so the exit
+     clip-path could fire before Мария (last card, last to settle) had
+     fully arrived — a bigger, more visible cut-off than the pixel-level
+     overflow clip this rule alone was meant to guard against. Fixed at
+     the source instead: the pile poses below are pulled in slightly so
+     the piled/rotated cards' bounding boxes stay inside .team-grid's
+     natural box without needing extra room. */
   .team-grid {
     overflow: hidden;
-    padding-bottom: 40px;
   }
   .team-slot:nth-child(1) .team-card {
-    transform: translate(5%, 4%) rotate(-3deg);
+    transform: translate(4%, 3%) rotate(-2.5deg);
   }
   .team-slot:nth-child(2) .team-card {
-    transform: translate(-4%, -4%) rotate(3deg);
+    transform: translate(-3%, -3%) rotate(2.5deg);
   }
   .team-slot:nth-child(3) .team-card {
-    transform: translate(4%, 3%) rotate(-3deg);
+    transform: translate(3%, 2%) rotate(-2.5deg);
   }
 
   /* Desktop's +1500px of pin-track exists to hold a wide 3-across fan-out
