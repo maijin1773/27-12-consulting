@@ -477,20 +477,32 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
 
   // Exit dissolve (once the pile has settled, .team-grid dissolves away —
   // same inset() mask-reveal technique curtainSections uses for entrances,
-  // run as an exit) used to compute its own progress independently, from
-  // .team-grid's own getBoundingClientRect() vs its sticky offset. That
-  // reads whether the grid is *currently still stuck*, which depends on
-  // native CSS sticky release — a separate thing from `overall` above,
-  // governed by .team-pin-track's fixed height vs .team-grid's actual
-  // content height. On the single-column mobile layout the stacked grid
-  // (3 full cards) is taller than the pin-track's extra scroll room can
-  // hold stuck for, so native sticky released — and the exit clip-path
-  // reached 100% — well before `overall` (and the pile settle it drives)
-  // had actually reached SETTLE_END. Мария (last card, last to settle)
-  // was getting dissolved away before she'd finished arriving. Deriving
-  // exit progress from the same `overall` the pile animation already uses
-  // guarantees the two stay in lockstep regardless of content height or
-  // native sticky's own release point.
+  // run as an exit): originally measured its own progress from
+  // .team-grid's getBoundingClientRect() vs its sticky offset, over a
+  // fixed EXIT_DISTANCE (320px) of real scroll. That reads whether the
+  // grid is *currently still stuck*, which depends on native CSS sticky
+  // release — a separate thing from `overall` below, governed by
+  // .team-pin-track's fixed height vs .team-grid's actual content height.
+  // On the single-column mobile layout the stacked grid (3 full cards) is
+  // taller than the pin-track's extra scroll room can hold stuck for, so
+  // native sticky released — and exit progress started climbing — well
+  // before `overall` (and the pile settle it drives) had actually reached
+  // SETTLE_END, dissolving Мария (last card, last to settle) before she'd
+  // finished arriving.
+  // First fix (deriving exit progress straight from `overall`) solved
+  // that but broke something else: on mobile `overall`'s remaining budget
+  // past SETTLE_END is only ~5.7% of an 800px scrubRoom (~46px), so the
+  // whole dissolve compressed into a single short flick instead of a
+  // graceful 320px — it read as an instant disappearance rather than a
+  // fade. Right fix: keep the original real-scroll-pixel EXIT_DISTANCE,
+  // but anchor it to wherever the grid's rect.top actually is the moment
+  // `overall` first reaches SETTLE_END (captured once below), instead of
+  // to the constant stickyOffset — so the full 320px plays out counted
+  // from confirmed-settled, however early native sticky happened to let
+  // go underneath it.
+  const EXIT_DISTANCE = 320;
+  let exitAnchorTop = null;
+
   const updateTeamFlip = () => {
     teamFlipTicking = false;
 
@@ -529,9 +541,14 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
     // box (a hard rectangular "frame" around the fan), so this must never
     // even momentarily apply before the pile has actually settled.
     if (!isSettled) {
+      exitAnchorTop = null; // re-arm: capture a fresh anchor next time settle completes
       teamGridFlip.style.clipPath = '';
     } else {
-      const exitProgress = Math.min(Math.max((overall - SETTLE_END) / (1 - SETTLE_END), 0), 1);
+      if (exitAnchorTop === null) {
+        exitAnchorTop = teamGridFlip.getBoundingClientRect().top;
+      }
+      const currentTop = teamGridFlip.getBoundingClientRect().top;
+      const exitProgress = Math.min(Math.max((exitAnchorTop - currentTop) / EXIT_DISTANCE, 0), 1);
       teamGridFlip.style.clipPath = exitProgress > 0 ? `inset(0 0 ${exitProgress * 100}% 0)` : '';
     }
   };
