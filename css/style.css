@@ -2116,26 +2116,48 @@ main > section:not(.hero) {
 /* ---------- responsive ---------- */
 
 @media (max-width: 900px) {
-  /* .hero keeps its fixed height (calc(100svh - header-h)) for the
-     desktop pin-scroll dissolve JS, which the stacked mobile panels still
-     share via .hero-panels{height:100%}. With implicit auto rows, that
-     definite total height let the two panels' rows collapse/stretch
-     unpredictably (photo's aspect-ratio was computing WIDTH from an
-     accidentally-squeezed row height instead of the other way around,
-     leaving it narrower than the screen with empty space beside it) — an
-     explicit split removes that ambiguity. */
+  /* The desktop hero pins in place (position: sticky) while script.js
+     scrubs three things off scroll progress: the text panel's content
+     sliding internally, the photo's object-position panning, and the
+     dissolve-out mask — tuned for the side-by-side desktop split, where
+     both panels share the same fixed frame height and the photo pan is
+     the visible "other half" of the motion. Once panels stack here, the
+     navy panel's own content (headline + subtitle + button) usually
+     exceeds its share of one viewport, so the internal slide has real
+     distance to travel and reads as scrolling on its own, while the
+     photo's pan is comparatively tiny — the two halves visibly decouple
+     instead of moving together. Same call as the team section's mobile
+     fallback below: don't tune the desktop-shaped scrub to fit, drop it
+     entirely and let the hero scroll away like a normal static block
+     (script.js skips the whole pin/slide/dissolve setup at this
+     breakpoint to match). */
+  .hero-pin-track {
+    height: auto;
+  }
+  .hero {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
   .hero-panels {
     grid-template-columns: 1fr;
-    grid-template-rows: 45% 55%;
+    grid-template-rows: none;
     min-height: 0;
+    height: auto;
   }
-  /* No aspect-ratio needed once the row itself has an explicit height —
-     the image is absolutely positioned with object-fit: cover, so it
-     fills whatever box it's given either way. */
+  /* No shared fixed-height frame to fill anymore, so the photo needs its
+     own intrinsic proportion instead of stretching to 100% of a row. */
   .hero-panel-photo {
-    aspect-ratio: auto;
+    aspect-ratio: 4 / 5;
     width: 100%;
-    height: 100%;
+    height: auto;
+  }
+  .hero-panel-sub {
+    overflow: visible;
+  }
+  .hero-panel-sub-inner {
+    min-height: 0;
+    transform: none !important;
   }
   /* Panel is full-width now (see .hero-panel-headline's own comment above
      for why vh stopped being the right unit once panels stack). */

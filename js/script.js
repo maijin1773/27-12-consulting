@@ -204,8 +204,11 @@ const heroPinTrack = document.querySelector('.hero-pin-track');
 const heroPanelSubInner = document.querySelector('.hero-panel-sub-inner');
 const heroPanelSub = document.querySelector('.hero-panel-sub');
 const heroPanelPhotoImg = document.querySelector('.hero-panel-photo img');
+// Stacked panels below 900px drop the whole pin/slide/dissolve scrub —
+// see the CSS override at the same breakpoint for why.
+const isMobileHeroLayout = window.matchMedia('(max-width: 900px)').matches;
 
-if (heroExitSection && heroPinTrack && heroPanelSubInner && heroPanelSub && !prefersReducedMotionQuery.matches) {
+if (heroExitSection && heroPinTrack && heroPanelSubInner && heroPanelSub && !prefersReducedMotionQuery.matches && !isMobileHeroLayout) {
   const syncHeroDissolve = createDissolveSync('.hero', 'hero-dissolve-mask', 'hero-dissolve-core', 'hero-dissolve-band');
   // First HOLD of the pin track's scroll room happens before any dissolve:
   // the first SLIDE_PORTION of that slides .hero-panel-sub-inner up (only
