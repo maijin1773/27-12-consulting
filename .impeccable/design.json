@@ -19,6 +19,7 @@
       "section-title": { "displayName": "Section Title", "purpose": "Every section's centered uppercase <h2>." },
       "heading": { "displayName": "Heading", "purpose": "Card and column <h3> titles." },
       "body": { "displayName": "Body", "purpose": "Paragraph copy inside cards and columns." },
+      "hero-sub": { "displayName": "Hero Subtitle", "purpose": "Hero lead paragraph only — Nunito Sans, distinct from the site-wide Body font." },
       "numeral": { "displayName": "Numeral", "purpose": "Logo mark '27.12' only." }
     },
     "shadows": [
@@ -79,13 +80,13 @@
     "rules": [
       { "name": "The Inverted Card Rule", "body": "A card's fill is always the opposite of the section it sits in: navy cards on cream sections, cream cards on navy sections. A card never shares its section's background color.", "section": "colors" },
       { "name": "The One Accent Rule", "body": "Brass Gold appears at most once or twice per screen — a headline word, a price, a logo mark. It is never a background, never a button fill, never applied to body text.", "section": "colors" },
-      { "name": "The One Serif Rule", "body": "Playfair Display appears only in the hero headline and its italic accent word. Every other heading on the page is sans-serif.", "section": "typography" },
+      { "name": "The One Display Rule", "body": "Unbounded appears only in the hero headline and its italic accent word. Every other heading uses Oswald or Golos Text.", "section": "typography" },
       { "name": "The Flat-At-Rest Rule", "body": "Nothing casts a shadow while idle. Shadow appears only on :hover as direct feedback to a pointer, and disappears immediately after.", "section": "elevation" }
     ],
     "dos": [
       "Do keep Brass Gold to one emphasis point per screen — a word, a number, a mark.",
       "Do invert card color against its section's background, every time.",
-      "Do keep section <h2> titles in Oswald uppercase; keep Playfair Display exclusive to the hero.",
+      "Do keep section <h2> titles in Oswald uppercase; keep Unbounded exclusive to the hero.",
       "Do leave surfaces flat at rest; only add shadow as hover feedback."
     ],
     "donts": [

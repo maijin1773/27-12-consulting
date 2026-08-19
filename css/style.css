@@ -10,7 +10,7 @@
   --ink-soft: #3d4e7f;
   --navy-text: #f2f2e8;
   --gold: #d4a748;
-  --font-display: 'Playfair Display', serif;
+  --font-display: 'Unbounded', sans-serif;
   --font-numerals: 'Jost', sans-serif;
   --font-heading: 'Golos Text', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -508,6 +508,7 @@ main > section:not(.hero) {
   gap: 1.5rem;
   margin-top: 4rem;
   margin-bottom: 0;
+  text-align: center;
 }
 
 .site-menu-nav a {
@@ -917,10 +918,19 @@ main > section:not(.hero) {
   color: var(--accent);
 }
 
+/* Unbounded's glyphs run far wider per character than Playfair Display's
+   (the font this size scale was originally tuned for), so the old
+   vh-based clamp badly overflowed the panel — vh also stopped tracking
+   the actual constraint once panels stack to full-width on mobile at
+   900px (width, not height, becomes the limit there). Sized empirically
+   against the panel's own clientWidth instead: the longest word
+   ("управляемой") fits at roughly 12.1% of the panel's width at every
+   breakpoint tested, so these clamps use vw at ~87% of that fitted ratio
+   for a safety margin. */
 .hero-panel-headline {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(3.8rem, 12vh, 8.5rem);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 5.3vw, 7.2rem);
   line-height: 1.05;
   letter-spacing: -0.015em;
   text-wrap: balance;
@@ -934,12 +944,20 @@ main > section:not(.hero) {
 }
 
 .hero-sub {
-  font-family: var(--font-body);
+  font-family: 'Nunito Sans', var(--font-body);
   font-weight: 400;
   color: var(--muted-on-card);
-  font-size: 1.21rem;
-  line-height: 1.6;
+  font-size: 1.35rem;
+  line-height: 1.45;
   max-width: 42ch;
+  text-align: right;
+  margin-left: auto;
+}
+
+.hero-sub .sub-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--gold);
+  text-underline-offset: 0.15em;
 }
 
 .hero-actions {
@@ -1411,15 +1429,6 @@ main > section:not(.hero) {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  filter: blur(0);
-  transition: filter 200ms ease-out;
-}
-
-/* Toggled from script.js on scroll, cleared ~120ms after scrolling stops —
-   masks the cut between differently-sized cards without slowing the snap
-   itself down. */
-.services-grid.is-transitioning {
-  filter: blur(3px);
 }
 
 .services-grid::-webkit-scrollbar {
@@ -1631,7 +1640,7 @@ main > section:not(.hero) {
 .promo-block.reveal {
   opacity: 0;
   transform: translateX(70px);
-  transition: opacity 380ms linear, transform 950ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 380ms linear, transform 950ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .promo-block.reveal.is-visible {
@@ -1758,6 +1767,54 @@ main > section:not(.hero) {
   padding: 2rem;
   background: var(--bg);
   color: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Same "Marquee Slide-Stop" entrance as .promo-block — slides in from the
+   right and brakes hard to a stop, then a single diagonal shimmer sweeps
+   across once it's settled. Rides staggerObserver in script.js, staggered
+   card to card like the other 3-across grids. */
+.project-col.reveal {
+  opacity: 0;
+  transform: translateX(70px);
+  transition: opacity 380ms linear, transform 950ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.project-col.reveal.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.project-col::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(212, 167, 72, 0.38) 50%, transparent 70%);
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+
+.project-col.reveal.is-visible::after {
+  animation: promo-shimmer 1300ms ease-out 450ms 1;
+}
+
+.project-grid > .reveal.project-col:nth-child(2) {
+  transition-delay: 100ms;
+}
+
+.project-grid > .reveal.project-col:nth-child(3) {
+  transition-delay: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-col.reveal {
+    transform: none !important;
+    transition: opacity 200ms ease !important;
+  }
+  .project-col.reveal.is-visible::after {
+    animation: none !important;
+  }
 }
 
 .project-col h3 {
@@ -1808,46 +1865,76 @@ main > section:not(.hero) {
 }
 
 .stages-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  display: flex;
+  flex-direction: column;
   text-align: left;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 
 .stage-card {
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 2rem;
-  background: var(--card-bg);
-  color: var(--accent);
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 0 1.5rem;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.stage-card:first-child {
+  border-top: 1px solid var(--border);
 }
 
 .stage-number {
-  color: var(--accent);
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 1.3rem;
-  margin-bottom: 0.75rem;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--card-bg);
+  margin-bottom: 0;
+}
+
+/* Everything except the number lives in its own column-2 wrapper — h3,
+   .stage-time and the list used to auto-place directly as grid items, and
+   a `grid-row: 1 / -1` on .stage-number was meant to reserve column 1 down
+   every row so the rest fell through to column 2. That relies on -1
+   resolving against the *implicit* grid, but -1 only ever resolves
+   against explicit row tracks (none are defined here), so it silently
+   collapsed to row 1 only — .stage-time then auto-placed into row 2,
+   column 1, the narrow number column, and wrapped onto 4+ lines. A real
+   wrapper sidesteps the whole implicit-grid gotcha: two items, two
+   columns, no row-spanning needed. min-width: 0 keeps long list text from
+   pushing the grid track wider than the card. */
+.stage-body {
+  min-width: 0;
 }
 
 .stage-card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.8rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.3rem;
 }
 
 .stage-time {
-  color: var(--muted-on-card);
+  color: var(--gold);
   font-size: 0.85rem;
-  margin-bottom: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+}
+
+.stage-card ul {
+  columns: 2;
+  column-gap: 2rem;
 }
 
 .stage-card li {
   position: relative;
-  padding-left: 1.3rem;
-  color: var(--muted-on-card);
-  font-size: 0.9rem;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
   margin-bottom: 0.6rem;
+  break-inside: avoid;
 }
 
 .stage-card li::before {
@@ -1870,8 +1957,12 @@ main > section:not(.hero) {
 }
 
 .terms-col h3 {
-  color: var(--accent);
-  font-size: 1.15rem;
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-on-card);
   margin-bottom: 0.75rem;
 }
 
@@ -1880,17 +1971,23 @@ main > section:not(.hero) {
   margin-bottom: 2rem;
 }
 
+/* Checkmark instead of the site-wide em-dash: this list is the one place
+   where the reader checks themself against criteria, not just reads a
+   description, so it gets its own marker to read as "check yourself
+   against this" rather than "here's a description". */
 .terms-col li {
   position: relative;
-  padding-left: 1.3rem;
+  padding-left: 1.6rem;
   color: var(--muted-on-card);
   margin-bottom: 0.8rem;
 }
 
 .terms-col li::before {
-  content: "—";
+  content: "✓";
   position: absolute;
   left: 0;
+  color: var(--gold);
+  font-weight: 700;
   color: var(--accent);
 }
 
@@ -1906,15 +2003,31 @@ main > section:not(.hero) {
   margin-bottom: 2.5rem;
 }
 
+/* Peeking scroll-snap carousel, same on every breakpoint: one step
+   centered at a time, with the next step's edge visible as a swipe/scroll
+   hint — echoes services' Full-Bleed Snap without needing its scrubber
+   (only 4 short items here, the peek is enough). Side padding is set so a
+   centered card's flex-basis (78%) plus the two paddings sums to 100%,
+   letting the first/last card center too. */
 .steps-list {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 11%;
+  margin-bottom: 1rem;
   text-align: left;
 }
 
+.steps-list::-webkit-scrollbar {
+  display: none;
+}
+
 .steps-list li {
+  flex: 0 0 78%;
+  scroll-snap-align: center;
   border: 1px solid var(--border-card);
   border-radius: var(--radius);
   padding: 1.5rem;
@@ -1936,6 +2049,30 @@ main > section:not(.hero) {
   font-size: 0.95rem;
 }
 
+/* Which step is centered in the carousel above — kept in sync by
+   script.js reading .steps-list's scroll position, not by scroll-snap
+   itself, since CSS alone has no way to reflect "which card is focused"
+   back onto a sibling element. */
+.steps-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.steps-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 200ms ease, transform 200ms ease;
+}
+
+.steps-dot.is-active {
+  background: var(--gold);
+  transform: scale(1.3);
+}
+
 /* ---------- footer ---------- */
 
 .site-footer {
@@ -1947,6 +2084,8 @@ main > section:not(.hero) {
 .footer-brand {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 0.6rem;
   margin-bottom: 0.75rem;
 }
@@ -1965,6 +2104,7 @@ main > section:not(.hero) {
   font-size: 0.85rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .footer-desc {
@@ -1997,6 +2137,11 @@ main > section:not(.hero) {
     width: 100%;
     height: 100%;
   }
+  /* Panel is full-width now (see .hero-panel-headline's own comment above
+     for why vh stopped being the right unit once panels stack). */
+  .hero-panel-headline {
+    font-size: clamp(1.8rem, 10.5vw, 4.4rem);
+  }
   .site-header {
     grid-template-columns: 1fr auto;
     grid-template-areas:
@@ -2018,15 +2163,22 @@ main > section:not(.hero) {
     width: 100%;
     justify-self: stretch;
   }
-  .project-grid,
-  .stages-grid {
+  .project-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .terms-grid {
     grid-template-columns: 1fr;
   }
-  .steps-list {
-    grid-template-columns: repeat(2, 1fr);
+  .stage-card {
+    grid-template-columns: 72px 1fr;
+    gap: 1.1rem;
+    padding: 2rem 0;
+  }
+  .stage-number {
+    font-size: 2.2rem;
+  }
+  .stage-card h3 {
+    font-size: 1.4rem;
   }
   .team-grid {
     flex-wrap: wrap;
@@ -2045,10 +2197,25 @@ main > section:not(.hero) {
 
 @media (max-width: 600px) {
   .project-grid,
-  .stages-grid,
-  .steps-list,
   .promo-list {
     grid-template-columns: 1fr;
+  }
+  .stage-card {
+    grid-template-columns: 60px 1fr;
+    gap: 0.85rem;
+    padding: 1.75rem 0;
+  }
+  .stage-number {
+    font-size: 1.6rem;
+  }
+  .stage-card h3 {
+    font-size: 1.2rem;
+  }
+  .stage-time {
+    font-size: 0.72rem;
+  }
+  .stage-card ul {
+    columns: 1;
   }
   .team-slot {
     flex-basis: 100%;
@@ -2101,8 +2268,8 @@ main > section:not(.hero) {
 .letter {
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.5em);
-  transition: opacity 0.45s ease-out, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(0.6em);
+  transition: opacity 0.45s ease-out, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .letters-visible .letter {
@@ -2126,16 +2293,18 @@ main > section:not(.hero) {
 .formats-grid > .reveal,
 .services-grid > .reveal,
 .stages-grid > .reveal,
-.steps-list > .reveal {
+.steps-list > .reveal,
+.terms-grid > .reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 300ms ease-out, transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(34px);
+  transition: opacity 350ms ease-out, transform 620ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .formats-grid > .reveal.is-visible,
 .services-grid > .reveal.is-visible,
 .stages-grid > .reveal.is-visible,
-.steps-list > .reveal.is-visible {
+.steps-list > .reveal.is-visible,
+.terms-grid > .reveal.is-visible {
   opacity: 1;
   transform: none;
 }
@@ -2143,7 +2312,8 @@ main > section:not(.hero) {
 .formats-grid > .reveal:nth-child(2),
 .services-grid > .reveal:nth-child(2),
 .stages-grid > .reveal:nth-child(2),
-.steps-list > .reveal:nth-child(2) {
+.steps-list > .reveal:nth-child(2),
+.terms-grid > .reveal:nth-child(2) {
   transition-delay: 40ms;
 }
 
@@ -2168,7 +2338,6 @@ main > section:not(.hero) {
 .project .section-eyebrow,
 .project h2,
 .project-intro,
-.project-grid .project-col,
 .project-terms {
   opacity: 0;
 }
@@ -2190,7 +2359,8 @@ main > section:not(.hero) {
   .formats-grid > .reveal,
   .services-grid > .reveal,
   .stages-grid > .reveal,
-  .steps-list > .reveal {
+  .steps-list > .reveal,
+  .terms-grid > .reveal {
     transform: none !important;
     transition: opacity 200ms ease !important;
     transition-delay: 0ms !important;
@@ -2203,7 +2373,6 @@ main > section:not(.hero) {
   .project .section-eyebrow,
   .project h2,
   .project-intro,
-  .project-grid .project-col,
   .project-terms {
     opacity: 1 !important;
   }

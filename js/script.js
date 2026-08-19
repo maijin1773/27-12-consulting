@@ -614,9 +614,29 @@ function splitTextIntoLetters(root) {
   });
 }
 
+// Shared by the CSS-driven card-grid stagger (.reveal/.is-visible) and the
+// letter-reveal exclusion below — anything matching this already gets
+// moved as one piece by a parent-level reveal.
+const blockRevealCardSelector =
+  '.formats-grid > .reveal, .services-grid > .reveal, .project-grid > .reveal, .stages-grid > .reveal, .steps-list > .reveal, .promo-block.reveal, .terms-grid > .reveal';
+// .project's own parts aren't marked with .reveal (they're WAAPI-animated
+// individually below) but need the same exclusion from letter-splitting.
+const blockRevealSelector = `${blockRevealCardSelector}, .project .section-eyebrow, .project h2, .project-intro, .project-terms`;
+
+// Text that already rides a parent-level block reveal (a card sliding up
+// as one piece, or .project's own WAAPI sequence) must not also be split
+// into letters — layering the letter stagger's ~50-letter/500ms delay
+// spread underneath a simultaneously-moving parent made long lines arrive
+// letter-by-letter at visibly different times while the parent was still
+// in motion, reading as a curved/wavy rise instead of the single straight
+// block motion the reveal is supposed to be.
 const letterTargets = Array.from(
   document.querySelectorAll('h2, h3, p, li, .format-link, .step-num, .step-text')
-).filter((el) => !el.closest('.hero') && !el.classList.contains('fold-heading'));
+).filter((el) => (
+  !el.closest('.hero')
+  && !el.classList.contains('fold-heading')
+  && !el.closest(blockRevealSelector)
+));
 
 letterTargets.forEach((el) => {
   if (el.dataset.lettered) return;
@@ -635,20 +655,16 @@ const letterObserver = new IntersectionObserver((entries) => {
 
 letterTargets.forEach((el) => letterObserver.observe(el));
 
-// Group-entrance stagger for card grids (formats, services, partnership
-// stages, start steps): the .reveal/.stagger classes already sat on these
-// in the markup with nothing behind them (see style.css) — team-grid is
-// excluded on purpose, its .reveal children are already driven every frame
-// by the scroll-scrubbed fan-out above. .promo-block rides the same
-// observer but has its own transform/shimmer in CSS ("Marquee Slide-Stop" +
-// shimmer sweep) rather than the shared fade-up. .project-grid is excluded
-// here — its whole section (heading group + cards + CTA) has its own WAAPI
-// entrance below instead of this CSS-transition one.
-const staggerRevealEls = Array.from(
-  document.querySelectorAll(
-    '.formats-grid > .reveal, .services-grid > .reveal, .stages-grid > .reveal, .steps-list > .reveal, .promo-block.reveal'
-  )
-);
+// Group-entrance stagger for card grids (formats, services, project,
+// partnership stages, start steps): the .reveal/.stagger classes already
+// sat on these in the markup with nothing behind them (see style.css) —
+// team-grid is excluded on purpose, its .reveal children are already
+// driven every frame by the scroll-scrubbed fan-out above. .promo-block
+// and .project-grid's cards ride the same observer but have their own
+// "Marquee Slide-Stop" transform/shimmer in CSS rather than the shared
+// fade-up. The rest of .project's entrance (heading group + CTA) still
+// uses its own separate WAAPI sequence below.
+const staggerRevealEls = Array.from(document.querySelectorAll(blockRevealCardSelector));
 
 const staggerObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
@@ -663,11 +679,13 @@ staggerRevealEls.forEach((el) => staggerObserver.observe(el));
 
 // "Проектная работа за 28 дней" entrance: Web Animations API instead of a
 // CSS transition — one hardware-accelerated element.animate() call per
-// piece (eyebrow, heading, intro, each card, CTA), staggered 70ms apart.
-// Fires once via IntersectionObserver, same as staggerObserver above, just
-// through WAAPI rather than a toggled class. Button hover colors are pure
-// CSS (:hover) and untouched by this — WAAPI here only ever animates
-// opacity/transform, never background or border-color.
+// piece (eyebrow, heading, intro, CTA), staggered 70ms apart. Fires once
+// via IntersectionObserver, same as staggerObserver above, just through
+// WAAPI rather than a toggled class. The three .project-col cards no
+// longer ride this — they now use the same "Marquee Slide-Stop" CSS
+// treatment as .promo-block, via staggerObserver above instead. Button
+// hover colors are pure CSS (:hover) and untouched by this — WAAPI here
+// only ever animates opacity/transform, never background or border-color.
 const projectSection = document.querySelector('.project');
 const projectInner = projectSection ? projectSection.querySelector('.project-inner') : null;
 
@@ -676,7 +694,6 @@ if (projectSection && projectInner) {
     projectSection.querySelector('.section-eyebrow'),
     projectSection.querySelector('h2'),
     projectSection.querySelector('.project-intro'),
-    ...projectSection.querySelectorAll('.project-col'),
     projectSection.querySelector('.project-terms'),
   ].filter(Boolean);
 
@@ -701,10 +718,10 @@ if (projectSection && projectInner) {
         projectParts.forEach((el, i) => {
           el.animate(
             [
-              { opacity: 0, transform: 'translateY(14px)' },
+              { opacity: 0, transform: 'translateY(34px)' },
               { opacity: 1, transform: 'translateY(0)' },
             ],
-            { duration: 460, delay: 140 + i * 70, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
+            { duration: 620, delay: 140 + i * 70, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fill: 'forwards' }
           );
         });
 
@@ -832,9 +849,14 @@ if (foldHeading && !prefersReducedMotionQuery.matches) {
 // Snap), a perspective tilt on something that large reads as broken rather
 // than premium — and it fought .card-hint's positioning (.tilt-card > *
 // resets every direct child to position: relative).
+// .stage-card is excluded: it's now a full-width text row, not a boxed
+// card, so a perspective tilt has no surface to read against.
+// .steps-list li is excluded: it's a wheel/swipe-scrolled carousel card
+// now, and a mousemove-driven perspective tilt fights that horizontal
+// scroll interaction rather than complementing it.
 const tiltEls = Array.from(
   document.querySelectorAll(
-    '.promo-block, .project-col, .stage-card, .steps-list li'
+    '.promo-block, .project-col'
   )
 ).filter((el) => !el.closest('.hero'));
 
@@ -940,23 +962,6 @@ if (servicesGrid) {
       servicesGrid.scrollLeft += e.deltaY;
     }
   }, { passive: false });
-
-  // Blur-mask crossfade (see .services-grid.is-transitioning in style.css):
-  // cards differ in content length, so a bare scroll-snap cut between them
-  // can look like a harder jump than intended. A brief blur while actually
-  // in motion — cleared once scrolling settles — smooths that cut without
-  // slowing the scroll itself. Listens to the native scroll event so it
-  // catches wheel, drag/touch, and scrubber-driven scrolling all at once.
-  if (!prefersReducedMotionQuery.matches) {
-    let servicesBlurTimer = null;
-    servicesGrid.addEventListener('scroll', () => {
-      servicesGrid.classList.add('is-transitioning');
-      clearTimeout(servicesBlurTimer);
-      servicesBlurTimer = setTimeout(() => {
-        servicesGrid.classList.remove('is-transitioning');
-      }, 120);
-    }, { passive: true });
-  }
 }
 
 // Gold scroll scrubber for the services strip: primary scroll control now
@@ -1026,4 +1031,59 @@ if (servicesGrid && servicesScrubberWrap && servicesScrubberThumb) {
     const clamped = Math.max(0, Math.min(trackW - thumbW, x));
     servicesGrid.scrollLeft = (clamped / (trackW - thumbW)) * maxServicesScroll();
   });
+}
+
+// Steps carousel ("Как начать"): same wheel-to-horizontal redirect as the
+// services strip above, plus a gold dot per step showing which one is
+// currently centered — scroll-snap has no way to reflect "which card is
+// focused" back onto a sibling on its own, so script.js tracks it.
+const stepsList = document.querySelector('.steps-list');
+const stepsDots = Array.from(document.querySelectorAll('.steps-dot'));
+
+if (stepsList) {
+  let stepsWheelTimer = null;
+
+  stepsList.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      stepsList.style.scrollSnapType = 'none';
+      clearTimeout(stepsWheelTimer);
+      stepsWheelTimer = setTimeout(() => {
+        stepsList.style.scrollSnapType = '';
+      }, 150);
+      stepsList.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+}
+
+if (stepsList && stepsDots.length) {
+  const stepItems = Array.from(stepsList.children);
+
+  const syncStepsDots = () => {
+    const containerCenter = stepsList.getBoundingClientRect().left + stepsList.clientWidth / 2;
+    let closest = 0;
+    let closestDist = Infinity;
+    stepItems.forEach((item, i) => {
+      const r = item.getBoundingClientRect();
+      const dist = Math.abs(r.left + r.width / 2 - containerCenter);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = i;
+      }
+    });
+    stepsDots.forEach((dot, i) => dot.classList.toggle('is-active', i === closest));
+  };
+
+  let stepsDotsTicking = false;
+  stepsList.addEventListener('scroll', () => {
+    if (!stepsDotsTicking) {
+      stepsDotsTicking = true;
+      requestAnimationFrame(() => {
+        stepsDotsTicking = false;
+        syncStepsDots();
+      });
+    }
+  }, { passive: true });
+  window.addEventListener('resize', syncStepsDots);
+  syncStepsDots();
 }

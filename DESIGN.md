@@ -13,11 +13,11 @@ colors:
   hairline-on-navy: "rgba(242, 242, 232, 0.3)"
 typography:
   display:
-    fontFamily: "Playfair Display, serif"
-    fontSize: "clamp(3rem, 9vh, 6.75rem)"
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: "-0.02em"
+    fontFamily: "Unbounded, sans-serif"
+    fontSize: "clamp(2.4rem, 5.3vw, 7.2rem)"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.015em"
   section-title:
     fontFamily: "Oswald, sans-serif"
     fontSize: "clamp(2.1rem, 5vw, 3.4rem)"
@@ -30,6 +30,10 @@ typography:
     letterSpacing: "-0.02em"
   body:
     fontFamily: "Inter, sans-serif"
+    fontWeight: 400
+    lineHeight: 1.6
+  hero-sub:
+    fontFamily: "Nunito Sans, sans-serif"
     fontWeight: 400
     lineHeight: 1.6
   numeral:
@@ -108,23 +112,23 @@ Two structural surfaces (cream, navy) that swap section by section, one accent s
 
 ## Typography
 
-**Display Font:** Playfair Display (serif, with system serif fallback)
+**Display Font:** Unbounded (geometric sans, used only for the hero headline)
 **Section-Title Font:** Oswald (sans-serif, bold uppercase)
 **Heading Font:** Golos Text (sans-serif)
-**Body Font:** Inter (sans-serif)
+**Body Font:** Inter (sans-serif); the hero subtitle alone runs on Nunito Sans instead
 **Numeral Font:** Jost (sans-serif, used only for the "27.12" logo mark)
 
-**Character:** A magazine-style serif carries the one emotional headline per page; everything else — section titles, body copy, labels — is disciplined sans-serif. The pairing reads as "editorial feature, audit report underneath."
+**Character:** One oversized, bold display headline carries the emotional weight per page; everything else — section titles, body copy, labels — is disciplined and quieter by comparison. The pairing reads as "one confident statement, audit report underneath."
 
 ### Hierarchy
-- **Display** (600, `clamp(3rem, 9vh, 6.75rem)`, line-height 1, Playfair Display): The hero headline only. One italic Brass Gold word inside it carries the emphasis.
+- **Display** (700, `clamp(2.4rem, 5.3vw, 7.2rem)` desktop / `clamp(1.8rem, 10.5vw, 4.4rem)` at ≤900px, line-height 1.05, Unbounded): The hero headline only. One italic Brass Gold word inside it carries the emphasis. Sized against the panel's own width rather than viewport height — Unbounded's glyphs run wide, so the safe ceiling is ~12% of the panel's clientWidth with a margin built in, not a fixed vh scale.
 - **Section-Title** (700, `clamp(2.1rem, 5vw, 3.4rem)`, line-height 0.95, Oswald, uppercase): Every section's `<h2>` ("ТРИ ФОРМАТА РАБОТЫ", "НАЧНИ С ОДНОГО ШАГА"). Centered, max-width 22ch, `text-wrap: balance`.
 - **Heading** (500, Golos Text): Card and column titles (`<h3>`) inside services, team, project, and stage cards.
 - **Body** (400, line-height 1.6, Inter): All paragraph copy. Descriptions inside cards run smaller (~0.9rem) than the hero's lead sentence (~1.15rem).
 - **Label** (700, uppercase, letter-spacing 0.03–0.08em, Golos Text or Oswald depending on context): Eyebrows, service zones, format labels, the header ticker.
 
 ### Named Rules
-**The One Serif Rule.** Playfair Display appears only in the hero headline and its italic accent word. Every other heading on the page is sans-serif — the serif is reserved for the single most important sentence on the site.
+**The One Display Rule.** Unbounded appears only in the hero headline and its italic accent word — nowhere else on the page. Every other heading uses Oswald or Golos Text; the bold display face is reserved for the single most important sentence on the site.
 
 ## Layout
 
@@ -172,7 +176,7 @@ Every main section after the hero wipes into view via `clip-path` as it's scroll
 ### Do:
 - **Do** keep Brass Gold to one emphasis point per screen — a word, a number, a mark.
 - **Do** invert card color against its section's background, every time.
-- **Do** keep section `<h2>` titles in Oswald uppercase; keep Playfair Display exclusive to the hero.
+- **Do** keep section `<h2>` titles in Oswald uppercase; keep Unbounded exclusive to the hero.
 - **Do** leave surfaces flat at rest; only add shadow as hover feedback.
 
 ### Don't:
