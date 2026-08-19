@@ -443,8 +443,15 @@ if (bgRays && !prefersReducedMotionQuery.matches) {
 const teamCardsFlip = Array.from(document.querySelectorAll('.team-card'));
 const teamGridFlip = document.querySelector('.team-grid');
 const teamPinTrack = document.querySelector('.team-pin-track');
+// Single-column mobile drops the whole pin/pile/dissolve sequence — see the
+// long comment on .team-pin-track in style.css for why: the stacked grid is
+// taller than any pin-track budget can hold natively "stuck" for, which
+// kept re-breaking the exit timing no matter how it was patched. Cards are
+// just shown at rest there instead (the `else` branch below, shared with
+// prefers-reduced-motion).
+const isMobileTeamLayout = window.matchMedia('(max-width: 600px)').matches;
 
-if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotionQuery.matches) {
+if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotionQuery.matches && !isMobileTeamLayout) {
   const PILE_DESKTOP = [
     { x: 45, y: 8, r: -8 },
     { x: -4, y: 8, r: 3 },
@@ -564,9 +571,9 @@ if (teamCardsFlip.length && teamGridFlip && teamPinTrack && !prefersReducedMotio
 
   updateTeamFlip();
 } else if (teamGridFlip) {
-  // No flip sequence to gate hover behind when motion is reduced — cards
-  // are shown at rest from the start (see the reduced-motion override in
-  // style.css), so hover should just work immediately.
+  // No flip sequence to gate hover behind when motion is reduced or this is
+  // the single-column mobile layout — cards are shown at rest from the
+  // start (see style.css), so hover should just work immediately.
   teamGridFlip.classList.add('is-settled');
 }
 

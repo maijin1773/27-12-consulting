@@ -2065,44 +2065,29 @@ main > section:not(.hero) {
     font-size: 0.82rem;
   }
 
-  /* Single-column team grid: cards are nearly full-viewport-width AND tall
-     (avatar + text), so bounding-box growth from rotation is dominated by
-     height*sin(angle) — even a modest angle adds real horizontal overflow.
-     Keep both the offset and the angle small, and clip locally here (not
-     on desktop, where it visibly framed/cropped the pile — see the
-     .team-grid rule above) as a second line of defence.
-     No padding here on purpose — .team-grid's own height feeds directly
-     into the sticky-release timing that script.js's exit-dissolve depends
-     on (EXIT_DISTANCE, tuned against .team-pin-track's fixed height).
-     Growing the box by even 40px shifted native CSS sticky's own unstick
-     point earlier than the JS's settle timeline expected, so the exit
-     clip-path could fire before Мария (last card, last to settle) had
-     fully arrived — a bigger, more visible cut-off than the pixel-level
-     overflow clip this rule alone was meant to guard against. Fixed at
-     the source instead: the pile poses below are pulled in slightly so
-     the piled/rotated cards' bounding boxes stay inside .team-grid's
-     natural box without needing extra room. */
-  .team-grid {
-    overflow: hidden;
-  }
-  .team-slot:nth-child(1) .team-card {
-    transform: translate(4%, 3%) rotate(-2.5deg);
-  }
-  .team-slot:nth-child(2) .team-card {
-    transform: translate(-3%, -3%) rotate(2.5deg);
-  }
-  .team-slot:nth-child(3) .team-card {
-    transform: translate(3%, 2%) rotate(-2.5deg);
-  }
-
-  /* Desktop's +1500px of pin-track exists to hold a wide 3-across fan-out
-     on screen for a long, deliberate scroll. Single-column mobile only
-     ever shows the pile settling in place with far smaller offsets (see
-     the poses above) — 1500px here bought 3 empty screens of scroll for
-     no new content. script.js reads offsetHeight every frame, so this
-     needs no JS change. */
+  /* Single-column team grid: three full-height photo+text cards stacked
+     is already a lot of scrolling on its own, and the pin/pile/dissolve
+     choreography this section uses on wider screens turned out to be
+     fundamentally at odds with it — the stacked grid is taller than any
+     reasonable pin-track scroll budget can hold "stuck" for, which kept
+     causing the exit dissolve to clip a card before it had fully arrived
+     (see the git history on this block for two earlier, narrower attempts
+     at patching that). Simplest fix that actually holds up: don't pin or
+     dissolve this section on mobile at all — same fallback already used
+     for prefers-reduced-motion (team-card visibility/transform reset
+     below). Cards are shown at rest, in normal document flow, and stay
+     fully visible instead of piling in and dissolving away. script.js
+     skips the whole flip/exit setup at this breakpoint to match. */
   .team-pin-track {
-    height: calc(100vh + 800px);
+    height: auto;
+  }
+  .team-grid {
+    position: static;
+    padding-bottom: 3rem;
+  }
+  .team-card {
+    visibility: visible;
+    transform: none !important;
   }
 }
 
