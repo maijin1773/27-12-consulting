@@ -691,6 +691,7 @@ main > section:not(.hero) {
   }
   .hero {
     position: relative;
+    top: 0;
     height: auto;
     overflow: visible;
   }
@@ -2136,6 +2137,7 @@ main > section:not(.hero) {
   }
   .hero {
     position: relative;
+    top: 0;
     height: auto;
     overflow: visible;
   }
