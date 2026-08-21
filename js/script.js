@@ -136,23 +136,51 @@ if (heroCta && !prefersReducedMotionQuery.matches) {
   });
 }
 
-// Hero is fully static now (see .hero in style.css) — no more pin/slide/
-// dissolve scroll scrub. heroPinTrack is kept only as the header-condense
-// observer's target just below.
-const heroPinTrack = document.querySelector('.hero-pin-track');
-
 // Header condenses once scrolled fully past the hero — a purely visual
 // transform: scale() on the logo (no padding/font-size change), so it
 // never touches layout or needs --header-h resynced. Signals "you're past
-// the intro" without affecting anything the hero/team pin-tracks depend on.
-if (siteHeader && heroPinTrack) {
+// the intro". Was observing the now-removed .hero-pin-track wrapper
+// (a vestige of the old pin-scroll hero); .hero itself is the section now.
+const heroSection = document.querySelector('.hero');
+
+if (siteHeader && heroSection) {
   const headerCondenseObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       siteHeader.classList.toggle('is-condensed', !entry.isIntersecting);
     });
   }, { threshold: 0 });
 
-  headerCondenseObserver.observe(heroPinTrack);
+  headerCondenseObserver.observe(heroSection);
+}
+
+// Hero entrance: fades/settles in once, shortly after load — unlike every
+// other section's reveal, this content is above the fold from the first
+// paint, so there's nothing to scroll into view. Waits on fonts.ready so
+// the stagger starts once the real (wider) Unbounded glyphs are in,
+// rather than animating in over a fallback font and reflowing under it.
+const heroLoadEls = Array.from(document.querySelectorAll('.hero-load'));
+
+if (heroLoadEls.length) {
+  if (prefersReducedMotionQuery.matches) {
+    heroLoadEls.forEach((el) => { el.style.opacity = '1'; });
+  } else {
+    const playHeroLoad = () => {
+      heroLoadEls.forEach((el, i) => {
+        el.animate(
+          [
+            { opacity: 0, transform: 'translateY(24px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+          { duration: 700, delay: 200 + i * 120, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
+        );
+      });
+    };
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(playHeroLoad);
+    } else {
+      playHeroLoad();
+    }
+  }
 }
 
 // Section curtain-reveal: every main section after the hero wipes down into

@@ -632,90 +632,69 @@ main > section:not(.hero) {
 
 /* ---------- hero ---------- */
 
-/* Static now on every breakpoint — no more pin/slide/dissolve scrub (see
-   script.js, where the whole updateHeroExit sequence was removed after
-   several rounds of trying to make its two independently-driven motions
-   read as one synchronized movement). No extra scroll room needed once
-   nothing pins in place. */
-.hero-pin-track {
-  position: relative;
-  height: auto;
-}
-
-/* Первый экран — во всю ширину окна, ровно пополам, без зазора. At least
-   one viewport tall on desktop (its two-column split usually has room to
-   spare at the current heading size) but no longer a hard height — with
-   the pin/slide gone there's nothing left to reveal content that doesn't
-   fit, so a fixed height + overflow:hidden here just clipped the button
-   whenever the text panel needed more room than exactly one viewport
-   (e.g. a shorter browser window). min-height + visible instead: if
-   content ever needs more room, the section — and, via .hero-panels'
-   grid align-items:stretch below, the photo panel right along with it —
-   simply grows taller instead of cutting anything off. */
+/* Full-bleed photo hero: one <img> covers the whole section, a navy
+   scrim darkens toward the right so the content column stays legible,
+   everything fades/settles in once on page load (see .hero-load and
+   script.js — no scroll dependency at all this time, after a whole run
+   of scroll-linked versions of this section). min-height, not a hard
+   height, and no overflow:hidden on the section itself — if content
+   ever needs more room than one viewport, the section (img included,
+   since it's sized to match via height:100%) simply grows to fit
+   instead of clipping anything, same fix as the previous version needed. */
 .hero {
   position: relative;
-  top: 0;
   min-height: calc(100svh - var(--header-h));
   overflow: visible;
+  /* Override the generic `section` rule's 1200px max-width/centering/
+     padding — this section's photo needs to run truly edge-to-edge,
+     not sit in the same boxed column as every other section. */
   max-width: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
-/* Holds the actual headline/subtitle/button, centered within the
-   .hero-panel-sub frame at rest and free to grow past it if needed. */
-.hero-panel-sub-inner {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-shrink: 0;
-  min-height: 100%;
-  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 4vw, 3.5rem) clamp(3rem, 8vh, 5.5rem);
-}
-
-/* No prefers-reduced-motion override needed for the hero any more — it's
-   static on every breakpoint by default now, same experience for
-   everyone regardless of motion preference. */
-
-
-.hero-panels {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  align-items: stretch;
-  gap: 0;
-  min-height: calc(100svh - var(--header-h));
-}
-
-.hero-panel {
-  border-radius: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-panel-photo {
-  position: relative;
-  border: none;
-}
-
-/* Светлая подложка сверху — чтобы тёмный текст логотипа читался поверх любого снимка */
-.hero-panel-photo::after {
-  content: "";
+.hero-bg {
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 30%;
-  background: linear-gradient(to bottom, rgba(242, 242, 232, 0.65), rgba(242, 242, 232, 0));
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Source photo is a tall 900x1600 portrait with the subjects' faces
+     near the top; the hero box is short and wide, so cover crops to a
+     thin horizontal band. Anchoring near the top keeps faces in frame
+     instead of centering on torsos/hands. */
+  object-position: 35% 12%;
+  display: block;
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 34%, rgba(40, 56, 100, 0.42) 55%, rgba(40, 56, 100, 0.84) 100%);
   pointer-events: none;
 }
 
 .hero-logo-lockup {
   position: absolute;
-  z-index: 1;
-  right: clamp(3.5rem, 7vw, 5.5rem);
+  z-index: 2;
+  left: clamp(1.5rem, 4vw, 3rem);
   top: clamp(1.5rem, 3vw, 2.25rem);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+}
+
+/* Soft light patch behind the hand-written mark only (not a full-width
+   band any more, now that it sits in a corner of a full-bleed photo
+   instead of above a dedicated photo panel) — keeps it legible
+   regardless of what's directly behind it in the source image. */
+.hero-logo-lockup::before {
+  content: "";
+  position: absolute;
+  inset: -1rem -1.5rem;
+  background: radial-gradient(ellipse at 30% 30%, rgba(242, 242, 232, 0.55), transparent 70%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Логотип, "прописывающийся" от руки: каждый символ — свой tspan
@@ -852,50 +831,37 @@ main > section:not(.hero) {
   }
 }
 
-.hero-panel-photo img {
-  display: block;
-  position: absolute;
-  /* Sized taller than its frame (clipped by .hero-panel's own
-     overflow:hidden) instead of exactly inset:0, so script.js can
-     translateY it upward in lockstep with the text panel's own slide —
-     same transform property, same progress value, same exact SYNC_PX
-     pixel distance — without ever exposing an empty gap at the bottom.
-     8% of even a short ~600px-tall hero is 48px, comfortably more than
-     the fixed 42px script.js ever applies. Anchored fully to the top at
-     rest so nothing is ever cropped off the models' heads. */
-  top: -8%;
-  left: 0;
-  right: 0;
-  height: 116%;
-  width: 100%;
-  object-fit: cover;
-  object-position: 50% 0%;
-}
-
-.hero-panel-sub {
+/* Text column: right-anchored over the scrim, sized against its own
+   max-width (620px) rather than a half-viewport panel now — see the
+   headline's own comment below for how that's fitted. */
+.hero-content {
   position: relative;
-  overflow: visible;
-  background: var(--card-bg);
+  z-index: 2;
+  min-height: calc(100svh - var(--header-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1.25rem;
+  max-width: 620px;
+  margin-left: auto;
+  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 4rem);
   color: var(--accent);
 }
 
-/* Unbounded's glyphs run far wider per character than Playfair Display's
-   (the font this size scale was originally tuned for), so the old
-   vh-based clamp badly overflowed the panel — vh also stopped tracking
-   the actual constraint once panels stack to full-width on mobile at
-   900px (width, not height, becomes the limit there). Sized empirically
-   against the panel's own clientWidth instead: the longest word
-   ("управляемой") fits at roughly 12.1% of the panel's width at every
-   breakpoint tested, so these clamps use vw at ~87% of that fitted ratio
-   for a safety margin. */
+/* Sized empirically (binary search per viewport, see fit-new-headline.js)
+   against .hero-content's own max-width (620px minus padding), not a
+   half-viewport panel. Above 900px the column's width barely moves
+   (492-530px, capped by max-width) so a flat size with safety margin
+   under the measured 38-41px fit is enough — no vw scaling needed. */
 .hero-panel-headline {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(2.4rem, 5.3vw, 7.2rem);
-  line-height: 1.05;
+  font-size: 2.1rem;
+  line-height: 1.08;
   letter-spacing: -0.015em;
   text-wrap: balance;
-  margin-bottom: clamp(2.5rem, 11vh, 5.5rem);
+  margin: 0;
 }
 
 .hero-panel-headline em {
@@ -908,11 +874,11 @@ main > section:not(.hero) {
   font-family: 'Nunito Sans', var(--font-body);
   font-weight: 400;
   color: var(--muted-on-card);
-  font-size: 1.35rem;
-  line-height: 1.45;
+  font-size: 1.15rem;
+  line-height: 1.5;
   max-width: 42ch;
   text-align: right;
-  margin-left: auto;
+  margin: 0;
 }
 
 .hero-sub .sub-underline {
@@ -925,8 +891,16 @@ main > section:not(.hero) {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: auto;
-  padding-top: clamp(1.5rem, 3.5vh, 2.25rem);
+  margin: 0;
+}
+
+/* On-load entrance (script.js) instead of any scroll trigger — the whole
+   block is above the fold from the first paint, so it fades/settles in
+   once, shortly after load, rather than waiting on scroll like every
+   other section's reveal. Resting opacity 0 here just prevents a flash
+   of fully-visible content before JS runs. */
+.hero-load {
+  opacity: 0;
 }
 
 /* ---------- who ---------- */
@@ -2077,41 +2051,36 @@ main > section:not(.hero) {
 /* ---------- responsive ---------- */
 
 @media (max-width: 900px) {
-  /* Hero is static on every breakpoint now (see the base .hero rule) —
-     this block only covers what's still genuinely mobile-specific: panels
-     stack instead of sitting side-by-side, so .hero itself needs to size
-     to its stacked content instead of staying clipped to one viewport,
-     and the photo needs its own intrinsic proportion instead of
-     stretching to fill a shared fixed-height row. */
-  .hero {
-    min-height: 0;
-    height: auto;
-    overflow: visible;
+  /* No side column of empty background to anchor text against on a
+     narrow crop — content spans full width instead, bottom-anchored over
+     a stronger scrim, closer to how a full-bleed mobile hero usually
+     reads. object-position shifts the crop toward wherever the subjects
+     sit in the frame instead of centering (adjust once the real photo is
+     in — this is tuned for a subject positioned left-of-center). */
+  .hero-bg {
+    object-position: 35% 12%;
   }
-  .hero-panels {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
-    min-height: 0;
-    height: auto;
+  .hero-scrim {
+    background: linear-gradient(180deg, transparent 35%, rgba(40, 56, 100, 0.55) 68%, rgba(40, 56, 100, 0.92) 100%);
   }
-  /* No shared fixed-height frame to fill anymore, so the photo needs its
-     own intrinsic proportion instead of stretching to 100% of a row. */
-  .hero-panel-photo {
-    aspect-ratio: 4 / 5;
-    width: 100%;
-    height: auto;
+  .hero-content {
+    max-width: none;
+    margin-left: 0;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 1.5rem 1.25rem 2.5rem;
+    gap: 1rem;
   }
-  .hero-panel-sub {
-    overflow: visible;
-  }
-  .hero-panel-sub-inner {
-    min-height: 0;
-    transform: none !important;
-  }
-  /* Panel is full-width now (see .hero-panel-headline's own comment above
-     for why vh stopped being the right unit once panels stack). */
   .hero-panel-headline {
-    font-size: clamp(1.8rem, 10.5vw, 4.4rem);
+    /* Below 900px .hero-content goes full-width, so available width scales
+       with viewport again; fit against 5.2vw keeps ~76-92% margin under
+       the measured curve (peaks near 820px where the column is widest
+       just before the breakpoint). */
+    font-size: clamp(1rem, 5.2vw, 2.4rem);
+  }
+  .hero-sub {
+    text-align: left;
+    max-width: none;
   }
   .site-header {
     grid-template-columns: 1fr auto;
