@@ -1,20 +1,3 @@
-// Keep --header-h in sync with the sticky header, so the hero can fill exactly
-// the rest of the first screen: min-height: calc(100svh - var(--header-h)).
-const siteHeader = document.querySelector('.site-header');
-
-if (siteHeader) {
-  const syncHeaderHeight = () => {
-    const h = Math.round(siteHeader.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--header-h', h + 'px');
-  };
-
-  syncHeaderHeight();
-  window.addEventListener('resize', syncHeaderHeight);
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(syncHeaderHeight);
-  }
-}
-
 // Reading-progress hairline: width tracks overall scroll position directly,
 // no easing — it's a 1:1 readout of where you are on the page, not a
 // decorative animation, so it stays accurate every frame rather than
@@ -134,23 +117,6 @@ if (heroCta && !prefersReducedMotionQuery.matches) {
   ['mousemove', 'scroll', 'keydown', 'touchstart'].forEach((evt) => {
     window.addEventListener(evt, resetCtaIdleTimer, { passive: true });
   });
-}
-
-// Header condenses once scrolled fully past the hero — a purely visual
-// transform: scale() on the logo (no padding/font-size change), so it
-// never touches layout or needs --header-h resynced. Signals "you're past
-// the intro". Was observing the now-removed .hero-pin-track wrapper
-// (a vestige of the old pin-scroll hero); .hero itself is the section now.
-const heroSection = document.querySelector('.hero');
-
-if (siteHeader && heroSection) {
-  const headerCondenseObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      siteHeader.classList.toggle('is-condensed', !entry.isIntersecting);
-    });
-  }, { threshold: 0 });
-
-  headerCondenseObserver.observe(heroSection);
 }
 
 // Hero entrance: fades/settles in once, shortly after load — unlike every
@@ -803,7 +769,7 @@ tiltEls.forEach((el) => {
   });
 });
 
-// Full-screen overlay menu, toggled from the header burger button.
+// Full-screen overlay menu, toggled from the floating burger button.
 const menuToggle = document.querySelector('.menu-toggle');
 const siteMenu = document.getElementById('site-menu');
 
