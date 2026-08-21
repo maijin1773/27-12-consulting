@@ -642,27 +642,28 @@ main > section:not(.hero) {
   height: auto;
 }
 
-/* Первый экран — во всю ширину окна, ровно пополам, без зазора. Still
-   exactly one viewport tall on desktop (its two-column split has room to
-   spare at the current heading size), just no longer sticky — it scrolls
-   away with the page like any other section. */
+/* Первый экран — во всю ширину окна, ровно пополам, без зазора. At least
+   one viewport tall on desktop (its two-column split usually has room to
+   spare at the current heading size) but no longer a hard height — with
+   the pin/slide gone there's nothing left to reveal content that doesn't
+   fit, so a fixed height + overflow:hidden here just clipped the button
+   whenever the text panel needed more room than exactly one viewport
+   (e.g. a shorter browser window). min-height + visible instead: if
+   content ever needs more room, the section — and, via .hero-panels'
+   grid align-items:stretch below, the photo panel right along with it —
+   simply grows taller instead of cutting anything off. */
 .hero {
   position: relative;
   top: 0;
-  height: calc(100svh - var(--header-h));
-  overflow: hidden;
+  min-height: calc(100svh - var(--header-h));
+  overflow: visible;
   max-width: none;
   padding: 0;
   margin: 0;
 }
 
-.hero-panels {
-  height: 100%;
-}
-
-
-/* Holds the actual headline/subtitle/button, centered within the fixed
-   .hero-panel-sub frame. */
+/* Holds the actual headline/subtitle/button, centered within the
+   .hero-panel-sub frame at rest and free to grow past it if needed. */
 .hero-panel-sub-inner {
   display: flex;
   flex-direction: column;
@@ -683,7 +684,6 @@ main > section:not(.hero) {
   align-items: stretch;
   gap: 0;
   min-height: calc(100svh - var(--header-h));
-  overflow: hidden;
 }
 
 .hero-panel {
@@ -874,7 +874,7 @@ main > section:not(.hero) {
 
 .hero-panel-sub {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   background: var(--card-bg);
   color: var(--accent);
 }
@@ -2084,6 +2084,7 @@ main > section:not(.hero) {
      and the photo needs its own intrinsic proportion instead of
      stretching to fill a shared fixed-height row. */
   .hero {
+    min-height: 0;
     height: auto;
     overflow: visible;
   }
