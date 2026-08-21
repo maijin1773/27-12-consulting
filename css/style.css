@@ -1553,22 +1553,13 @@ main > section:not(.hero) {
   text-align: center;
 }
 
-/* On the navy .project section gold reads the way it does everywhere
-   else we put it on a dark ground (.stage-time, the ticker dot) — the
-   base rule below keeps ink instead, since gold-on-cream is the same
-   low-contrast problem the hero wordmark had (see its own fix). */
 .project .section-eyebrow {
-  color: var(--gold);
+  color: var(--accent);
 }
 
-/* Eyebrow reads as a small confident heading in its own right — bold,
-   sized closer to a heading than a whisper-tag, natural letter-spacing
-   instead of heavily tracked-out — rather than a tiny quiet label. */
 .section-eyebrow {
-  font-family: var(--font-display);
-  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--ink);
   margin-bottom: 0.75rem;
