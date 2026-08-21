@@ -659,18 +659,20 @@ main > section:not(.hero) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Source photo is a tall 900x1600 portrait with the subjects' faces
-     near the top; the hero box is short and wide, so cover crops to a
-     thin horizontal band. Anchoring near the top keeps faces in frame
-     instead of centering on torsos/hands. */
-  object-position: 35% 12%;
+  /* Source photo is a wide 2048x1152 shot: the two subjects sit in
+     roughly the left 40% (faces around 30-40% down), the rest is open
+     warm-grey negative space. Whether cover crops width or height
+     depends on the box's own aspect ratio at a given viewport, so
+     anchor toward the subjects' actual position (not plain center) to
+     keep them in frame either way. */
+  object-position: 28% 38%;
   display: block;
 }
 
 .hero-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 34%, rgba(40, 56, 100, 0.42) 55%, rgba(40, 56, 100, 0.84) 100%);
+  background: linear-gradient(100deg, transparent 26%, rgba(40, 56, 100, 0.68) 50%, rgba(40, 56, 100, 0.94) 100%);
   pointer-events: none;
 }
 
@@ -2054,12 +2056,10 @@ main > section:not(.hero) {
   /* No side column of empty background to anchor text against on a
      narrow crop — content spans full width instead, bottom-anchored over
      a stronger scrim, closer to how a full-bleed mobile hero usually
-     reads. object-position shifts the crop toward wherever the subjects
-     sit in the frame instead of centering (adjust once the real photo is
-     in — this is tuned for a subject positioned left-of-center). */
-  .hero-bg {
-    object-position: 35% 12%;
-  }
+     reads. Photo is wide (2048x1152) so on phone-aspect boxes cover
+     always crops horizontally, never vertically — the base .hero-bg
+     object-position's X value already centers on the subjects, no
+     mobile-specific override needed. */
   .hero-scrim {
     background: linear-gradient(180deg, transparent 35%, rgba(40, 56, 100, 0.55) 68%, rgba(40, 56, 100, 0.92) 100%);
   }
