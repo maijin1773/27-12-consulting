@@ -246,16 +246,14 @@ if (heroExitSection && heroPinTrack && heroPanelSubInner && heroPanelSub && !pre
     heroPanelSubInner.style.transform = `translateY(${-(SYNC_PX + slideMax) * slideProgress}px)`;
 
     // Photo now moves via the same transform/translateY property as the
-    // text panel, at the same progress — not the subtler object-position
-    // pan this used to be — so both halves read as one synchronized
-    // motion instead of two different mechanisms. Percentage-based (~5%
-    // of the img's own height, comparable in scale to the text panel's
-    // SYNC_PX on a typical viewport) so it stays safely inside the 6%
-    // margin baked into .hero-panel-photo img regardless of actual
-    // viewport height, rather than a fixed px amount that could exceed a
-    // short viewport's smaller margin.
+    // text panel, at the same progress AND the exact same SYNC_PX pixel
+    // distance — not just a comparable percentage-based approximation —
+    // so there's no residual gap between the two even a few px wide.
+    // .hero-panel-photo img is sized well past this in CSS (8% margin,
+    // comfortably more than 42px on any realistic viewport height) so it
+    // never exposes a gap at the bottom.
     if (heroPanelPhotoImg) {
-      heroPanelPhotoImg.style.transform = `translateY(${-slideProgress * 5}%)`;
+      heroPanelPhotoImg.style.transform = `translateY(${-SYNC_PX * slideProgress}px)`;
     }
 
     const dissolveProgress = Math.min(Math.max((overall - HOLD) / (1 - HOLD), 0), 1);

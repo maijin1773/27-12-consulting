@@ -905,14 +905,15 @@ main > section:not(.hero) {
   /* Sized taller than its frame (clipped by .hero-panel's own
      overflow:hidden) instead of exactly inset:0, so script.js can
      translateY it upward in lockstep with the text panel's own slide —
-     same transform property, same progress value — without ever exposing
-     an empty gap at the bottom. The 6% margin this buys is comfortably
-     more than the ~5% translateY script.js ever applies. Anchored fully
-     to the top at rest so nothing is ever cropped off the models' heads. */
-  top: -6%;
+     same transform property, same progress value, same exact SYNC_PX
+     pixel distance — without ever exposing an empty gap at the bottom.
+     8% of even a short ~600px-tall hero is 48px, comfortably more than
+     the fixed 42px script.js ever applies. Anchored fully to the top at
+     rest so nothing is ever cropped off the models' heads. */
+  top: -8%;
   left: 0;
   right: 0;
-  height: 112%;
+  height: 116%;
   width: 100%;
   object-fit: cover;
   object-position: 50% 0%;
