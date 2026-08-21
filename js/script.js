@@ -233,17 +233,29 @@ if (heroExitSection && heroPinTrack && heroPanelSubInner && heroPanelSub && !pre
 
     const holdProgress = Math.min(overall / HOLD, 1);
     const slideProgress = Math.min(holdProgress / SLIDE_PORTION, 1);
+    // Text used to only move when its own content overflowed the frame
+    // (slideMax > 0), which is 0 on most desktop viewports — the photo's
+    // object-position pan was then the only thing visibly moving, reading
+    // as one half drifting on its own. SYNC_PX is a floor so both panels
+    // always move the same guaranteed distance together; slideMax still
+    // adds extra travel on top for the rare short-viewport case where the
+    // headline alone needs more room to fully reveal the subtitle/button.
+    const SYNC_PX = 42;
     const slideMax = Math.max(0, heroPanelSubInner.scrollHeight - heroPanelSub.clientHeight);
     heroPanelSubInner.classList.toggle('is-tall', slideMax > 0);
-    heroPanelSubInner.style.transform = slideMax > 0 ? `translateY(${-slideMax * slideProgress}px)` : '';
+    heroPanelSubInner.style.transform = `translateY(${-(SYNC_PX + slideMax) * slideProgress}px)`;
 
-    // Photo pans in step with the text panel's slide (same slideProgress)
-    // so both halves of the hero visibly move together instead of only
-    // the text side reacting to scroll. Stays anchored at the top at
-    // rest (object-position 50% 0% in CSS — nothing is ever cropped off
-    // the models' heads) and only ever pans further down from there.
+    // Photo now moves via the same transform/translateY property as the
+    // text panel, at the same progress — not the subtler object-position
+    // pan this used to be — so both halves read as one synchronized
+    // motion instead of two different mechanisms. Percentage-based (~5%
+    // of the img's own height, comparable in scale to the text panel's
+    // SYNC_PX on a typical viewport) so it stays safely inside the 6%
+    // margin baked into .hero-panel-photo img regardless of actual
+    // viewport height, rather than a fixed px amount that could exceed a
+    // short viewport's smaller margin.
     if (heroPanelPhotoImg) {
-      heroPanelPhotoImg.style.objectPosition = `50% ${slideProgress * 22}%`;
+      heroPanelPhotoImg.style.transform = `translateY(${-slideProgress * 5}%)`;
     }
 
     const dissolveProgress = Math.min(Math.max((overall - HOLD) / (1 - HOLD), 0), 1);

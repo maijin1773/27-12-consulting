@@ -902,13 +902,19 @@ main > section:not(.hero) {
 .hero-panel-photo img {
   display: block;
   position: absolute;
-  inset: 0;
+  /* Sized taller than its frame (clipped by .hero-panel's own
+     overflow:hidden) instead of exactly inset:0, so script.js can
+     translateY it upward in lockstep with the text panel's own slide —
+     same transform property, same progress value — without ever exposing
+     an empty gap at the bottom. The 6% margin this buys is comfortably
+     more than the ~5% translateY script.js ever applies. Anchored fully
+     to the top at rest so nothing is ever cropped off the models' heads. */
+  top: -6%;
+  left: 0;
+  right: 0;
+  height: 112%;
   width: 100%;
-  height: 100%;
   object-fit: cover;
-  /* Anchored fully to the top so nothing is ever cropped off the models'
-     heads — script.js pans this downward in sync with the text panel's
-     slide, so both sides of the hero visibly move together on scroll. */
   object-position: 50% 0%;
 }
 
