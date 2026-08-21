@@ -751,12 +751,17 @@ main > section:not(.hero) {
    half-viewport panel. Above 900px the column's width barely moves
    (492-530px, capped by max-width) so a flat size with safety margin
    under the measured 38-41px fit is enough — no vw scaling needed. */
+/* Weight/leading modeled on shustraya.ru/design's hero: a huge headline
+   at regular weight with tight line-height reads as more confident than
+   a smaller bold one — scale carries it instead of font-weight. Sizes
+   are fitted empirically per breakpoint (see fit-headline-v2.js) against
+   .hero-content's own column width, same method as before. */
 .hero-panel-headline {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 2.1rem;
-  line-height: 1.08;
-  letter-spacing: -0.015em;
+  font-weight: 400;
+  font-size: 2.4rem;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   margin: 0;
 }
@@ -1968,10 +1973,10 @@ main > section:not(.hero) {
   }
   .hero-panel-headline {
     /* Below 900px .hero-content goes full-width, so available width scales
-       with viewport again; fit against 5.2vw keeps ~76-92% margin under
-       the measured curve (peaks near 820px where the column is widest
-       just before the breakpoint). */
-    font-size: clamp(1rem, 5.2vw, 2.4rem);
+       with viewport again; fit against 6vw keeps ~77-84% margin under the
+       measured curve (peaks near 820px where the column is widest just
+       before the breakpoint). */
+    font-size: clamp(1.15rem, 6vw, 2.7rem);
   }
   .hero-sub {
     text-align: left;
