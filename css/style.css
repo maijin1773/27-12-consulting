@@ -632,32 +632,28 @@ main > section:not(.hero) {
 
 /* ---------- hero ---------- */
 
-/* Extra scroll room below the hero's own height so it can sit pinned
-   (.hero below is sticky) while the dissolve plays out in place, rather
-   than dissolving while also scrolling away — see script.js. The first
-   HOLD fraction of this room is: a bit of scroll that slides
-   .hero-panel-sub-inner up to reveal the subtitle/button (its content can
-   be taller than one screen at wide-short viewports — the large headline
-   alone can exceed the available height), then a held pause once it's
-   all visible, then the dissolve starts. */
+/* Static now on every breakpoint — no more pin/slide/dissolve scrub (see
+   script.js, where the whole updateHeroExit sequence was removed after
+   several rounds of trying to make its two independently-driven motions
+   read as one synchronized movement). No extra scroll room needed once
+   nothing pins in place. */
 .hero-pin-track {
   position: relative;
-  height: calc(100svh - var(--header-h) + 190vh);
+  height: auto;
 }
 
-/* Первый экран — во всю ширину окна, ровно пополам, без зазора. Fixed to
-   exactly one screen (not min-height) so it pins in place instead of
-   scrolling away — see .hero-panel-sub-inner below for how taller content
-   still gets fully seen. */
+/* Первый экран — во всю ширину окна, ровно пополам, без зазора. Still
+   exactly one viewport tall on desktop (its two-column split has room to
+   spare at the current heading size), just no longer sticky — it scrolls
+   away with the page like any other section. */
 .hero {
-  position: sticky;
-  top: var(--header-h);
+  position: relative;
+  top: 0;
   height: calc(100svh - var(--header-h));
   overflow: hidden;
   max-width: none;
   padding: 0;
   margin: 0;
-  will-change: clip-path;
 }
 
 .hero-panels {
@@ -665,9 +661,8 @@ main > section:not(.hero) {
 }
 
 
-/* Holds the actual headline/subtitle/button — script.js slides this
-   vertically during the pin track's hold phase when it's taller than the
-   fixed .hero-panel-sub frame, instead of anything being clipped away. */
+/* Holds the actual headline/subtitle/button, centered within the fixed
+   .hero-panel-sub frame. */
 .hero-panel-sub-inner {
   display: flex;
   flex-direction: column;
@@ -677,52 +672,10 @@ main > section:not(.hero) {
   padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 4vw, 3.5rem) clamp(3rem, 8vh, 5.5rem);
 }
 
-/* When the content is taller than the frame, centering an overflow would
-   crop the headline's top by the same amount as the button's bottom —
-   start from the top instead, so script.js's slide is the only thing that
-   ever moves it. */
-.hero-panel-sub-inner.is-tall {
-  justify-content: flex-start;
-}
+/* No prefers-reduced-motion override needed for the hero any more — it's
+   static on every breakpoint by default now, same experience for
+   everyone regardless of motion preference. */
 
-@media (prefers-reduced-motion: reduce) {
-  .hero-pin-track {
-    height: auto;
-  }
-  .hero {
-    position: relative;
-    top: 0;
-    height: auto;
-    overflow: visible;
-  }
-  .hero-panels {
-    height: auto;
-    min-height: calc(100svh - var(--header-h));
-  }
-  .hero-panel-sub {
-    overflow: visible;
-  }
-  .hero-panel-sub-inner {
-    transform: none !important;
-  }
-}
-
-/* Organic dissolve boundary + its glowing seam (hero only) — see
-   #hero-dissolve-mask in index.html and the dissolve helper in script.js.
-   Hidden by default; JS raises opacity only while the section is actively
-   dissolving out on scroll. */
-.dissolve-glow {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 64px;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, var(--gold) 45%, var(--gold) 55%, transparent);
-  filter: url(#dissolve-noise) blur(10px);
-  opacity: 0;
-  mix-blend-mode: screen;
-  z-index: 5;
-}
 
 .hero-panels {
   display: grid;
@@ -2124,27 +2077,13 @@ main > section:not(.hero) {
 /* ---------- responsive ---------- */
 
 @media (max-width: 900px) {
-  /* The desktop hero pins in place (position: sticky) while script.js
-     scrubs three things off scroll progress: the text panel's content
-     sliding internally, the photo's object-position panning, and the
-     dissolve-out mask — tuned for the side-by-side desktop split, where
-     both panels share the same fixed frame height and the photo pan is
-     the visible "other half" of the motion. Once panels stack here, the
-     navy panel's own content (headline + subtitle + button) usually
-     exceeds its share of one viewport, so the internal slide has real
-     distance to travel and reads as scrolling on its own, while the
-     photo's pan is comparatively tiny — the two halves visibly decouple
-     instead of moving together. Same call as the team section's mobile
-     fallback below: don't tune the desktop-shaped scrub to fit, drop it
-     entirely and let the hero scroll away like a normal static block
-     (script.js skips the whole pin/slide/dissolve setup at this
-     breakpoint to match). */
-  .hero-pin-track {
-    height: auto;
-  }
+  /* Hero is static on every breakpoint now (see the base .hero rule) —
+     this block only covers what's still genuinely mobile-specific: panels
+     stack instead of sitting side-by-side, so .hero itself needs to size
+     to its stacked content instead of staying clipped to one viewport,
+     and the photo needs its own intrinsic proportion instead of
+     stretching to fill a shared fixed-height row. */
   .hero {
-    position: relative;
-    top: 0;
     height: auto;
     overflow: visible;
   }

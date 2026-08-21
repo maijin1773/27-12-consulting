@@ -16,23 +16,6 @@
 <div id="bg-rays" aria-hidden="true"></div>
 <div id="scroll-progress" aria-hidden="true"></div>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <filter id="dissolve-noise" x="-25%" y="-25%" width="150%" height="150%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="3" seed="11" result="noise" />
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="70" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-    <!-- Two shapes per mask: a plain, unfiltered "core" rect that always keeps
-         the top/left/right edges perfectly straight (they never dissolve),
-         and a thin "band" rect — only this one gets the noise filter — that
-         rides the current boundary so just that seam turns organic. -->
-    <mask id="hero-dissolve-mask" maskUnits="userSpaceOnUse">
-      <rect id="hero-dissolve-core" x="0" y="0" width="0" height="0" fill="#fff" />
-      <rect id="hero-dissolve-band" x="0" y="0" width="0" height="0" fill="#fff" filter="url(#dissolve-noise)" />
-    </mask>
-  </defs>
-</svg>
-
 <header class="site-header">
   <a href="#top" class="logo"><span class="logo-num">27.12</span><span class="logo-word">Consulting</span></a>
   <div class="header-ticker">
@@ -101,7 +84,6 @@
         </div>
       </div>
     </div>
-    <div class="dissolve-glow" aria-hidden="true"></div>
   </section>
   </div>
 
