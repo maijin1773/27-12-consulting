@@ -12,6 +12,33 @@
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Hero photo duotone: shadows map to --card-bg (#283864), highlights to --gold (#d4a748).
+         SVG filter primitives can't read CSS custom properties, so these table values are the
+         same hex converted to 0-1 fractions — keep in sync with :root if those tokens change. -->
+    <filter id="hero-duotone" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0" result="hero-duotone-gray"/>
+      <!-- Gamma-compress before the duotone lookup: the source photo's studio
+           backdrop sits very bright (~0.8+ gray), which a plain 2-stop table
+           would push straight to solid gold and read as a flat color fill
+           rather than a graded photo. Exponent 2.6 pulls highlights toward
+           the midtone so the backdrop picks up navy too, keeping gold for
+           the actual lit highlights instead of the whole background. -->
+      <feComponentTransfer in="hero-duotone-gray" result="hero-duotone-gamma">
+        <feFuncR type="gamma" amplitude="1" exponent="1.8" offset="0"/>
+        <feFuncG type="gamma" amplitude="1" exponent="1.8" offset="0"/>
+        <feFuncB type="gamma" amplitude="1" exponent="1.8" offset="0"/>
+      </feComponentTransfer>
+      <feComponentTransfer in="hero-duotone-gamma">
+        <feFuncR type="table" tableValues="0.1569 0.8314"/>
+        <feFuncG type="table" tableValues="0.2196 0.6549"/>
+        <feFuncB type="table" tableValues="0.3922 0.2824"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+</svg>
+
 <div id="bg-wash" aria-hidden="true"></div>
 <div id="bg-rays" aria-hidden="true"></div>
 <div id="scroll-progress" aria-hidden="true"></div>
@@ -50,7 +77,7 @@
       <h2 class="hero-panel-headline hero-load">От текущих продаж к <em>управляемой</em> чистой прибыли</h2>
       <p class="hero-sub hero-load">Бюро для fashion-брендов, которые уже продают на маркетплейсах и хотят <span class="sub-underline">управлять результатом</span>, а не реагировать на него.</p>
       <div class="hero-actions hero-load">
-        <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-on-navy">Обсудить проект</a>
+        <a href="https://t.me/Nadezhda_97" target="_blank" rel="noopener" class="btn btn-gold">Обсудить проект</a>
       </div>
     </div>
   </section>

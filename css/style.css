@@ -484,6 +484,21 @@ main > section:not(.hero) {
   color: var(--navy-text);
 }
 
+/* Hero-only variant: gold fill on the duotone hero, since a cream button
+   here reads flat against the photo's own cream/gold tones. This is a
+   deliberate, scoped exception to DESIGN.md's "gold is never a button
+   fill" rule for this one hero CTA — not a green light to reuse it
+   elsewhere. */
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212, 167, 72, 0.35);
+}
+
 .btn:active {
   transform: scale(0.97);
   transition: transform 100ms ease-out;
@@ -566,12 +581,23 @@ main > section:not(.hero) {
      keep them in frame either way. */
   object-position: 28% 38%;
   display: block;
+  filter: url(#hero-duotone);
 }
 
+/* Two layers doing two different jobs, not one gradient trying to do both:
+   the radial vignette pushes the photo's own bright, mostly-empty backdrop
+   (see .hero-bg's object-position comment — subjects sit around 28% 38%)
+   toward navy at the edges/corners, independent of the duotone filter's
+   per-pixel luminance mapping — a gamma curve alone couldn't knock back
+   that backdrop without also washing gold out of the subjects themselves.
+   The linear layer is the original bottom-anchored fade, kept for text
+   legibility under the content column. */
 .hero-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 26%, rgba(40, 56, 100, 0.68) 50%, rgba(40, 56, 100, 0.94) 100%);
+  background:
+    radial-gradient(120% 95% at 24% 42%, transparent 28%, rgba(40, 56, 100, 0.5) 62%, rgba(40, 56, 100, 0.88) 100%),
+    linear-gradient(180deg, transparent 35%, rgba(40, 56, 100, 0.35) 68%, rgba(40, 56, 100, 0.85) 100%);
   pointer-events: none;
 }
 
@@ -737,11 +763,10 @@ main > section:not(.hero) {
   min-height: calc(100svh - var(--header-h));
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-end;
+  justify-content: flex-end;
+  align-items: flex-start;
   gap: 1.25rem;
   max-width: 620px;
-  margin-left: auto;
   padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 4rem);
   color: var(--accent);
 }
@@ -779,7 +804,7 @@ main > section:not(.hero) {
   font-size: 1.15rem;
   line-height: 1.5;
   max-width: 42ch;
-  text-align: right;
+  text-align: left;
   margin: 0;
 }
 
