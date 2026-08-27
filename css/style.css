@@ -9,14 +9,27 @@
   --border-card: rgba(242, 242, 232, 0.3);
   --ink-soft: #3d4e7f;
   --navy-text: #f2f2e8;
-  --gold: #d4a748;
-  --font-display: 'Unbounded', sans-serif;
+  --gold: #b98755;
+  --font-display: 'Manrope', sans-serif;
   --font-numerals: 'Jost', sans-serif;
   --font-heading: 'Golos Text', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-title: 'Oswald', sans-serif;
   --gap: clamp(1.5rem, 4vw, 3rem);
   --radius: 6px;
+  /* Type scale (desktop/laptop) — every non-heading font-size on the site
+     should reference one of these instead of a one-off rem value. Section
+     h2 headings (and the hero headline) stay on their own per-section
+     clamp() formulas, already consistent with each other; this scale
+     covers everything smaller: labels, chips, buttons, descriptions, card
+     h3s. Values were chosen to match a standard 12/14/16/18/20/22px web
+     scale rather than the ad-hoc 0.72–0.95rem spread that was here before. */
+  --text-xs: 0.75rem;   /* 12px — smallest captions/prices (format-price, format-link, terms-col h3) */
+  --text-sm: 0.875rem;  /* 14px — chips/tags, eyebrows, small buttons, category labels */
+  --text-base: 1rem;    /* 16px — buttons, gold pills, step text, hero subtitle */
+  --text-md: 1.125rem;  /* 18px — card descriptions (team/service) */
+  --text-lg: 1.25rem;   /* 20px — project intro, numeral badges */
+  --text-xl: 1.4rem;    /* 22.4px — card h3 headings (format-tile, stage-card, price-num) */
   /* No header bar anymore (removed in favor of a floating burger only) —
      kept at 0 rather than deleted outright, since a handful of sections
      still reference it in calc() for spacing that used to clear a fixed
@@ -30,8 +43,17 @@
   padding: 0;
 }
 
+/* overflow-x here in addition to body's — several reveal animations
+   (.project-col's slide-in among them) sit translateX()'d off-screen
+   before their IntersectionObserver fires, and that pre-animation offset
+   counts toward the page's scrollable width. body alone doesn't reliably
+   suppress that on iOS Safari, where <html> is the actual scrolling
+   root — without this, the page gets a few extra px of real horizontal
+   scroll site-wide (visible as a sliver on the right edge) even while
+   nowhere near the section causing it. */
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -76,77 +98,19 @@ body {
   pointer-events: none;
 }
 
-/* Persistent gold ray pattern — sits above #bg-wash (same z-index, later
-   in DOM order) and behind all real content, so it only ever touches the
-   page background, never card surfaces (cards paint their own opaque
-   background over it in normal flow). Populated once by script.js; each
-   ray fades in/out at its own random spot rather than one sweeping strip.
-   Kept faint everywhere so the wash's cream/navy alternation still reads
-   as the dominant background color — this is texture, not a new hue. */
-#bg-rays {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.bg-ray {
-  position: absolute;
-  top: -15%;
-  left: var(--x);
-  width: var(--w);
-  height: 130%;
-  border-radius: 50%;
-  background: linear-gradient(180deg,
-    rgba(212, 167, 72, 0) 0%,
-    rgba(212, 167, 72, var(--o)) 22%,
-    rgba(255, 240, 205, calc(var(--o) * 1.5)) 38%,
-    rgba(212, 167, 72, var(--o)) 58%,
-    rgba(212, 167, 72, 0) 100%);
-  filter: blur(var(--blur));
-  opacity: 0;
-  animation: bg-ray-appear var(--dur) ease-in-out var(--delay) infinite;
-  transform-origin: center center;
-}
-
-@keyframes bg-ray-appear {
-  0%   { opacity: 0; transform: skewX(var(--tilt)) translate(0, -2%) scaleY(0.92); }
-  6%   { opacity: 1; }
-  38%  { opacity: 1; transform: skewX(var(--tilt)) translate(var(--drift), 2%) scaleY(1.04); }
-  58%  { opacity: 0; }
-  100% { opacity: 0; }
-}
-
-.bg-glint {
-  position: absolute;
-  top: var(--gy);
-  left: var(--gx);
-  width: var(--gs);
-  height: var(--gs);
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff8e6 0%, rgba(212, 167, 72, 0.9) 35%, transparent 72%);
-  opacity: 0;
-  animation: bg-glint-flash var(--gdur) ease-in-out var(--gdelay) infinite;
-}
-
-@keyframes bg-glint-flash {
-  0%, 92%, 100% { opacity: 0; transform: scale(0.4); }
-  96%           { opacity: 1; transform: scale(1.15); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   #bg-wash {
     display: none;
   }
-  #bg-rays {
-    display: none;
-  }
   /* script.js's scroll-driven wash never runs under reduced motion, so
-     these three sections need their own solid background back — without
-     it they'd render transparent (light --accent text on nothing). */
+     these navy-zone sections need their own solid background back —
+     without it they'd render transparent (light --accent text on
+     nothing). */
+  .who,
   .formats,
+  .services,
   .project,
+  .partnership,
   .terms {
     background: var(--card-bg);
   }
@@ -157,88 +121,23 @@ a {
   text-decoration: none;
 }
 
+/* Brand-matched keyboard focus ring — before this, every interactive
+   element outside the site menu (which has its own color-based focus
+   style) fell back to the browser default outline, usually blue, which
+   clashes with navy/gold and reads as an unfinished edge case rather
+   than a deliberate state. :focus-visible only, so mouse/touch clicks
+   don't show it — matches the site menu's own :focus-visible-only
+   convention. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
 h1, h2, h3 {
   font-family: var(--font-heading);
   font-weight: 500;
   letter-spacing: -0.02em;
-}
-
-/* Заголовки секций — узкий тяжёлый капс (Oswald) */
-.who h2,
-.formats h2,
-.services h2,
-.project h2,
-.partnership h2,
-.start h2 {
-  font-family: var(--font-title);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: clamp(2.1rem, 5vw, 3.4rem);
-  line-height: 0.95;
-  letter-spacing: -0.005em;
-  text-wrap: balance;
-  max-width: 22ch;
-  margin-inline: auto;
-}
-
-/* "Folding text" heading ("Нас трое"): each character starts folded flat
-   90° around its own LEFT or RIGHT edge — like a door swinging shut — and
-   unfolds upright as the heading crosses a fixed band of the viewport,
-   continuously scroll-scrubbed in script.js. Mirrors the annnimate.com
-   folding-text reference exactly: its two live instances use
-   data-anm-direction "fold-right" (rotationY, hinge on the right edge) and
-   "fold-left" (rotationY, hinge on the left edge) — rotationY around a
-   side edge, NOT rotationX around the baseline. "Нас" hinges left (reveals
-   left-to-right); "трое" hinges right (reveals right-to-left) — see
-   splitTextIntoFoldChars in script.js. */
-.fold-heading {
-  perspective: 1200px;
-}
-
-/* "Нас трое" stacked onto two lines and scaled up (live-mode typeset
-   session 59049536, carbonized): calc() around clamp() keeps the
-   responsive range intact instead of baking one fixed px value.
-   Selector must out-specify the shared ".who h2, .formats h2, ..." rule
-   (class+type, 0,1,1) or the override silently loses — .fold-heading
-   alone (0,1,0) is NOT enough. */
-.who h2.fold-heading {
-  font-size: calc(clamp(2.1rem, 5vw, 3.4rem) * 3.5);
-}
-
-.who-line {
-  display: block;
-}
-
-.who-line + .who-line {
-  margin-top: 0.2em;
-}
-
-.fold-word {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.fold-char {
-  display: inline-block;
-  transform-style: preserve-3d;
-  opacity: 0;
-}
-
-.fold-char--hinge-left {
-  transform-origin: 0% 50%;
-  transform: rotateY(-90deg);
-}
-
-.fold-char--hinge-right {
-  transform-origin: 100% 50%;
-  transform: rotateY(90deg);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fold-char {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 ul, ol {
@@ -285,21 +184,25 @@ main > section:not(.hero) {
   width: 48px;
   height: 48px;
   padding: 0;
-  /* --navy-text and --bg are the same cream hex, so over a plain cream
-     section the fill alone would vanish into the page — the border is
-     what keeps the pill's edge visible there; the shadow does the work
-     over photos and navy cards. */
-  border: 1px solid var(--border);
+  /* Ring instead of a filled pill: a thin gold border carries the button
+     across every section it floats over while scrolling (fixed position),
+     the same way gold already works as the one accent everywhere else on
+     the site — cream sections, navy cards, and the hero photo all give it
+     enough contrast on their own. A faint blurred backdrop is kept (not
+     a solid fill) purely so the hit-area still reads as a control over
+     busy photo content, without going back to a filled pill. */
+  border: 1.5px solid var(--gold);
   border-radius: 999px;
-  background: var(--navy-text);
-  box-shadow: 0 4px 16px rgba(28, 24, 23, 0.18);
+  background: rgba(242, 242, 232, 0.1);
+  backdrop-filter: blur(6px);
+  box-shadow: none;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, background 0.2s;
 }
 
 .menu-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(28, 24, 23, 0.24);
+  background: rgba(242, 242, 232, 0.18);
 }
 
 .menu-toggle:active {
@@ -319,7 +222,7 @@ main > section:not(.hero) {
   width: 20px;
   height: 2px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--gold);
   transition: transform 0.3s ease, opacity 0.2s ease;
 }
 
@@ -336,6 +239,14 @@ main > section:not(.hero) {
   right: 0;
   left: auto;
   width: min(300px, 78vw);
+  /* Fixed to the viewport height with its own scroll, rather than
+     growing as tall as its content wants — without this, the contacts
+     block and CTA silently overflowed past the bottom of shorter phone
+     screens with no way to reach them (nothing below .site-menu on the
+     page to reveal by scrolling the page itself, since the menu is
+     position: fixed). */
+  height: 100dvh;
+  overflow-y: auto;
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -360,21 +271,38 @@ main > section:not(.hero) {
   transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Same mark as .hero-logo/.footer-logo, static like the footer's (not
+   looping) — a menu the user can open and close repeatedly shouldn't
+   restart a multi-second draw-on animation every time. In normal flex
+   flow (not absolutely positioned) and centered, rather than pinned to
+   the top-left corner next to the close button — bigger and centered
+   reads as the header of the panel instead of a small corner mark. */
 .site-menu-logo {
-  position: absolute;
-  top: clamp(1.5rem, 4vw, 3rem);
-  left: clamp(1.5rem, 4vw, 3rem);
-  font-family: var(--font-numerals);
-  font-weight: 400;
-  font-size: 2.6rem;
-  line-height: 1;
-  color: var(--gold);
+  align-self: center;
+  margin-top: 0.5rem;
+  display: block;
+  line-height: 0;
 }
 
+.site-menu-logo .logo-write {
+  width: 128px;
+}
+
+.site-menu-logo .lw-glyph {
+  animation: none;
+  fill-opacity: 1;
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+/* Tucked into the actual corner (smaller, fixed inset) rather than
+   sharing the content padding scale — now that the logo is centered and
+   bigger, matching that inset made the close button read as paired with
+   it instead of sitting apart in its own corner. */
 .site-menu-close {
   position: absolute;
-  top: clamp(1.5rem, 4vw, 3rem);
-  right: clamp(1.5rem, 4vw, 3rem);
+  top: 1rem;
+  right: 1rem;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -405,7 +333,7 @@ main > section:not(.hero) {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-top: 4rem;
+  margin-top: 2.5rem;
   margin-bottom: 0;
   text-align: center;
 }
@@ -425,9 +353,45 @@ main > section:not(.hero) {
   color: var(--gold);
 }
 
+.site-menu-contacts {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-card);
+}
+
+.site-menu-contacts-eyebrow {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-on-card);
+  margin-bottom: 0.6rem;
+}
+
+.site-menu-contacts a {
+  display: block;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+  transition: color 0.2s ease;
+}
+
+.site-menu-contacts a:last-child {
+  margin-bottom: 0;
+}
+
+.site-menu-contacts a:hover,
+.site-menu-contacts a:focus-visible {
+  color: var(--gold);
+}
+
 .site-menu-cta {
   align-self: flex-start;
-  margin-top: 2.5rem;
+  margin-top: 2rem;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -445,14 +409,14 @@ main > section:not(.hero) {
   display: inline-block;
   padding: 0.9rem 2rem;
   border-radius: 999px;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   letter-spacing: 0.01em;
   transition: transform 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .btn-small {
   padding: 0.6rem 1.4rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 .btn-primary {
@@ -558,48 +522,104 @@ main > section:not(.hero) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Source photo is a wide 2048x1152 shot: the two subjects sit in
-     roughly the left 40% (faces around 30-40% down), the rest is open
-     warm-grey negative space. Whether cover crops width or height
-     depends on the box's own aspect ratio at a given viewport, so
-     anchor toward the subjects' actual position (not plain center) to
-     keep them in frame either way. */
-  object-position: 28% 38%;
+  /* Clean photo (4096x2294, no baked-in text — see the note on
+     .hero-logo-lockup): this is the user's own reference (duotone navy/
+     gold, generated in Recraft), text-removed rather than replaced.
+     Subject map (as % of image width): the man sits at 21-47%, the
+     shadow/gap at 47-67%, the woman at 66-92%.
+
+     object-position scales continuously with viewport width instead of
+     jumping between fixed breakpoints — a fixed-breakpoint version of
+     this (390px / 1400px cutoffs) looked right at the exact widths it
+     was tested at and wrong at everything in between (real laptops vary
+     hugely in effective CSS width because of OS display scaling, so
+     "in between" is most real windows, not an edge case). Below 390px
+     it holds at 30%/15% (committing to the man alone — cover crops too
+     much width to show both at any narrow ratio); above 1920px it holds
+     at 55%/35% (centered on the gap, both figures in frame); between
+     those it's a straight linear ramp, so every width in between gets a
+     proportionally-appropriate crop instead of one of two guesses. */
+  object-position: clamp(30%, calc(30% + (100vw - 390px) * 0.0163), 55%)
+                    clamp(15%, calc(15% + (100vw - 390px) * 0.01307), 35%);
   display: block;
+  /* Resting state for the graceful-exit effect script.js drives on this
+     element as the hero scrolls out of view — see the hero exit block
+     there. transform-origin: center so the shrink reads as the photo
+     settling back/away, not sliding toward a corner. */
+  transform-origin: center;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Reference image already reads dark at bottom-left (natural shadow), but
+   that's specific to this exact 16:9 crop — object-fit: cover reframes
+   differently at other aspect ratios, so a real scrim guarantees the text
+   stays legible regardless of viewport shape. Bottom-heavy, not
+   right-heavy: content now anchors bottom-left, not a right-hand column. */
 .hero-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 26%, rgba(40, 56, 100, 0.68) 50%, rgba(40, 56, 100, 0.94) 100%);
+  /* Two independent layers: the diagonal one protects the text panel
+     bottom-left (as before); the flat top band protects the logo, which
+     sits at a fixed position regardless of crop — the photo's brightness
+     there varies a lot across breakpoints (bright gold background on
+     mobile's tight crop vs. navy on wide desktop), so the logo needs its
+     own guaranteed-dark strip rather than relying on what the crop
+     happens to show. */
+  background:
+    linear-gradient(180deg, rgba(28, 24, 23, 0.68) 0%, transparent 20%),
+    linear-gradient(190deg, transparent 30%, rgba(28, 24, 23, 0.35) 55%, rgba(40, 56, 100, 0.82) 100%);
   pointer-events: none;
 }
 
-.hero-logo-lockup {
+/* Visually hidden, not display: none — content stays real for screen
+   readers and search engines, it just isn't painted. Standard clip-based
+   technique (not opacity/visibility, which some assistive tech skips). */
+.sr-only {
   position: absolute;
-  z-index: 2;
-  left: clamp(1.5rem, 4vw, 3rem);
-  top: clamp(1.5rem, 3vw, 2.25rem);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* This corner of the photo is a light warm-grey — close enough to the
-     gold numeral's own tone that flat gold reads almost invisibly on it.
-     A soft light patch behind the mark (an earlier attempt at fixing
-     this) actually made it worse, since lightening the background pushes
-     gold-on-light contrast down further, and the patch's own edge read
-     as a pasted-on rectangle against the photo's grain. A drop-shadow on
-     the mark itself grounds it in the photo instead of sitting on top of
-     it, and works on both the gold numeral and the dark wordmark. */
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.25));
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* Логотип, "прописывающийся" от руки: каждый символ — свой tspan
-   со stroke-dasharray/dashoffset (обводка) и последующей заливкой,
-   символы стартуют со сдвигом по времени, весь цикл бесконечен. */
+/* images/hero-main.jpg is plain photography now (no text baked in — an
+   earlier version had the wordmark/headline/button drawn into the pixels
+   themselves, which broke responsiveness and forced the live copy below
+   into .sr-only to avoid duplicating it; see project notes). display:
+   contents so .hero-logo positions itself straight against .hero instead
+   of through this wrapper. */
+.hero-logo-lockup {
+  display: contents;
+}
+
+.hero-logo {
+  position: absolute;
+  top: clamp(1.5rem, 3vw, 2.25rem);
+  left: clamp(1.5rem, 4vw, 3rem);
+  z-index: 2;
+  display: block;
+  line-height: 0;
+}
+
+/* Restored from the pre-photo hero (the animated "write-on" wordmark) —
+   each character is its own tspan with a staggered animation-delay, so
+   the glyphs draw in left-to-right rather than all at once. Recolored
+   for the current photo: numerals keep the original gold, but the word
+   moves from --ink (illegible on a dark photo) to --accent/cream, which
+   is the same split the flat logo used right before this. */
 .logo-write {
   display: block;
-  width: clamp(150px, 15vw, 210px);
+  width: clamp(120px, 12vw, 170px);
   height: auto;
   overflow: visible;
 }
@@ -640,19 +660,13 @@ main > section:not(.hero) {
 }
 
 .lw-word .lw-glyph {
-  color: var(--ink);
+  color: var(--accent);
   stroke-width: 1.1;
   stroke-dasharray: 220;
   stroke-dashoffset: 220;
   animation-name: logo-glyph-write-word;
 }
 
-/* Solid fill now covers most of the cycle (25%-95%, was 55%-85%) so the
-   hero's animated "27.12" reads as the same solid gold as the static
-   header logo most of the time, instead of spending nearly half the loop
-   as a thin unfilled outline that looks paler than --gold at a glance —
-   and since glyphs are staggered, a longer solid window also means fewer
-   moments where some digits are filled and others are still mid-outline. */
 @keyframes logo-glyph-write-num {
   0% {
     fill-opacity: 0;
@@ -728,59 +742,60 @@ main > section:not(.hero) {
   }
 }
 
-/* Text column: right-anchored over the scrim, sized against its own
-   max-width (620px) rather than a half-viewport panel now — see the
-   headline's own comment below for how that's fitted. */
+/* Text column: centered, low — sits in the lower third of the frame
+   rather than pinned to a corner. Chosen after comparing bottom-left,
+   bottom-right, split, top-anchored, and off-grid placements directly
+   on this photo; centered-low read cleanest against a composition where
+   both figures already flank the middle. */
 .hero-content {
   position: relative;
   z-index: 2;
   min-height: calc(100svh - var(--header-h));
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-end;
+  justify-content: flex-end;
+  align-items: center;
   gap: 1.25rem;
-  max-width: 620px;
-  margin-left: auto;
-  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 4rem);
+  width: 100%;
+  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 8vh, 6rem);
   color: var(--accent);
+  text-align: center;
 }
 
-/* Sized empirically (binary search per viewport, see fit-new-headline.js)
-   against .hero-content's own max-width (620px minus padding), not a
-   half-viewport panel. Above 900px the column's width barely moves
-   (492-530px, capped by max-width) so a flat size with safety margin
-   under the measured 38-41px fit is enough — no vw scaling needed. */
-/* Weight/leading modeled on shustraya.ru/design's hero: a huge headline
-   at regular weight with tight line-height reads as more confident than
-   a smaller bold one — scale carries it instead of font-weight. Sizes
-   are fitted empirically per breakpoint (see fit-headline-v2.js) against
-   .hero-content's own column width, same method as before. */
+/* Manrope: light weight carries the sentence, 700 picks out the accent
+   word — hierarchy comes from weight contrast within one family rather
+   than switching typefaces, which is why the em below only changes
+   weight and color, not font-family. Chosen over the heavier serif/caps
+   options (Bodoni, Cinzel, Archivo Black, etc. — see DESIGN.md for the
+   comparison) because centering amplifies loud type; light Manrope
+   stays composed instead of reading as a poster headline. */
 .hero-panel-headline {
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 2.4rem;
-  line-height: 0.94;
+  font-weight: 300;
+  font-size: clamp(2rem, 4.4vw, 3.6rem);
+  line-height: 1.2;
   letter-spacing: -0.01em;
+  text-align: center;
   text-wrap: balance;
-  margin: 0;
+  max-width: 36ch;
+  margin: 0 auto;
 }
 
 .hero-panel-headline em {
-  font-style: italic;
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 700;
   color: var(--gold);
 }
 
 .hero-sub {
-  font-family: 'Nunito Sans', var(--font-body);
-  font-weight: 400;
-  color: var(--muted-on-card);
-  font-size: 1.15rem;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--text-base);
   line-height: 1.5;
-  max-width: 42ch;
-  text-align: right;
-  margin: 0;
+  color: var(--muted-on-card);
+  max-width: 44ch;
+  text-align: center;
+  margin: 0 auto;
 }
 
 .hero-sub .sub-underline {
@@ -808,295 +823,155 @@ main > section:not(.hero) {
 /* ---------- who ---------- */
 
 .who {
-  position: relative;
-  max-width: none;
-  padding-left: 0;
-  padding-right: 0;
+  color: var(--accent);
 }
 
 .who h2 {
-  color: var(--card-bg);
-  margin-bottom: clamp(4rem, 16vh, 10rem);
-  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.1;
+  color: var(--accent);
+  text-align: left;
+  text-wrap: balance;
+  margin-bottom: 2.5rem;
   padding-left: var(--gap);
   padding-right: var(--gap);
+  max-width: none;
 }
 
-/* Pin track: the grid sticks in place for the height of this box minus one
-   viewport, so the pile-in/settle sequence (script.js) has room to play out
-   over a deliberate scroll while the cards stay fully on screen — without
-   this the cards would finish settling only after they'd already scrolled
-   past the viewport. The pin releases right as they finish (no held pause
-   after): from there the grid scrolls up with the page like ordinary
-   content, then dissolves away as it leaves — see updateTeamExit in
-   script.js. */
-.team-pin-track {
-  position: relative;
-  height: calc(100vh + 2000px);
-}
-
-/* Flexbox, not grid: grid-template-columns doesn't actually transition in
-   browsers (it snaps instantly, no matter what's declared), which is
-   exactly why the brinex.ru reference this hover-grow effect is modeled
-   on uses flex-basis instead — that property animates natively and
-   reliably. See .team-slot below for the hover rule itself. */
+/* Full-bleed, no 1200px content cap like the rest of the site's sections —
+   the photos are the point here, so they get to run wide instead of
+   sitting in a narrow centered column with a lot of side gutter. Text
+   (pill/tags/desc) below each photo gets its own small inset (see below)
+   so it doesn't stretch full-card-width, which would fight readability
+   past ~65ch. */
 .team-grid {
-  position: sticky;
-  top: calc(var(--header-h) + 6vh);
-  display: flex;
-  gap: 1.75rem;
-  max-width: 920px;
-  width: 100%;
-  padding: 0 var(--gap);
-  margin: 0 auto;
-  box-sizing: border-box;
-  will-change: clip-path;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap);
+  padding: 0 1.5rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .team-pin-track {
-    height: auto;
-  }
-  .team-grid {
-    position: static;
-  }
+.team-pill,
+.team-tags,
+.team-desc {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
 }
 
-.team-slot {
-  position: relative;
-  min-width: 0;
-  flex: 1 1 calc(33.333% - 1.1667rem);
-  transition: flex-basis 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Gated to .is-settled (set by script.js once the Multi Flip reveal has
-   fully settled): hovering mid-flip would otherwise fight the pile/fan
-   transform with a flex-basis change it was never designed to combine
-   with. */
-@media (hover: hover) and (pointer: fine) {
-  .team-grid.is-settled .team-slot:has(.team-card-face:hover) {
-    flex-basis: 50%;
-    flex-shrink: 0;
-  }
-
-  /* Description text starts collapsed on any device that can hover — this,
-     not the shrunk sizing in the short-viewport rules below, is what
-     actually reclaims the height a full paragraph costs at rest. It comes
-     back on hover (see the reveal paired with it further down). Touch
-     devices don't match this media query at all, so the description just
-     stays in normal flow there — there's no hover gesture to reveal it
-     with, so hiding it would remove real content with no way back. */
-  .team-desc {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    overflow: hidden;
-    transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
-  }
-}
-
-/* Always fully opaque — never animated via opacity. script.js toggles
-   visibility (a binary switch, not a gradual blend) once scroll reaches
-   SETTLE_START, so the card either doesn't render at all or is fully
-   solid — never a translucent in-between state. Only position/rotation
-   are ever animated. */
 .team-card {
-  position: relative;
-  height: 100%;
-  opacity: 1;
-  visibility: hidden;
-  will-change: transform;
-}
-
-/* "Multi Flip" starting pile: each card sits offset and rotated toward the
-   centre, overlapping its neighbours. script.js reads this exact pose (kept
-   in sync with the PILE array there) and interpolates it down to
-   translate(0,0) rotate(0) continuously as the user scrolls, so the fan
-   only fully settles after a long, deliberate scroll — no fixed-duration
-   transition here, every frame is driven directly off scroll position. */
-.team-slot:nth-child(1) .team-card {
-  transform: translate(45%, 8%) rotate(-8deg);
-}
-
-.team-slot:nth-child(2) .team-card {
-  transform: translate(-4%, 8%) rotate(3deg);
-}
-
-.team-slot:nth-child(3) .team-card {
-  transform: translate(-46%, 12%) rotate(7deg);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .team-card {
-    visibility: visible;
-    transform: none !important;
-  }
-}
-
-.team-card-face {
-  position: relative;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  text-align: left;
-  background: var(--card-bg);
-  color: var(--accent);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 1.4rem;
 }
 
-.team-avatar {
-  position: relative;
-  width: 100%;
-  /* Fixed height, not aspect-ratio: the hover-grow effect below only ever
-     changes a card's width (its grid column), never its height — an
-     aspect-ratio here would make the photo taller too as it widens,
-     overflowing the pinned section and forcing a scroll that immediately
-     trips the close/dissolve trigger. object-fit: cover on the img just
-     shows more or less of the photo horizontally as this stays put. */
-  /* Scales with viewport height, not a single fixed value: short screens
-     (small vh) shrink it enough to still fit the whole card in the pinned
-     section without scrolling; normal/tall screens grow it toward the
-     original, more spacious first-version crop. */
-  height: clamp(18rem, 40vh, 28rem);
-  /* Room for .team-tags below to overlap the photo's bottom edge without
-     crowding the name/description that follow. */
-  margin-bottom: 2.9rem;
-}
-
-/* Clips the photo only — kept separate from .team-avatar itself so
-   .team-tags (a sibling) can overflow past the photo's bottom edge
-   instead of being cropped along with it. */
-.team-avatar-photo {
-  position: absolute;
-  inset: 0;
+.team-photo {
+  border: 2px solid var(--gold);
   overflow: hidden;
-  border-radius: calc(var(--radius) - 2px);
+  height: clamp(20rem, 34vh, 26rem);
+  margin-bottom: 1.4rem;
 }
 
-.team-avatar img {
+.team-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Anchored toward the top so heads are never cropped off — default
-     center anchoring was cutting into hair/foreheads once the fixed
-     avatar height (above) made the crop tighter than a plain aspect-ratio
-     would have. */
+  /* Anchored toward the top so heads are never cropped off. */
   object-position: 50% 12%;
   display: block;
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Activity tags, one per line — overlaps the photo's bottom-left corner,
-   half on the image and half below it. */
-.team-tags {
-  position: absolute;
-  left: 0.9rem;
-  bottom: -1.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.6rem 0.9rem;
+/* Subtle zoom-within-frame on hover — .team-photo's own overflow:hidden
+   does the clipping, so the gold border never moves, only the photo
+   underneath it. Matches format-tile's existing hover language (and its
+   hover/pointer media guard) rather than introducing a new one. */
+@media (hover: hover) and (pointer: fine) {
+  .team-card:hover .team-photo img {
+    transform: scale(1.03);
+  }
+}
+
+/* Мария's source photo has more empty headroom above her than the other
+   two, so the shared 12% crop left a noticeably bigger gap above her head
+   — pull this one specifically further up (crops away more of the empty
+   background instead of her face) to match the other two visually. */
+.team-card:nth-child(3) .team-photo img {
+  object-position: 50% 26%;
+}
+
+.team-pill {
+  display: inline-block;
+  align-self: flex-start;
   background: var(--gold);
-  border: 1px solid var(--ink);
-  border-radius: var(--radius);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-md);
+  text-align: center;
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  margin-bottom: 0.7rem;
+}
+
+.team-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
 }
 
 .team-tags span {
-  display: block;
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink);
-  line-height: 1.45;
-}
-
-.team-name {
-  display: flex;
-  flex-direction: column;
-  font-size: 1.5rem;
-  line-height: 1.15;
-  text-transform: uppercase;
-  margin-bottom: 0.7rem;
+  border: 1px solid var(--border-card);
   color: var(--accent);
-  transition: font-size 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.34rem 0.8rem;
+  border-radius: 999px;
 }
 
 .team-desc {
   color: var(--muted-on-card);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: var(--text-md);
+  line-height: 1.6;
 }
 
-/* Grid item wrapper for the hide/reveal pair below: a grid track can only
-   shrink past its content's natural height if the item inside it is
-   allowed to shrink too — grid items default to min-height: auto (their
-   own content size), which would otherwise pin the 0fr track open. */
-.team-desc > span {
-  min-height: 0;
-  overflow: hidden;
+/* ---------- section texture (grain + gold bloom) ----------
+   Applied to the flat single-color sections (formats/services/project/
+   partnership/terms) so they don't read as empty text-on-flat-color —
+   a faint SVG grain across the whole section plus one soft gold radial
+   bloom in a corner, both kept subtle enough to stay a background detail
+   rather than a decoration competing with the content. ::before/::after
+   are free on every one of these sections (existing pseudo-elements live
+   on child elements instead), so no conflict. No overflow:hidden here
+   deliberately — .project-col's reveal slides in from translateX(70px)
+   and a clip on the section would cut the start of that motion. inset:0
+   already keeps the texture layers sized to the section without needing
+   to clip anything that extends past it. */
+.section-texture {
+  position: relative;
 }
 
-/* Hover-grow text sizing (brinex.ru reference): the hovered card's name
-   grows, while the other two shrink to match their squeezed columns (see
-   .team-slot's flex-basis hover rule above). The shrink rule targets
-   :not(:hover) cards specifically, so it can never fight the grow rule for
-   the hovered card itself regardless of specificity. Gated to .is-settled
-   for the same reason as that flex-basis rule. The description's own
-   reveal (not a size change) lives in the hide/reveal pair below. */
-@media (hover: hover) and (pointer: fine) {
-  .team-grid.is-settled:has(.team-card-face:hover) .team-card-face:not(:hover) .team-name {
-    font-size: 1.15rem;
-  }
-
-  .team-grid.is-settled .team-card-face:hover .team-name {
-    font-size: 1.75rem;
-  }
-  .team-grid.is-settled .team-card-face:hover .team-desc {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
+.section-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Short viewports (laptops): the grid sticks for a long scroll stretch, so
-   any part of a card taller than the viewport is never visible at all —
-   not clipped by CSS, just permanently below the fold while pinned. Tighten
-   the top offset and every fixed vertical gap so the whole card comfortably
-   fits under typical laptop window heights, where 6vh of top breathing room
-   plus the tall-screen avatar size otherwise pushes the description past
-   the bottom edge. */
-@media (max-height: 820px) {
-  .team-grid {
-    top: calc(var(--header-h) + 2vh);
-  }
-
-  .team-avatar {
-    height: clamp(16rem, 42vh, 24rem);
-    margin-bottom: 2rem;
-  }
-
-  .team-card-face {
-    padding: 1rem;
-  }
-
-  .team-name {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-  }
-}
-
-/* The name hover-grow above (brinex.ru reference) adds real height to the
-   hovered card on top of the description reveal it already triggers — on a
-   short screen, skip the name growth specifically so the height budget goes
-   to the description becoming readable, not to enlarging text that already
-   reads fine at rest size. Width still grows (flex-basis, no height cost,
-   and the wider column can only help the description wrap into fewer
-   lines). */
-@media (max-height: 820px) and (hover: hover) and (pointer: fine) {
-  .team-grid.is-settled .team-card-face:hover .team-name {
-    font-size: 1.25rem;
-  }
+.section-texture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 700px 400px at 85% 100%, rgba(185, 135, 85, 0.3), transparent 65%);
 }
 
 /* ---------- formats ---------- */
@@ -1106,10 +981,21 @@ main > section:not(.hero) {
   border-top: 1px solid var(--border-card);
 }
 
+/* Manrope to match the hero and "Нас трое" — same weight, no per-word
+   accent color here (kept deliberately uniform, unlike the hero's gold
+   word). */
 .formats h2 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.1;
   color: var(--accent);
+  text-align: left;
+  text-wrap: balance;
+  max-width: none;
   margin-bottom: 2.5rem;
-  text-align: center;
 }
 
 .formats-grid {
@@ -1157,7 +1043,6 @@ main > section:not(.hero) {
   transition: color 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.format-label,
 .format-tile h3 {
   transition: color 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1167,48 +1052,73 @@ main > section:not(.hero) {
   transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Labels/price/link are small uppercase UI text — Oswald, matching the
-   site's other condensed-caps labels. Titles are headings — Golos Text,
-   same as every other card h3 on the site (team/service/project/stage),
-   instead of the one-off Unbounded that only ever appeared here. */
-.format-label,
-.format-price,
-.format-link {
+/* Price/link are small uppercase UI text — Oswald, matching the site's
+   other condensed-caps labels. Titles are headings — Golos Text, same as
+   every other card h3 on the site (team/service/project/stage), instead
+   of the one-off Unbounded that only ever appeared here. */
+.format-price {
   font-family: var(--font-title);
-  font-size: clamp(0.7rem, 1.1vw, 0.85rem);
+  font-size: var(--text-xs);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
+/* Inter, not the condensed Oswald caps — matches the reference mockup and
+   reads lighter/wider next to the Manrope pill and headline. */
+.format-link {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Manrope to match the numeral font used everywhere else this session
+   (hero, team-pill) rather than the old Golos Text. */
 .format-num {
   display: block;
-  color: var(--accent);
-  font-family: var(--font-heading);
+  color: var(--gold);
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: var(--text-lg);
   font-variant-numeric: tabular-nums;
   margin: 0;
 }
 
+/* Pill sits inline with the headline, not stacked above it — one line per
+   format, matching the row's own single-line rhythm. */
 .format-text {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.9rem;
   flex: 1;
 }
 
 .format-tile h3 {
   font-family: var(--font-heading);
-  font-size: 1.35rem;
+  font-size: var(--text-xl);
   font-weight: 500;
   color: var(--accent);
   margin: 0;
 }
 
+/* Same gold pill as .team-pill on "Нас трое" — the format name ("Разовая
+   услуга") is the thing a scanning eye should land on first, ahead of the
+   descriptive headline below it, and now reads as one continuous visual
+   language with the team section instead of a plain Oswald caption. */
 .format-label {
-  color: var(--muted-on-card);
-  font-weight: 600;
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--gold);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-sm);
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
   margin: 0;
 }
 
@@ -1226,7 +1136,6 @@ main > section:not(.hero) {
     transform: scaleX(1);
   }
   .format-tile:hover .format-num,
-  .format-tile:hover .format-label,
   .format-tile:hover h3 {
     color: var(--ink);
   }
@@ -1245,10 +1154,20 @@ main > section:not(.hero) {
   border-top: 1px solid var(--border);
 }
 
+/* Manrope to match the hero, "Нас трое" and "Три формата работы" — same
+   weight, left-aligned, no per-word accent. */
 .services h2 {
-  color: var(--card-bg);
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.1;
+  color: var(--accent);
+  text-align: left;
+  text-wrap: balance;
+  max-width: none;
   margin-bottom: 2.5rem;
-  text-align: center;
 }
 
 /* Full-Bleed Snap: one service fills the whole row at a time — "Начни с
@@ -1280,23 +1199,105 @@ main > section:not(.hero) {
   gap: 0.9rem;
   flex: 0 0 100%;
   scroll-snap-align: center;
-  border: 1px solid var(--border-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: clamp(2.5rem, 6vw, 4rem);
   min-height: 20rem;
-  background: var(--card-bg);
-  color: var(--accent);
+  background: var(--bg);
+  color: var(--ink);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease;
+}
+
+/* Only one card is visible at a time (scroll-snap strip), so a hover lift
+   here reads as "this card responds" rather than needing to compete with
+   siblings the way a grid of visible cards would. Specificity needs the
+   extra .services-grid qualifier to beat .services-grid > .reveal.is-visible
+   (same 0,2,0 specificity, but that rule sits later in the file and would
+   otherwise win the transform tie and cancel this hover). */
+@media (hover: hover) and (pointer: fine) {
+  .services-grid .service-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--gold);
+  }
 }
 
 /* Gold scroll scrubber: the primary way to move between services now that
-   only one is visible at a time — drag the thumb or click the track. */
+   only one is visible at a time — drag the thumb or click the track. Sits
+   directly under the card with an explicit "Далее" label instead of a
+   per-card hint badge, so the affordance is visible without scrolling
+   further and named in words, not just implied by a drifting arrow. */
+.services-scrubber-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.9rem 0 3rem;
+}
+
 .services-scrubber {
   position: relative;
+  flex: 1;
   height: 3px;
   background: var(--border-card);
   border-radius: 999px;
-  margin: 0.9rem 0 3rem;
   cursor: pointer;
+}
+
+/* Button reset — "Назад"/"Далее" are real controls now (they move the
+   strip), not decorative labels, so they're <button> elements with a
+   generous invisible hit area (negative margin cancels the padding
+   visually) rather than a bare <span>. */
+.services-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  cursor: pointer;
+  transition: opacity 200ms ease;
+}
+
+.services-nav-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--gold);
+}
+
+.services-nav-next svg {
+  animation: hint-drift-breathe 2.2s ease-in-out infinite;
+}
+
+.services-nav-prev svg {
+  animation: hint-drift-breathe-reverse 2.2s ease-in-out infinite;
+}
+
+/* First/last card — nothing further to go back to or forward to. */
+.services-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.services-nav-btn:disabled svg {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services-nav-btn svg {
+    animation: none;
+  }
+}
+
+@keyframes hint-drift-breathe-reverse {
+  0%, 100% { transform: translateX(0); opacity: 0.7; }
+  50% { transform: translateX(-4px); opacity: 1; }
 }
 
 /* The draggable thumb: hit area is 44px tall (mobile touch-target
@@ -1328,73 +1329,22 @@ main > section:not(.hero) {
   cursor: grabbing;
 }
 
-/* "Scroll right" hint: one badge per card, except the last — there's
-   nothing further to scroll to from there. Anchored to the price row's
-   own divider line (not the card's outer edge) so it reads as "there's
-   more past this line", straddling the border-bottom. Permanent — this
-   section's only other scroll affordance is the gold scrubber below the
-   fold, easy to miss, so the hint never dismisses. */
-.service-price {
-  position: relative;
-}
-
-.card-hint {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  transform: translateY(-50%);
-  z-index: 2;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(212, 167, 72, 0.5);
-  background: rgba(28, 24, 23, 0.28);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  opacity: 0.8;
-  animation: hint-drift-breathe 2.2s ease-in-out infinite;
-}
-
-.card-hint svg {
-  width: 15px;
-  height: 15px;
-  stroke: var(--gold);
-}
-
-.services-grid .service-card:last-child .card-hint {
-  display: none;
-}
-
-.service-card:nth-child(1) .card-hint { animation-delay: 0s; }
-.service-card:nth-child(2) .card-hint { animation-delay: 0.1s; }
-.service-card:nth-child(3) .card-hint { animation-delay: 0.2s; }
-.service-card:nth-child(4) .card-hint { animation-delay: 0.3s; }
-.service-card:nth-child(5) .card-hint { animation-delay: 0.4s; }
-
 @keyframes hint-drift-breathe {
-  0%, 100% { transform: translateY(-50%) translateX(0); box-shadow: 0 0 0 0 rgba(212, 167, 72, 0.4); opacity: 0.8; }
-  50% { transform: translateY(-50%) translateX(6px); box-shadow: 0 0 0 7px rgba(212, 167, 72, 0); opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-hint {
-    animation: none;
-  }
+  0%, 100% { transform: translateX(0); opacity: 0.7; }
+  50% { transform: translateX(4px); opacity: 1; }
 }
 
 .service-zone {
-  color: var(--muted-on-card);
-  font-size: 0.82rem;
+  color: var(--card-bg);
+  font-size: var(--text-sm);
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 0.6rem;
 }
 
 .service-card h3 {
-  font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+  font-size: clamp(1.6rem, 3.6vw, 2.2rem);
   font-weight: 500;
   line-height: 1.25;
 }
@@ -1408,13 +1358,13 @@ main > section:not(.hero) {
 .service-price {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   align-content: flex-start;
   column-gap: 0.5em;
   row-gap: 0.4em;
-  border-bottom: 1px solid var(--border-card);
-  color: var(--accent);
-  font-size: 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  font-size: var(--text-md);
   line-height: 1.4;
   padding-bottom: 1rem;
 }
@@ -1422,132 +1372,44 @@ main > section:not(.hero) {
 .price-num {
   display: inline-block;
   background: var(--gold);
-  color: var(--ink);
+  color: var(--accent);
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-variant-numeric: tabular-nums;
   line-height: 1.3;
   padding: 0.08em 0.45em;
   border-radius: var(--radius);
 }
 
-/* Loose leading on the flowing prose, tight leading on the stamped label
-   below (.service-format) — opposite textures, not just opposite sizes.
-   Also compensates light-on-navy text, which reads better with a touch
-   more leading than dark-on-light needs. */
 .service-desc {
-  color: var(--accent);
-  font-size: 1.05rem;
+  color: var(--ink);
+  font-size: var(--text-md);
   line-height: 1.7;
   max-width: 56ch;
 }
 
-/* Logistics metadata, not prose — matches .service-zone's tracking
-   (0.1em) exactly, so the two label rows bookend the card with the same
-   stamped cadence instead of two slightly different ones. */
-.service-format {
-  color: var(--accent);
-  font-size: 0.72rem;
+/* Deliverables as individual chips instead of a single dense
+   dot-separated sentence (was .service-format) — each item reads at a
+   glance instead of requiring the whole line to be parsed. */
+.service-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.service-chips span {
+  font-size: var(--text-sm);
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  line-height: 1.5;
-  max-width: 56ch;
+  color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
 }
 
 .service-card .btn {
   align-self: flex-start;
-}
-
-.promo-block {
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: clamp(2rem, 5vw, 3rem);
-  background: var(--card-bg);
-  color: var(--accent);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Entrance: "Marquee Slide-Stop" — slides in from the right at speed and
-   brakes hard into place (strong ease-out, not a symmetric ease), then a
-   single diagonal shimmer sweeps across once it's settled. Fires once via
-   staggerObserver in script.js, same as the other card grids' fade-up. */
-.promo-block.reveal {
-  opacity: 0;
-  transform: translateX(70px);
-  transition: opacity 380ms linear, transform 950ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.promo-block.reveal.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.promo-block::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, transparent 30%, rgba(212, 167, 72, 0.38) 50%, transparent 70%);
-  transform: translateX(-130%);
-  pointer-events: none;
-}
-
-.promo-block.reveal.is-visible::after {
-  animation: promo-shimmer 1300ms ease-out 450ms 1;
-}
-
-@keyframes promo-shimmer {
-  to {
-    transform: translateX(130%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .promo-block.reveal {
-    transform: none !important;
-    transition: opacity 200ms ease !important;
-  }
-  .promo-block.reveal.is-visible::after {
-    animation: none !important;
-  }
-}
-
-.promo-block h3 {
-  font-size: 1.4rem;
-  margin-bottom: 0.75rem;
-}
-
-.promo-intro {
-  color: var(--muted-on-card);
-  margin-bottom: 1rem;
-}
-
-.promo-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.6rem 2rem;
-  margin-bottom: 1.5rem;
-}
-
-.promo-list li {
-  position: relative;
-  padding-left: 1.3rem;
-  font-size: 0.95rem;
-}
-
-.promo-list li::before {
-  content: "—";
-  position: absolute;
-  left: 0;
-}
-
-.promo-note {
-  color: var(--muted-on-card);
-  font-size: 0.88rem;
-  max-width: 60ch;
-  margin-bottom: 1.75rem;
 }
 
 /* ---------- project ---------- */
@@ -1555,39 +1417,41 @@ main > section:not(.hero) {
 .project {
   color: var(--accent);
   border-top: 1px solid var(--border-card);
-  text-align: center;
-}
-
-.project .section-eyebrow {
-  color: var(--accent);
+  text-align: left;
 }
 
 .section-eyebrow {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--ink);
   margin-bottom: 0.75rem;
 }
 
-/* This heading is much longer than the other sections' ("Полная пересборка
-   бренда на маркетплейсе") — the shared rule's max-width: 22ch/text-wrap:
-   balance above is tuned for short headings and would wrap this one to two
-   lines. Overridden here to one line at a smaller starting size; script.js
-   (fitHeadingToOneLine) then shrinks the actual font-size just enough to
-   guarantee it never overflows at any viewport width. */
+/* Manrope to match the hero, "Нас трое", "Три формата работы" and "Начни
+   с одного шага" — same weight, left-aligned, wraps naturally instead of
+   the old one-line shrink-to-fit (script.js's fitHeadingToOneLine no
+   longer runs on this heading). */
 .project h2 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: clamp(2.3rem, 5.2vw, 3.9rem);
+  line-height: 1.1;
   color: var(--accent);
-  margin-bottom: 1.75rem;
+  text-wrap: balance;
   max-width: none;
-  white-space: nowrap;
-  font-size: clamp(1.5rem, 4vw, 2.6rem);
+  margin-bottom: 1.75rem;
 }
 
 .project-intro {
   color: var(--muted-on-card);
-  max-width: 60ch;
-  margin: 0 auto 3rem;
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  max-width: 42ch;
+  margin: 0 0 3rem;
 }
 
 .project-grid {
@@ -1598,20 +1462,39 @@ main > section:not(.hero) {
   margin-bottom: 3rem;
 }
 
+/* No card box (a deliberate departure from the site's usual Inverted
+   Card Rule) — icon + gold pill + a quieter list read calmer directly on
+   the navy section than three more bordered tiles would, chosen over
+   several boxed alternatives during review. */
 .project-col {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2rem;
-  background: var(--bg);
-  color: var(--ink);
+  color: var(--accent);
   position: relative;
   overflow: hidden;
 }
 
-/* Same "Marquee Slide-Stop" entrance as .promo-block — slides in from the
-   right and brakes hard to a stop, then a single diagonal shimmer sweeps
-   across once it's settled. Rides staggerObserver in script.js, staggered
-   card to card like the other 3-across grids. */
+.project-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  border: 1px solid var(--border-card);
+  margin-bottom: 1.3rem;
+}
+
+.project-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* "Marquee Slide-Stop" entrance — slides in from the right and brakes
+   hard to a stop, then a single diagonal shimmer sweeps across once it's
+   settled. Rides staggerObserver in script.js, staggered card to card
+   like the other 3-across grids. */
 .project-col.reveal {
   opacity: 0;
   transform: translateX(70px);
@@ -1654,29 +1537,42 @@ main > section:not(.hero) {
   }
 }
 
+/* Same gold pill as .team-pill / .format-label — one continuous visual
+   language for "the name of this group" across the whole site. */
 .project-col h3 {
-  font-size: 1.1rem;
-  margin-bottom: 1.1rem;
+  display: inline-block;
+  background: var(--gold);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-base);
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  margin-bottom: 1.3rem;
 }
 
-.project-col li {
-  position: relative;
-  padding-left: 1.3rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin-bottom: 0.7rem;
+/* Short tags instead of full sentences — same chip language as
+   .service-chips, scanned rather than read. Deliberately the only thing
+   in each column besides the icon and pill; the fuller "lead phrase —
+   qualifier" list this replaced is gone, not just restyled. */
+.project-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
-.project-col li::before {
-  content: "—";
-  position: absolute;
-  left: 0;
-  color: var(--ink);
+.project-chips span {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent);
+  border: 1px solid var(--border-card);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
 }
 
 .project-terms {
   max-width: 60ch;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .project-terms .btn {
@@ -1686,98 +1582,134 @@ main > section:not(.hero) {
 /* ---------- partnership ---------- */
 
 .partnership {
-  border-top: 1px solid var(--border);
-  text-align: center;
+  border-top: 1px solid var(--border-card);
 }
 
-/* Long like .project h2 above (see the comment there) — one line, no wrap,
-   shrink-to-fit handled by script.js (fitHeadingToOneLine). */
 .partnership h2 {
-  color: var(--card-bg);
-  margin-bottom: 3rem;
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: clamp(2.3rem, 5.2vw, 3.9rem);
+  line-height: 1.1;
+  color: var(--accent);
+  text-wrap: balance;
   max-width: none;
-  white-space: nowrap;
-  font-size: clamp(1.6rem, 4.2vw, 2.8rem);
-  transform: translateX(-20px);
+  margin-bottom: 3.5rem;
 }
 
+/* Vertical timeline: a single hairline runs down the dot column, each
+   stage's dot sits on it. Padding-left on the grid reserves that column
+   so the dots (absolutely positioned relative to each .stage-card) don't
+   need per-card offsets. */
 .stages-grid {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
+  position: relative;
+  padding-left: 2.5rem;
   margin-bottom: 1rem;
 }
 
+/* Draws in top-to-bottom instead of just being there — triggered by
+   .stages-grid's own .is-visible (added separately in script.js, since
+   the grid itself isn't one of the .reveal cards). scaleY needs a fixed
+   transform-origin: top so it grows downward, not from the center. */
+.stages-grid::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: var(--border-card);
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 1100ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.stages-grid.is-visible::before {
+  transform: scaleY(1);
+}
+
 .stage-card {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 0 1.5rem;
-  padding: 2.5rem 0;
-  border-bottom: 1px solid var(--border);
-  color: var(--ink);
+  position: relative;
+  padding-bottom: 3rem;
+  color: var(--accent);
 }
 
-.stage-card:first-child {
-  border-top: 1px solid var(--border);
+.stage-card:last-child {
+  padding-bottom: 0;
 }
 
-.stage-number {
-  font-family: var(--font-title);
-  font-weight: 700;
-  font-size: 3rem;
-  line-height: 1;
-  color: var(--card-bg);
-  margin-bottom: 0;
+/* Pops in on its own delay per stage — deliberately later than its
+   card's own content (see the nth-child delays below), so each dot
+   reads as "lighting up" once the line above has drawn as far as it,
+   rather than just fading in with the rest of the card. */
+.stage-dot {
+  position: absolute;
+  left: -2.5rem;
+  top: 6px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 4px solid var(--card-bg);
+  box-shadow: 0 0 0 1px var(--gold);
+  opacity: 0;
+  transform: scale(0.3);
+  transition: opacity 250ms ease, transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Everything except the number lives in its own column-2 wrapper — h3,
-   .stage-time and the list used to auto-place directly as grid items, and
-   a `grid-row: 1 / -1` on .stage-number was meant to reserve column 1 down
-   every row so the rest fell through to column 2. That relies on -1
-   resolving against the *implicit* grid, but -1 only ever resolves
-   against explicit row tracks (none are defined here), so it silently
-   collapsed to row 1 only — .stage-time then auto-placed into row 2,
-   column 1, the narrow number column, and wrapped onto 4+ lines. A real
-   wrapper sidesteps the whole implicit-grid gotcha: two items, two
-   columns, no row-spanning needed. min-width: 0 keeps long list text from
-   pushing the grid track wider than the card. */
-.stage-body {
-  min-width: 0;
+.reveal.is-visible .stage-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stage-card:nth-child(1) .stage-dot { transition-delay: 250ms; }
+.stage-card:nth-child(2) .stage-dot { transition-delay: 550ms; }
+.stage-card:nth-child(3) .stage-dot { transition-delay: 850ms; }
+
+/* .stage-card has no border/background of its own (it's a timeline entry,
+   not a boxed card), so a hover lift would look out of place — the dot is
+   the one visual object here, so it's what responds. transition-delay: 0
+   overrides the nth-child entrance delays above, which would otherwise
+   still apply to this transform change after the entrance has long since
+   finished (they're set on the same property, not just the reveal). */
+@media (hover: hover) and (pointer: fine) {
+  .stage-card:hover .stage-dot {
+    transform: scale(1.25);
+    transition-delay: 0ms;
+  }
 }
 
 .stage-card h3 {
-  font-size: 1.8rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xl);
   letter-spacing: -0.01em;
   margin-bottom: 0.3rem;
 }
 
 .stage-time {
   color: var(--gold);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 1rem;
 }
 
-.stage-card ul {
-  columns: 2;
-  column-gap: 2rem;
+.stage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
 }
 
-.stage-card li {
-  position: relative;
-  padding-left: 1.1rem;
-  color: var(--muted);
-  font-size: 0.92rem;
-  margin-bottom: 0.6rem;
-  break-inside: avoid;
-}
-
-.stage-card li::before {
-  content: "—";
-  position: absolute;
-  left: 0;
+.stage-chips span {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent);
+  border: 1px solid var(--border-card);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
 }
 
 /* ---------- terms ---------- */
@@ -1787,135 +1719,91 @@ main > section:not(.hero) {
   border-top: 1px solid var(--border-card);
 }
 
+/* Minimal editorial: no card boxes or divider lines, just stacked blocks
+   with generous margin between them — the section relies on big Manrope
+   type and whitespace instead of structure to carry hierarchy. */
 .terms-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--gap);
+  display: flex;
+  flex-direction: column;
 }
 
-.terms-col h3 {
-  font-family: var(--font-title);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.terms-block {
+  max-width: 70ch;
+  margin-bottom: 3rem;
+}
+
+.terms-block:last-child {
+  margin-bottom: 0;
+}
+
+.terms-block h3 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 1.7rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.terms-block p {
   color: var(--muted-on-card);
-  margin-bottom: 0.75rem;
+  font-size: var(--text-md);
+  line-height: 1.7;
 }
 
-.terms-col p {
-  color: var(--muted-on-card);
-  margin-bottom: 2rem;
-}
-
-/* Checkmark instead of the site-wide em-dash: this list is the one place
-   where the reader checks themself against criteria, not just reads a
-   description, so it gets its own marker to read as "check yourself
-   against this" rather than "here's a description". */
-.terms-col li {
-  position: relative;
-  padding-left: 1.6rem;
-  color: var(--muted-on-card);
-  margin-bottom: 0.8rem;
-}
-
-.terms-col li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
+/* One accent point per view (DESIGN.md's One Accent Rule) — the single
+   number a prospect actually self-qualifies against. */
+.text-accent-num {
   color: var(--gold);
   font-weight: 700;
-  color: var(--accent);
 }
 
-/* ---------- start ---------- */
-
-.start {
-  border-top: 1px solid var(--border);
-  text-align: center;
-}
-
-.start h2 {
-  color: var(--card-bg);
-  margin-bottom: 2.5rem;
-}
-
-/* Peeking scroll-snap carousel, same on every breakpoint: one step
-   centered at a time, with the next step's edge visible as a swipe/scroll
-   hint — echoes services' Full-Bleed Snap without needing its scrubber
-   (only 4 short items here, the peek is enough). Side padding is set so a
-   centered card's flex-basis (78%) plus the two paddings sums to 100%,
-   letting the first/last card center too. */
-.steps-list {
+.terms-block ul {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 0 11%;
-  margin-bottom: 1rem;
-  text-align: left;
 }
 
-.steps-list::-webkit-scrollbar {
-  display: none;
-}
-
-.steps-list li {
-  flex: 0 0 78%;
-  scroll-snap-align: center;
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  background: var(--card-bg);
-  color: var(--accent);
-}
-
-.step-num {
-  display: block;
-  color: var(--accent);
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 1.3rem;
-  margin-bottom: 0.6rem;
-}
-
-.step-text {
-  display: block;
-  font-size: 0.95rem;
-}
-
-/* Which step is centered in the carousel above — kept in sync by
-   script.js reading .steps-list's scroll position, not by scroll-snap
-   itself, since CSS alone has no way to reflect "which card is focused"
-   back onto a sibling element. */
-.steps-dots {
+/* Circular gold check badge instead of a bare ✓ character — this list is
+   the one place where the reader checks themself against criteria, not
+   just reads a description, so it gets its own marker weight. */
+.terms-block li {
   display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  align-items: flex-start;
+  gap: 0.9rem;
+  color: var(--accent);
+  font-size: var(--text-md);
+  line-height: 1.5;
 }
 
-.steps-dot {
-  width: 6px;
-  height: 6px;
+.terms-check {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: 0.2rem;
   border-radius: 50%;
-  background: var(--border);
-  transition: background 200ms ease, transform 200ms ease;
-}
-
-.steps-dot.is-active {
   background: var(--gold);
-  transform: scale(1.3);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 /* ---------- footer ---------- */
 
+/* Sits directly after .terms (navy) with no section in between any more —
+   background/text set explicitly here rather than left to inherit, so it
+   doesn't depend on the fixed #bg-wash layer still being painted navy
+   from the last section (that layer stops updating past the final
+   `main > section`, so relying on it left the footer with dark ink text
+   over a navy backdrop it never actually declared). */
 .site-footer {
+  background: var(--card-bg);
+  color: var(--accent);
   text-align: center;
   padding: clamp(3rem, 7vw, 5rem) var(--gap) 3rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-card);
 }
 
 .footer-brand {
@@ -1928,24 +1816,43 @@ main > section:not(.hero) {
 }
 
 .footer-logo {
-  font-size: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Same mark as .hero-logo, just inline instead of corner-positioned and
+   scaled down to sit in the footer's text row — but static, not looping:
+   the write-on animation reads as a one-time flourish on the hero's first
+   paint, not something that should keep re-drawing every time someone
+   scrolls to the footer. Same resting values as the reduced-motion
+   fallback above, applied unconditionally here rather than only under
+   prefers-reduced-motion. */
+.footer-logo .logo-write {
+  width: 70px;
+}
+
+.footer-logo .lw-glyph {
+  animation: none;
+  fill-opacity: 1;
+  stroke-dashoffset: 0;
+  opacity: 1;
 }
 
 .footer-dot {
-  color: var(--muted);
+  color: var(--muted-on-card);
 }
 
 .footer-tagline {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .footer-desc {
-  color: var(--muted);
+  color: var(--muted-on-card);
   max-width: 44ch;
   margin: 0 auto 1.5rem;
 }
@@ -1953,79 +1860,142 @@ main > section:not(.hero) {
 /* ---------- responsive ---------- */
 
 @media (max-width: 900px) {
-  /* No side column of empty background to anchor text against on a
-     narrow crop — content spans full width instead, bottom-anchored over
-     a stronger scrim, closer to how a full-bleed mobile hero usually
-     reads. Photo is wide (2048x1152) so on phone-aspect boxes cover
-     always crops horizontally, never vertically — the base .hero-bg
-     object-position's X value already centers on the subjects, no
-     mobile-specific override needed. */
-  .hero-scrim {
-    background: linear-gradient(180deg, transparent 35%, rgba(40, 56, 100, 0.55) 68%, rgba(40, 56, 100, 0.92) 100%);
-  }
+  /* Centered anchor is the same at every width (see the base rules
+     above) — only the padding/gap tighten up and the headline's clamp
+     floor drops further below 900px, where a narrow phone would
+     otherwise size the headline off the same curve tuned for a much
+     wider box. */
   .hero-content {
-    max-width: none;
-    margin-left: 0;
-    align-items: flex-start;
-    justify-content: flex-end;
     padding: 1.5rem 1.25rem 2.5rem;
     gap: 1rem;
   }
-  .hero-panel-headline {
-    /* Below 900px .hero-content goes full-width, so available width scales
-       with viewport again; fit against 6vw keeps ~77-84% margin under the
-       measured curve (peaks near 820px where the column is widest just
-       before the breakpoint). */
-    font-size: clamp(1.15rem, 6vw, 2.7rem);
+  .hero-logo {
+    top: 1.25rem;
+    left: 1.25rem;
   }
-  .hero-sub {
-    text-align: left;
-    max-width: none;
+  .hero-panel-headline {
+    font-size: clamp(1.6rem, 7.5vw, 2.4rem);
   }
   .project-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .terms-grid {
-    grid-template-columns: 1fr;
+  .stages-grid {
+    padding-left: 2rem;
+  }
+  .stage-dot {
+    left: -2rem;
   }
   .stage-card {
-    grid-template-columns: 72px 1fr;
-    gap: 1.1rem;
-    padding: 2rem 0;
+    padding-bottom: 2.4rem;
   }
-  .stage-number {
-    font-size: 2.2rem;
-  }
-  .stage-card h3 {
-    font-size: 1.4rem;
-  }
-  .team-grid {
+  /* Below 900px .format-tile stays a single nowrap row (num, format-text,
+     link), so format-text's own column only gets whatever width is left
+     over after num and link claim theirs — around half the row on a
+     phone. The headline then wraps inside that narrow leftover column
+     instead of across the row. Wrapping the whole tile and giving
+     format-text (and the link) their own full-width line each fixes
+     that: num stays a small label above, the pill+headline block gets
+     the full row to itself, the link drops to its own line below. */
+  .format-tile {
     flex-wrap: wrap;
+    row-gap: 0.5rem;
   }
-  .team-slot {
-    flex-basis: calc(50% - 0.875rem);
+  .format-text {
+    flex-basis: 100%;
   }
-
-  /* Same reasoning as the 600px override below: desktop's +1500px pin-track
-     was tuned for the full 3-across fan-out and is excessive once the grid
-     itself has already stepped down. */
-  .team-pin-track {
-    height: calc(100vh + 1400px);
+  .format-link {
+    flex-basis: 100%;
+    text-align: right;
+  }
+  /* A full-height swipeable portrait per teammate read heavy and hid two
+     of three people behind a swipe gesture. A compact photo + text row,
+     stacked vertically with hairline dividers, keeps proportions closer
+     to the body text around it and shows everyone at once. */
+  /* padding: 0 cancels the desktop rule's own 0 1.5rem — .who's section
+     padding already insets it, and matches every other section's content
+     edge (the "Нас трое" heading included). Stacking both was quietly
+     eating ~48px of width that the cramped photo/text columns below
+     needed more. */
+  .team-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+  }
+  .team-card {
+    display: grid;
+    grid-template-columns: 3fr minmax(0, 2fr);
+    grid-template-rows: auto auto auto;
+    gap: 0.5rem 1.1rem;
+    padding: 1.8rem 0;
+    border-top: 1px solid var(--border-card);
+  }
+  .team-card:first-child {
+    border-top: none;
+  }
+  /* Auto-placement would fill row 1 left-to-right then wrap to row 2,
+     landing .team-tags under the photo instead of under the pill —
+     place all four children explicitly instead. The photo spans all
+     three text rows with the default grid stretch, so its height
+     tracks however tall the pill+tags+description block ends up.
+     min-height: 0 overrides the grid item's default min-height: auto —
+     without it, Safari/WebKit honors the <img>'s own intrinsic height as
+     the item's minimum and lets the photo grow past its stretched box
+     and spill through the gold border instead of being clipped to it
+     (Chromium is more forgiving here, which is why this only showed up
+     on a real phone). Same fix as .stage-body's min-width: 0 elsewhere
+     in this file, just the height axis. */
+  .team-photo {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin-bottom: 0;
+  }
+  .team-pill {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .team-tags {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .team-desc {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .team-pill,
+  .team-tags,
+  .team-desc {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  /* font-size dialed back from the desktop --text-md (18px) — at the
+     narrower mobile text column, "Шевлягина" alone doesn't fit even on
+     its own line at 18px, so overflow-wrap was breaking it mid-word and
+     leaving a single orphaned letter on a third line. --text-base still
+     reads clearly bigger than the 14px role tags below it, just no
+     longer wide enough to force a mid-word break for the longest name. */
+  .team-pill {
+    font-size: var(--text-base);
+    padding: 0.5rem 1rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 }
 
 @media (max-width: 600px) {
-  .project-grid,
-  .promo-list {
+  .project-grid {
     grid-template-columns: 1fr;
   }
-  .stage-card {
-    grid-template-columns: 60px 1fr;
-    gap: 0.85rem;
-    padding: 1.75rem 0;
+  .stages-grid {
+    padding-left: 1.6rem;
   }
-  .stage-number {
-    font-size: 1.6rem;
+  .stage-dot {
+    left: -1.6rem;
+  }
+  .stage-card {
+    padding-bottom: 2rem;
   }
   .stage-card h3 {
     font-size: 1.2rem;
@@ -2033,106 +2003,72 @@ main > section:not(.hero) {
   .stage-time {
     font-size: 0.72rem;
   }
-  .stage-card ul {
-    columns: 1;
-  }
-  .team-slot {
-    flex-basis: 100%;
-  }
-
-  /* Single-column team grid: three full-height photo+text cards stacked
-     is already a lot of scrolling on its own, and the pin/pile/dissolve
-     choreography this section uses on wider screens turned out to be
-     fundamentally at odds with it — the stacked grid is taller than any
-     reasonable pin-track scroll budget can hold "stuck" for, which kept
-     causing the exit dissolve to clip a card before it had fully arrived
-     (see the git history on this block for two earlier, narrower attempts
-     at patching that). Simplest fix that actually holds up: don't pin or
-     dissolve this section on mobile at all — same fallback already used
-     for prefers-reduced-motion (team-card visibility/transform reset
-     below). Cards are shown at rest, in normal document flow, and stay
-     fully visible instead of piling in and dissolving away. script.js
-     skips the whole flip/exit setup at this breakpoint to match. */
-  .team-pin-track {
-    height: auto;
-  }
-  .team-grid {
-    position: static;
-    padding-bottom: 3rem;
-  }
-  .team-card {
-    visibility: visible;
-    transform: none !important;
-  }
 }
 
 
-/* ---------- letter-by-letter text reveal ---------- */
-
-.word {
-  display: inline-block;
-}
-
-.letter {
-  display: inline-block;
+/* ---------- text-block reveal (replaces the old letter-by-letter split) ----------
+   Body text outside .hero now rides the same fade-up as the card grids
+   below instead of animating letter-by-letter — .text-reveal is applied in
+   script.js to the same target set the old letterTargets used. */
+.text-reveal {
   opacity: 0;
-  transform: translateY(0.6em);
-  transition: opacity 0.45s ease-out, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: translateY(34px);
+  transition: opacity 350ms ease-out, transform 620ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.letters-visible .letter {
+.text-reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .letter {
-    transition: none;
-    opacity: 1;
-    transform: none;
+  .text-reveal {
+    transform: none !important;
+    transition: opacity 200ms ease !important;
   }
 }
 
 /* ---------- group-entrance stagger (card grids) ----------
    .reveal/.stagger already sat unused in the markup on every one of these
-   grids. team-grid is deliberately excluded — its .reveal children are
-   driven every frame by the JS-scrubbed fan-out above, and layering a CSS
-   transition on top would smear that scrub into a laggy trail. */
+   grids. team-grid rides the same shared fade-up now — it used to run its
+   own JS-scrubbed pile/fan-out instead, removed along with the rest of
+   that section's old design. */
+.team-grid > .reveal,
 .formats-grid > .reveal,
 .services-grid > .reveal,
 .stages-grid > .reveal,
-.steps-list > .reveal,
 .terms-grid > .reveal {
   opacity: 0;
   transform: translateY(34px);
   transition: opacity 350ms ease-out, transform 620ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.team-grid > .reveal.is-visible,
 .formats-grid > .reveal.is-visible,
 .services-grid > .reveal.is-visible,
 .stages-grid > .reveal.is-visible,
-.steps-list > .reveal.is-visible,
 .terms-grid > .reveal.is-visible {
   opacity: 1;
   transform: none;
 }
 
+.team-grid > .reveal:nth-child(2),
 .formats-grid > .reveal:nth-child(2),
 .services-grid > .reveal:nth-child(2),
 .stages-grid > .reveal:nth-child(2),
-.steps-list > .reveal:nth-child(2),
 .terms-grid > .reveal:nth-child(2) {
   transition-delay: 40ms;
 }
 
+.team-grid > .reveal:nth-child(3),
 .formats-grid > .reveal:nth-child(3),
 .services-grid > .reveal:nth-child(3),
 .stages-grid > .reveal:nth-child(3),
-.steps-list > .reveal:nth-child(3) {
+.terms-grid > .reveal:nth-child(3) {
   transition-delay: 80ms;
 }
 
-/* "Проектная работа за 28 дней" entrance: driven by script.js via the Web
+/* "Полная пересборка бренда..." entrance: driven by script.js via the Web
    Animations API instead of a CSS transition — see projectObserver there.
    .project-inner wipes open independently of the section's own inline
    clip-path (the site-wide curtain-reveal targets the <section> itself,
@@ -2143,20 +2079,67 @@ main > section:not(.hero) {
   clip-path: inset(0 0 100% 0);
 }
 
-.project .section-eyebrow,
 .project h2,
 .project-intro,
 .project-terms {
   opacity: 0;
 }
 
-.services-grid > .reveal:nth-child(4),
-.steps-list > .reveal:nth-child(4) {
+.services-grid > .reveal:nth-child(4) {
   transition-delay: 120ms;
 }
 
 .services-grid > .reveal:nth-child(5) {
   transition-delay: 160ms;
+}
+
+/* Chip cascade: chips reveal one after another (45ms apart) instead of
+   all appearing at once with their parent card — rides the same
+   .reveal.is-visible toggle staggerObserver already applies to the card,
+   no extra JS or observer needed. Resting state only takes effect once
+   an ancestor is .reveal (cards use that class already); chips outside a
+   .reveal ancestor are unaffected. */
+.service-chips span,
+.project-chips span,
+.stage-chips span {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 320ms ease-out, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible .service-chips span,
+.reveal.is-visible .project-chips span,
+.reveal.is-visible .stage-chips span {
+  opacity: 1;
+  transform: none;
+}
+
+.service-chips span:nth-child(2), .project-chips span:nth-child(2), .stage-chips span:nth-child(2) { transition-delay: 45ms; }
+.service-chips span:nth-child(3), .project-chips span:nth-child(3), .stage-chips span:nth-child(3) { transition-delay: 90ms; }
+.service-chips span:nth-child(4), .project-chips span:nth-child(4), .stage-chips span:nth-child(4) { transition-delay: 135ms; }
+.service-chips span:nth-child(5), .project-chips span:nth-child(5), .stage-chips span:nth-child(5) { transition-delay: 180ms; }
+.service-chips span:nth-child(6), .project-chips span:nth-child(6), .stage-chips span:nth-child(6) { transition-delay: 225ms; }
+.service-chips span:nth-child(7), .project-chips span:nth-child(7), .stage-chips span:nth-child(7) { transition-delay: 270ms; }
+.service-chips span:nth-child(8), .project-chips span:nth-child(8), .stage-chips span:nth-child(8) { transition-delay: 315ms; }
+
+/* Spring pill scale-in: the gold "name of this group" pill (team-pill,
+   project-col h3, format-label) scales up past 1 and settles back
+   instead of just fading with its card — a back-out curve reads as
+   weight/springiness rather than the flat fade everything else uses.
+   Same .reveal.is-visible trigger as the chip cascade above. */
+.team-pill,
+.project-col h3,
+.format-label {
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 300ms ease, transform 550ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.reveal.is-visible .team-pill,
+.project-col.reveal.is-visible h3,
+.reveal.is-visible .format-label {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .services-grid > .reveal:nth-child(6) {
@@ -2167,8 +2150,33 @@ main > section:not(.hero) {
   .formats-grid > .reveal,
   .services-grid > .reveal,
   .stages-grid > .reveal,
-  .steps-list > .reveal,
   .terms-grid > .reveal {
+    transform: none !important;
+    transition: opacity 200ms ease !important;
+    transition-delay: 0ms !important;
+  }
+
+  .service-chips span,
+  .project-chips span,
+  .stage-chips span {
+    transform: none !important;
+    transition: opacity 200ms ease !important;
+    transition-delay: 0ms !important;
+  }
+
+  .team-pill,
+  .project-col h3,
+  .format-label {
+    transform: none !important;
+    transition: opacity 200ms ease !important;
+  }
+
+  .stages-grid::before {
+    transform: scaleY(1) !important;
+    transition: none !important;
+  }
+
+  .stage-dot {
     transform: none !important;
     transition: opacity 200ms ease !important;
     transition-delay: 0ms !important;
@@ -2178,7 +2186,6 @@ main > section:not(.hero) {
     clip-path: none !important;
   }
 
-  .project .section-eyebrow,
   .project h2,
   .project-intro,
   .project-terms {
@@ -2186,41 +2193,3 @@ main > section:not(.hero) {
   }
 }
 
-/* ---------- 3D tilt cards ---------- */
-
-.tilt-card {
-  position: relative;
-  overflow: hidden;
-  transform: perspective(900px);
-  transition: transform 0.5s ease;
-}
-
-.tilt-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(circle 260px at var(--tilt-x, 50%) var(--tilt-y, 50%), rgba(242, 242, 232, 0.28), transparent 70%);
-  transition: opacity 0.4s ease;
-}
-
-.tilt-card.tilt-active::before {
-  opacity: 1;
-}
-
-.tilt-card > * {
-  position: relative;
-  z-index: 1;
-}
-
-@media (prefers-reduced-motion: reduce), (hover: none) {
-  .tilt-card {
-    transform: none !important;
-    transition: none;
-  }
-  .tilt-card::before {
-    display: none;
-  }
-}

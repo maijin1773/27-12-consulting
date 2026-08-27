@@ -1,0 +1,25 @@
+# Agent/skill tooling — not site content
+.agents/
+.claude/
+
+# Scratch exploration files from design sessions — not part of the shipped site
+_depth-examples.html
+_scroll-animations.html
+card1.png
+card2.png
+card3.png
+hero-sub-typography-options.png
+hero-typography-systems.png
+hero-unusual-concepts.png
+rd01.png
+who-all-breakpoints.png
+who-mobile-all-cards.png
+who-section-my10.png
+who-section-stoplist15.png
+who-section-variants.png
+
+# Misc dev artifacts
+.playwright-mcp/
+*.log
+.DS_Store
+Thumbs.db

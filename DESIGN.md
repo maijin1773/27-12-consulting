@@ -13,11 +13,11 @@ colors:
   hairline-on-navy: "rgba(242, 242, 232, 0.3)"
 typography:
   display:
-    fontFamily: "Unbounded, sans-serif"
-    fontSize: "clamp(2.4rem, 5.3vw, 7.2rem)"
-    fontWeight: 700
-    lineHeight: 1.05
-    letterSpacing: "-0.015em"
+    fontFamily: "Manrope, sans-serif"
+    fontSize: "clamp(2rem, 4.4vw, 3.6rem)"
+    fontWeight: 300
+    lineHeight: 1.2
+    letterSpacing: "-0.01em"
   section-title:
     fontFamily: "Oswald, sans-serif"
     fontSize: "clamp(2.1rem, 5vw, 3.4rem)"
@@ -32,13 +32,22 @@ typography:
     fontFamily: "Inter, sans-serif"
     fontWeight: 400
     lineHeight: 1.6
-  hero-sub:
-    fontFamily: "Nunito Sans, sans-serif"
-    fontWeight: 400
-    lineHeight: 1.6
   numeral:
     fontFamily: "Jost, sans-serif"
     fontWeight: 400
+  feature-title:
+    fontFamily: "Manrope, sans-serif"
+    fontSize: "clamp(2.3rem, 5.2vw, 3.9rem)"
+    fontWeight: 300
+    lineHeight: 1.1
+    letterSpacing: "-0.01em"
+sizeScale:
+  text-xs: "0.75rem"
+  text-sm: "0.875rem"
+  text-base: "1rem"
+  text-md: "1.125rem"
+  text-lg: "1.25rem"
+  text-xl: "1.4rem"
 rounded:
   card: "6px"
   pill: "999px"
@@ -112,27 +121,41 @@ Two structural surfaces (cream, navy) that swap section by section, one accent s
 
 ## Typography
 
-**Display Font:** Unbounded (geometric sans, used only for the hero headline)
-**Section-Title Font:** Oswald (sans-serif, bold uppercase)
+**Display Font:** Manrope (geometric sans) — the hero headline, and every section's `<h2>` (who, formats, services, project, partnership). Weight 300 for the resting line, 700–800 for gold pills/emphasis within the same family.
+**Section-Title Font:** Oswald (sans-serif, bold uppercase) — legacy pattern, now only `.start h2`; every other section has migrated to the Manrope display face above.
 **Heading Font:** Golos Text (sans-serif)
-**Body Font:** Inter (sans-serif); the hero subtitle alone runs on Nunito Sans instead
+**Body Font:** Inter (sans-serif) — the hero subtitle also runs on Inter, at a lighter weight
 **Numeral Font:** Jost (sans-serif, used only for the "27.12" logo mark)
 
-**Character:** One oversized, bold display headline carries the emotional weight per page; everything else — section titles, body copy, labels — is disciplined and quieter by comparison. The pairing reads as "one confident statement, audit report underneath."
+**Character:** One display face now carries every section's headline, not just the hero — but each section still gets exactly one moment of emphasis (a gold word, a gold pill), never more. Everything else — body copy, labels, chips — is disciplined and quieter by comparison, using weight and size rather than a second typeface for hierarchy.
 
 ### Hierarchy
-- **Display** (700, `clamp(2.4rem, 5.3vw, 7.2rem)` desktop / `clamp(1.8rem, 10.5vw, 4.4rem)` at ≤900px, line-height 1.05, Unbounded): The hero headline only. One italic Brass Gold word inside it carries the emphasis. Sized against the panel's own width rather than viewport height — Unbounded's glyphs run wide, so the safe ceiling is ~12% of the panel's clientWidth with a margin built in, not a fixed vh scale.
-- **Section-Title** (700, `clamp(2.1rem, 5vw, 3.4rem)`, line-height 0.95, Oswald, uppercase): Every section's `<h2>` ("ТРИ ФОРМАТА РАБОТЫ", "НАЧНИ С ОДНОГО ШАГА"). Centered, max-width 22ch, `text-wrap: balance`.
+- **Display** (300, Manrope): Hero headline `clamp(2rem, 4.4vw, 3.6rem)`; who/formats/services `clamp(2rem, 4.4vw, 3.4rem)`; project/partnership `clamp(2.3rem, 5.2vw, 3.9rem)` (the "feature" tier — deliberately the largest headings on the site). One Brass Gold word/pill at weight 700–800 carries the emphasis in each.
+- **Section-Title** (700, `clamp(2.1rem, 5vw, 3.4rem)`, line-height 0.95, Oswald, uppercase): `.start h2` only — the one section not yet migrated to the Manrope pattern above.
 - **Heading** (500, Golos Text): Card and column titles (`<h3>`) inside services, team, project, and stage cards.
-- **Body** (400, line-height 1.6, Inter): All paragraph copy. Descriptions inside cards run smaller (~0.9rem) than the hero's lead sentence (~1.15rem).
-- **Label** (700, uppercase, letter-spacing 0.03–0.08em, Golos Text or Oswald depending on context): Eyebrows, service zones, format labels, the header ticker.
+- **Body** (400, line-height 1.6, Inter): All paragraph copy — see the Size Scale below for the actual step each one runs on.
+- **Label** (600–700, uppercase, letter-spacing 0.03–0.15em, Golos Text/Oswald/Inter depending on context): Eyebrows, service zones, format labels, chips.
+
+### Size Scale (desktop/laptop)
+Everything below the section-h2 tier is now a token in `:root`, not a one-off rem value — introduced to replace an ad-hoc spread (0.72–0.95rem across near-identical chip/label components, seven different values for the same visual role). Section h2s keep their own per-section clamp() formulas above; this scale covers labels, chips, buttons, descriptions and card h3s.
+
+| Token | Size | Used by |
+|---|---|---|
+| `--text-xs` | 12px | format-price, format-link, terms-col h3 |
+| `--text-sm` | 14px | all chips/tags (team/service/stage/project), eyebrows, small buttons, category labels, format-label |
+| `--text-base` | 16px | buttons, gold pills (team-pill, project-col h3), hero subtitle, step text |
+| `--text-md` | 18px | card descriptions (team-desc, service-desc), service-price line |
+| `--text-lg` | 20px | project-intro, numeral badges (format-num, step-num, footer-logo) |
+| `--text-xl` | 22.4px | card h3 headings (format-tile, stage-card), price-num |
+
+`.service-card h3` is a deliberate exception — it keeps its own fluid `clamp(1.6rem, 3.6vw, 2.2rem)` rather than snapping to `--text-xl`, per an earlier explicit request to size services' product-card headings independently larger.
 
 ### Named Rules
-**The One Display Rule.** Unbounded appears only in the hero headline and its italic accent word — nowhere else on the page. Every other heading uses Oswald or Golos Text; the bold display face is reserved for the single most important sentence on the site.
+**The One Display Rule** (superseded). Originally: Manrope reserved for the hero headline only. Retired once who/formats/services/project/partnership all migrated to the same Manrope display treatment for their h2s, so the page reads as one consistent voice section to section rather than one loud headline among several Oswald ones. The underlying principle survives at the *word* level — one gold accent per headline, weight contrast (300 → 700/800) rather than a second typeface.
 
 ## Layout
 
-Sections are full-bleed for background color but cap inner content at `max-width: 1200px`, centered, with horizontal padding `clamp(1.5rem, 4vw, 3rem)` and vertical padding `clamp(3.5rem, 9vw, 7rem)`. The hero is the one exception: full-width two-panel split (photo | navy text panel) with no max-width. Grids are simple `repeat(3, 1fr)` or `repeat(4, 1fr)` with a fixed gap (1.5–2.5rem), collapsing to a single column under 900px / 600px breakpoints. No masonry, no asymmetric spans — the grid is always regular.
+Sections are full-bleed for background color but cap inner content at `max-width: 1200px`, centered, with horizontal padding `clamp(1.5rem, 4vw, 3rem)` and vertical padding `clamp(3.5rem, 9vw, 7rem)`. The hero is the one exception: a full-bleed duotone photograph (the bureau's own reference image, navy/gold treatment) with the logo fixed top-left and the headline/subtitle/CTA centered in the lower third, no max-width. Grids are simple `repeat(3, 1fr)` or `repeat(4, 1fr)` with a fixed gap (1.5–2.5rem), collapsing to a single column under 900px / 600px breakpoints. No masonry, no asymmetric spans — the grid is always regular.
 
 ## Elevation & Depth
 

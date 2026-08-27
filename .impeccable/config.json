@@ -46,6 +46,15 @@
         ],
         "createdAt": "2026-08-21T17:06:04.242Z",
         "reason": "L635 match is the literal text <img> inside a CSS comment describing the hero markup, not an actual <img> tag; no img/src/background-image exists anywhere in this file"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(185, 135, 85, 0.3)",
+        "files": [
+          "css/style.css"
+        ],
+        "createdAt": "2026-08-27T17:45:58.884Z",
+        "reason": "Reuses the existing --gold token (#b98755) at reduced opacity for the section-texture gold bloom effect, not a new color"
       }
     ]
   }
